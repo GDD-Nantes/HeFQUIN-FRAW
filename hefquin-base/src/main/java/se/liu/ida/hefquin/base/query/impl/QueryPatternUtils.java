@@ -50,6 +50,17 @@ public class QueryPatternUtils
 		return new BGPImpl(tps);
 	}
 
+	public static BGP createFrawBGP( final BasicPattern pattern ) {
+		final Set<TriplePattern> tps = new HashSet<>();
+		final Iterator<Triple> it = pattern.iterator();
+		while ( it.hasNext() ) {
+			tps.add( new TriplePatternImpl(it.next()) );
+		}
+		return new FrawBGPImpl(tps);
+	}
+
+
+
 	/**
 	 * Assumes that the given {@link ElementPathBlock} does not contain
 	 * property path patterns (but only triple patterns). If it does,
