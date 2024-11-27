@@ -10,6 +10,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 
 import se.liu.ida.hefquin.base.data.SolutionMapping;
+import se.liu.ida.hefquin.base.data.utils.FrawUtils;
 import se.liu.ida.hefquin.base.data.utils.SolutionMappingUtils;
 import se.liu.ida.hefquin.base.query.Query;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
@@ -70,7 +71,7 @@ public abstract class BaseForExecOpBindJoinWithRequestOps<QueryType extends Quer
 	protected static final int minimumRequestBlockSize = 5;
 
 	// statistics
-	private long numberOfOutputMappingsProduced = 0L;
+	protected long numberOfOutputMappingsProduced = 0L;
 	protected boolean requestBlockSizeWasReduced = false;
 	protected int numberOfRequestOpsUsed = 0;
 	protected ExecutableOperatorStats statsOfFirstReqOp = null;

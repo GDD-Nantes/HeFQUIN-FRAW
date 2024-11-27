@@ -7,7 +7,7 @@ import se.liu.ida.hefquin.engine.queryproc.ExecutionStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryResultSink;
 
 public class FrawExecutionEngineImpl implements ExecutionEngine {
-    // An exeuction engine designed to execute federated aggregation queries
+    // An execution engine designed to execute federated aggregation queries
     // Queries processed by this engine should be of the shape VALUES SERVICE
 
     @Override

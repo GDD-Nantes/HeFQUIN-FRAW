@@ -9,7 +9,7 @@ import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.*;
 
-public class FrawLogicalToPhysicalOpConverter extends LogicalToPhysicalOpConverter {
+public class FrawLogicalToPhysicalOpConverter  {
     public static PhysicalOperator convert(final LogicalOperator lop ) {
         if (      lop instanceof NullaryLogicalOp) return convert( (NullaryLogicalOp) lop );
         else if ( lop instanceof UnaryLogicalOp)   return convert( (UnaryLogicalOp) lop );
@@ -48,7 +48,7 @@ public class FrawLogicalToPhysicalOpConverter extends LogicalToPhysicalOpConvert
     public static UnaryPhysicalOp convert( final LogicalOpTPAdd lop ) {
         final FederationMember fm = lop.getFederationMember();
 
-        if (      fm instanceof SPARQLEndpoint) return new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+        if (      fm instanceof SPARQLEndpoint) return new PhysicalOpFrawBindJoin(lop);
 
         else if ( fm instanceof TPFServer)      return new PhysicalOpIndexNestedLoopsJoin(lop);
 
@@ -60,7 +60,7 @@ public class FrawLogicalToPhysicalOpConverter extends LogicalToPhysicalOpConvert
     public static UnaryPhysicalOp convert( final LogicalOpTPOptAdd lop ) {
         final FederationMember fm = lop.getFederationMember();
 
-        if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+        if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoin(lop);
 
         else if ( fm instanceof TPFServer )      return new PhysicalOpIndexNestedLoopsJoin(lop);
 
@@ -72,7 +72,7 @@ public class FrawLogicalToPhysicalOpConverter extends LogicalToPhysicalOpConvert
     public static UnaryPhysicalOp convert( final LogicalOpBGPAdd lop ) {
         final FederationMember fm = lop.getFederationMember();
 
-        if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+        if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoin(lop);
 
         else throw new UnsupportedOperationException("Unsupported type of federation member: " + fm.getClass().getName() + ".");
     }
@@ -80,7 +80,7 @@ public class FrawLogicalToPhysicalOpConverter extends LogicalToPhysicalOpConvert
     public static UnaryPhysicalOp convert( final LogicalOpBGPOptAdd lop ) {
         final FederationMember fm = lop.getFederationMember();
 
-        if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+        if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoin(lop);
 
         else throw new UnsupportedOperationException("Unsupported type of federation member: " + fm.getClass().getName() + ".");
     }
@@ -88,7 +88,7 @@ public class FrawLogicalToPhysicalOpConverter extends LogicalToPhysicalOpConvert
     public static UnaryPhysicalOp convert( final LogicalOpGPAdd lop ) {
         final FederationMember fm = lop.getFederationMember();
 
-        if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+        if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoin(lop);
 
         else throw new UnsupportedOperationException("Unsupported type of federation member: " + fm.getClass().getName() + ".");
     }
@@ -96,7 +96,7 @@ public class FrawLogicalToPhysicalOpConverter extends LogicalToPhysicalOpConvert
     public static UnaryPhysicalOp convert( final LogicalOpGPOptAdd lop ) {
         final FederationMember fm = lop.getFederationMember();
 
-        if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+        if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoin(lop);
 
         else throw new UnsupportedOperationException("Unsupported type of federation member: " + fm.getClass().getName() + ".");
     }
@@ -121,7 +121,7 @@ public class FrawLogicalToPhysicalOpConverter extends LogicalToPhysicalOpConvert
 
     // --------- binary operators -----------
 
-    public static BinaryPhysicalOp convert(final BinaryLogicalOp lop ) {
+    public static PhysicalOperator convert(final BinaryLogicalOp lop ) {
         if (      lop instanceof LogicalOpJoin )     return convert( (LogicalOpJoin) lop );
         else if ( lop instanceof LogicalOpUnion )    return convert( (LogicalOpUnion) lop );
         else if ( lop instanceof LogicalOpRightJoin ) return convert( (LogicalOpRightJoin) lop );
@@ -129,7 +129,7 @@ public class FrawLogicalToPhysicalOpConverter extends LogicalToPhysicalOpConvert
     }
 
     public static BinaryPhysicalOp convert( final LogicalOpJoin lop ) {
-        return new PhysicalOpSymmetricHashJoin(lop);
+        return new PhysicalOpFrawJoin(lop);
     }
 
     public static BinaryPhysicalOp convert( final LogicalOpUnion lop ) {
