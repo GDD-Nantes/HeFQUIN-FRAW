@@ -2,7 +2,9 @@ package se.liu.ida.hefquin.base.data.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.atlas.logging.Log;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_Literal;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
@@ -51,7 +53,7 @@ public class FrawUtils {
                 Node n1 = bind1.get(v);
                 Node n2 = bind2.get(v);
                 if(v.getVarName().equals("probabilityOfRetrievingRestOfMapping")){
-
+                    builder.add(v, NodeFactory.createLiteral(String.valueOf((Double) n1.getLiteralValue() * (Double) n2.getLiteralValue()), XSDDatatype.XSDdouble));
                 }
                 if ( !n1.equals(n2) )
                     Log.warn(BindingLib.class, "merge: Mismatch : " + n1 + " != " + n2);

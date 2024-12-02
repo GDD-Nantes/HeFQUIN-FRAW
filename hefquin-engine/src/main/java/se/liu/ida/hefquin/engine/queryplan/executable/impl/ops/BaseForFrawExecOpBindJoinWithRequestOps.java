@@ -83,14 +83,20 @@ public class BaseForFrawExecOpBindJoinWithRequestOps extends BaseForExecOpBindJo
     }
 
     @Override
+    protected NullaryExecutableOp createExecutableReqOp(Iterable<SolutionMapping> solMaps) {
+        return createExecutableRequestOperator(solMaps);
+    }
+
     protected NullaryExecutableOp createExecutableRequestOperator(Iterable<SolutionMapping> solMaps) {
 
         final Set<Binding> bindings = new HashSet<>();
         final Set<Var> joinVars = new HashSet<>();
 
         boolean noJoinVars = false;
+
         for ( final SolutionMapping s : solMaps ) {
-            final Binding b = SolutionMappingUtils.restrict( s.asJenaBinding(), varsInSubQuery );
+
+            final Binding b = SolutionMappingUtils.restrict( s.asJenaBinding(), varsInSubQuery);
 
             // If there exists a solution mapping that does not have any variables in common with the triple pattern of this operator
             // retrieve all matching triples of the given query
