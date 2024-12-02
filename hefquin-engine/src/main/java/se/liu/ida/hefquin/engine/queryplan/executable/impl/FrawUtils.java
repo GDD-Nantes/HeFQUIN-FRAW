@@ -52,7 +52,7 @@ public class FrawUtils {
                 // Checking!
                 Node n1 = bind1.get(v);
                 Node n2 = bind2.get(v);
-                if(v.equals(MAPPING_PROBABILITY)){
+                if(v.equals(MAPPING_PROBABILITY) && !builder.contains(MAPPING_PROBABILITY)){
                     builder.add(v, NodeFactory.createLiteral(String.valueOf((Double) n1.getLiteralValue() * (Double) n2.getLiteralValue()), XSDDatatype.XSDdouble));
                 }
                 if ( !n1.equals(n2) )

@@ -50,7 +50,7 @@ public class ExecOpFrawMultiwayUnion extends ExecOpMultiwayUnion{
                         if(!var.equals(MAPPING_PROBABILITY)){
                             Node node = binding.get(var);
                             bb.add(var, node);
-                        }else {
+                        }else if(!bb.contains(MAPPING_PROBABILITY)) {
                             Double newProbability = ((Double) binding.get(MAPPING_PROBABILITY).getLiteralValue()) / numberOfChildren;
                             bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(newProbability), XSDDatatype.XSDdouble));
                         }
