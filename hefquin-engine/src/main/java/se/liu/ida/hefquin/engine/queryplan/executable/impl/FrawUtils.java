@@ -1,11 +1,9 @@
-package se.liu.ida.hefquin.base.data.utils;
+package se.liu.ida.hefquin.engine.queryplan.executable.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.graph.Node_Literal;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
@@ -14,6 +12,8 @@ import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 
 import java.util.Iterator;
+
+import static se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants.MAPPING_PROBABILITY;
 
 public class FrawUtils {
 
@@ -25,7 +25,7 @@ public class FrawUtils {
         while ( it.hasNext() ) {
             final Var v = it.next();
             // TODO : make it look nicer
-            if ( b2.contains(v) && ! b2.get(v).sameValueAs(b1.get(v)) && !v.getVarName().equals("probabilityOfRetrievingRestOfMapping"))
+            if ( b2.contains(v) && ! b2.get(v).sameValueAs(b1.get(v)) && !v.equals(MAPPING_PROBABILITY))
                 return false;
         }
 
@@ -52,7 +52,7 @@ public class FrawUtils {
                 // Checking!
                 Node n1 = bind1.get(v);
                 Node n2 = bind2.get(v);
-                if(v.getVarName().equals("probabilityOfRetrievingRestOfMapping")){
+                if(v.equals(MAPPING_PROBABILITY)){
                     builder.add(v, NodeFactory.createLiteral(String.valueOf((Double) n1.getLiteralValue() * (Double) n2.getLiteralValue()), XSDDatatype.XSDdouble));
                 }
                 if ( !n1.equals(n2) )

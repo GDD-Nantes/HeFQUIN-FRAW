@@ -1,7 +1,7 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
 
 import se.liu.ida.hefquin.base.data.SolutionMapping;
-import se.liu.ida.hefquin.base.data.utils.FrawUtils;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils;
 import se.liu.ida.hefquin.base.data.utils.SolutionMappingUtils;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultBlock;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultElementSink;

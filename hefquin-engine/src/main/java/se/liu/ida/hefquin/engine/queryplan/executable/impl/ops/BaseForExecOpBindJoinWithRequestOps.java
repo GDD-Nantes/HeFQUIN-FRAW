@@ -10,7 +10,6 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 
 import se.liu.ida.hefquin.base.data.SolutionMapping;
-import se.liu.ida.hefquin.base.data.utils.FrawUtils;
 import se.liu.ida.hefquin.base.data.utils.SolutionMappingUtils;
 import se.liu.ida.hefquin.base.query.Query;
 import se.liu.ida.hefquin.engine.federation.FederationMember;

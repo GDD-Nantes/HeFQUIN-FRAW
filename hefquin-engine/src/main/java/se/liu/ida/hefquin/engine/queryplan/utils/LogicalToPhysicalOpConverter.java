@@ -172,7 +172,7 @@ public class LogicalToPhysicalOpConverter
 	}
 
 	public static NaryPhysicalOp convert( final LogicalOpMultiwayUnion lop ) {
-		return new PhysicalOpMultiwayUnion();
+		return new PhysicalOpFrawMultiwayUnion();
 	}
 
 }

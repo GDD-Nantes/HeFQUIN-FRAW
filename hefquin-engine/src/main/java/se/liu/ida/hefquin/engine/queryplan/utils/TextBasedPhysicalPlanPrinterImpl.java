@@ -77,6 +77,13 @@ public class TextBasedPhysicalPlanPrinterImpl extends BaseForTextBasedPlanPrinte
 
 		@Override
 		public void visit( final PhysicalOpFrawBindJoin op ){
+			out.append( indentLevelString + "frawd bind join (" + op.getID() + ") " );
+			out.append( System.lineSeparator() );
+			printLogicalOperator( op, indentLevelStringForOpDetail + singleBase, out, lopNP );
+		}
+
+		@Override
+		public void visit( final PhysicalOpFrawMultiwayUnion op ){
 			out.append( indentLevelString + "frawd bind union (" + op.getID() + ") " );
 			out.append( System.lineSeparator() );
 			printLogicalOperator( op, indentLevelStringForOpDetail + singleBase, out, lopNP );
