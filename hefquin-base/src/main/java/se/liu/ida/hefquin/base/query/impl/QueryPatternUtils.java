@@ -6,15 +6,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVars;
-import org.apache.jena.sparql.algebra.op.OpBGP;
-import org.apache.jena.sparql.algebra.op.OpFilter;
-import org.apache.jena.sparql.algebra.op.OpJoin;
-import org.apache.jena.sparql.algebra.op.OpLeftJoin;
-import org.apache.jena.sparql.algebra.op.OpService;
-import org.apache.jena.sparql.algebra.op.OpTriple;
-import org.apache.jena.sparql.algebra.op.Op1;
-import org.apache.jena.sparql.algebra.op.OpUnion;
-import org.apache.jena.sparql.algebra.op.Op2;
+import org.apache.jena.sparql.algebra.op.*;
 import org.apache.jena.sparql.core.*;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.Expr;
@@ -48,15 +40,6 @@ public class QueryPatternUtils
 			tps.add( new TriplePatternImpl(it.next()) );
 		}
 		return new BGPImpl(tps);
-	}
-
-	public static BGP createFrawBGP( final BasicPattern pattern ) {
-		final Set<TriplePattern> tps = new HashSet<>();
-		final Iterator<Triple> it = pattern.iterator();
-		while ( it.hasNext() ) {
-			tps.add( new TriplePatternImpl(it.next()) );
-		}
-		return new FrawBGPImpl(tps);
 	}
 
 
@@ -240,6 +223,14 @@ public class QueryPatternUtils
 			final List<Triple> triples = ((OpBGP) op).getPattern().getList();
 			for ( final Triple t: triples ) {
 				tps.add( new TriplePatternImpl(t) );
+			}
+			return tps;
+		} else if ( op instanceof OpSequence) {
+			final List<Op> elements = ((OpSequence) op).getElements();
+			for(Op element : elements){
+				//Should always be the case ...?
+				if(element instanceof OpTriple)
+					tps.add(new TriplePatternImpl(((OpTriple) element).getTriple()));
 			}
 			return tps;
 		}
