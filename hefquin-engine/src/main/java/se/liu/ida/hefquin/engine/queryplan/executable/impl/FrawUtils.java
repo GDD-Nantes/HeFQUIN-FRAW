@@ -55,7 +55,7 @@ public class FrawUtils {
                 if(v.equals(MAPPING_PROBABILITY) && !builder.contains(MAPPING_PROBABILITY)){
                     builder.add(v, NodeFactory.createLiteral(String.valueOf((Double) n1.getLiteralValue() * (Double) n2.getLiteralValue()), XSDDatatype.XSDdouble));
                 }
-                if ( !n1.equals(n2) )
+                if ( !n1.equals(n2) && !v.equals(MAPPING_PROBABILITY))
                     Log.warn(BindingLib.class, "merge: Mismatch : " + n1 + " != " + n2);
             }
         }
