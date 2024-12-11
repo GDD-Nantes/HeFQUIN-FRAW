@@ -5,6 +5,7 @@ import se.liu.ida.hefquin.base.utils.StatsPrinter;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlan;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlanStats;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultBlock;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.pushbased.PushBasedExecPlanSamplingTaskBase;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
 import se.liu.ida.hefquin.engine.queryproc.QueryResultSink;
@@ -21,9 +22,6 @@ import java.util.concurrent.RejectedExecutionException;
 public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
     protected final LinkedList<ExecPlanTask> tasks;
     protected ExecutorService threadPool;
-    // Hardcoded, TODO : make it config dependent
-    final int expectedNumberOfResults = 100;
-    int numberOfResults = 0;
 
     public TaskBasedExecutableSamplingPlanImpl( final LinkedList<ExecPlanTask> tasks, final ExecutionContext ctx ) {
         assert ! tasks.isEmpty();
@@ -66,12 +64,11 @@ public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
         try {
             final ExecPlanTask rootTask = tasks.getFirst();
             boolean exhausted = false;
-            while ( ! exhausted ) {
-                final IntermediateResultBlock block = rootTask.getNextIntermediateResultBlock();
+            while ( ! exhausted || tasks.stream().allMatch(t -> !t.isCompleted()) ) {
+                IntermediateResultBlock block = rootTask.getNextIntermediateResultBlock();
                 if ( block != null ) {
                     for ( final SolutionMapping sm : block.getSolutionMappings() ) {
                         resultSink.send(sm);
-                        this.numberOfResults++;
                     }
                 }
                 else {
@@ -143,7 +140,7 @@ public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
     public List<Exception> getExceptionsCaughtDuringExecution() {
         final List<Exception> allExceptions = new ArrayList<>();
         for ( final ExecPlanTask t : tasks ) {
-            final List<Exception> exceptionsOfTask = ( (ExecPlanTaskBase) t ).getExceptionsCaughtDuringExecution();
+            final List<Exception> exceptionsOfTask = ( (PushBasedExecPlanSamplingTaskBase) t ).getExceptionsCaughtDuringExecution();
             allExceptions.addAll(exceptionsOfTask);
         }
 

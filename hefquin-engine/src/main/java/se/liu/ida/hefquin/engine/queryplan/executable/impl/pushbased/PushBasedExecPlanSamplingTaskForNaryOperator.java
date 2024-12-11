@@ -6,6 +6,8 @@ import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTaskInputExce
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTaskInterruptionException;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 
+import java.util.Arrays;
+
 public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecPlanSamplingTaskBase {
 
     protected final NaryExecutableOp op;
@@ -22,9 +24,8 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
         assert inputs.length > 0;
 
         this.op = op;
-        // TODO : remove the casting !! inputs should be all PushBasedExecPlanSamplingTaskBase even though
-        //  it's not clean
-        this.inputs = (PushBasedExecPlanSamplingTaskBase[]) inputs;
+        // TODO : not pretty
+        this.inputs = Arrays.copyOf(inputs, inputs.length, PushBasedExecPlanSamplingTaskBase[].class);
     }
 
     @Override
@@ -56,9 +57,19 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
 
     @Override
     protected void propagateNextBatch() throws ExecPlanTaskInterruptionException, ExecPlanTaskInputException {
-        for (PushBasedExecPlanSamplingTaskBase input : this.inputs) {
-            input.setStatus(Status.RUNNING);
-            input.propagateNextBatch();
+        synchronized (availableResultBlocks){
+            for (PushBasedExecPlanSamplingTaskBase input : this.inputs) {
+                input.propagateNextBatch();
+            }
+            this.setStatus(Status.READY_NEXT_BATCH);
+        }
+    }
+
+    @Override
+    protected boolean isPreviousBatchDone() {
+        synchronized (availableResultBlocks){
+            boolean inputsDone = Arrays.stream(inputs).allMatch(i -> i.isPreviousBatchDone());
+            return inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
         }
     }
 
@@ -144,4 +155,6 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
     protected ExecutableOperator getExecOp() {
         return op;
     }
+
+
 }

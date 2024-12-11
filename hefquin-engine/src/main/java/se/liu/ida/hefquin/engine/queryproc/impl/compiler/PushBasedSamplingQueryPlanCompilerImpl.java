@@ -6,7 +6,6 @@ import java.util.Map;
 
 import se.liu.ida.hefquin.engine.queryplan.executable.*;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTask;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.TaskBasedExecutablePlanImpl;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.TaskBasedExecutableSamplingPlanImpl;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.pushbased.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
@@ -27,35 +26,34 @@ public class PushBasedSamplingQueryPlanCompilerImpl extends TaskBasedSamplingQue
     }
 
     @Override
-    protected PushBasedExecPlanTask createTaskForNullaryExecOp( final NullaryExecutableOp op,
-                                                                final ExecutionContext execCxt,
-                                                                final int preferredOutputBlockSize ) {
-        return new PushBasedExecPlanTaskForNullaryOperator(op, execCxt, preferredOutputBlockSize);
+    protected PushBasedExecPlanSamplingTaskForNullaryOperator createTaskForNullaryExecOp(final NullaryExecutableOp op,
+                                                                                         final ExecutionContext execCxt,
+                                                                                         final int preferredOutputBlockSize ) {
+        return new PushBasedExecPlanSamplingTaskForNullaryOperator(op, execCxt, preferredOutputBlockSize);
     }
 
     @Override
-    protected PushBasedExecPlanTask createTaskForUnaryExecOp( final UnaryExecutableOp op,
-                                                              final ExecPlanTask childTask,
-                                                              final ExecutionContext execCxt,
-                                                              final int preferredOutputBlockSize ) {
-        return new PushBasedExecPlanTaskForUnaryOperator(op, childTask, execCxt, preferredOutputBlockSize);
+    protected PushBasedExecPlanSamplingTaskForUnaryOperator createTaskForUnaryExecOp(final UnaryExecutableOp op,
+                                                                                     final ExecPlanTask childTask,
+                                                                                     final ExecutionContext execCxt,
+                                                                                     final int preferredOutputBlockSize ) {
+        return new PushBasedExecPlanSamplingTaskForUnaryOperator(op, childTask, execCxt, preferredOutputBlockSize);
     }
 
     @Override
-    protected PushBasedExecPlanTask createTaskForBinaryExecOp( final BinaryExecutableOp op,
-                                                               final ExecPlanTask childTask1,
-                                                               final ExecPlanTask childTask2,
-                                                               final ExecutionContext execCxt,
-                                                               final int preferredOutputBlockSize ) {
-        return new PushBasedExecPlanTaskForBinaryOperator(op, childTask1, childTask2, execCxt, preferredOutputBlockSize);
+    protected PushBasedExecPlanSamplingTaskForBinaryOperator createTaskForBinaryExecOp(final BinaryExecutableOp op,
+                                                                                       final ExecPlanTask childTask1,
+                                                                                       final ExecPlanTask childTask2,
+                                                                                       final ExecutionContext execCxt,
+                                                                                       final int preferredOutputBlockSize) {
+        return new PushBasedExecPlanSamplingTaskForBinaryOperator(op, childTask1, childTask2, execCxt, preferredOutputBlockSize);
     }
 
     @Override
-    protected PushBasedExecPlanTask createTaskForNaryExecOp( NaryExecutableOp op,
-                                                             ExecPlanTask[] childTasks,
-                                                             ExecutionContext execCxt,
-                                                             int preferredOutputBlockSize) {
-        // Is it better to cast or to use the impl in the signature ...?
+    protected PushBasedExecPlanSamplingTaskForNaryOperator createTaskForNaryExecOp(NaryExecutableOp op,
+                                                                                   ExecPlanTask[] childTasks,
+                                                                                   ExecutionContext execCxt,
+                                                                                   int preferredOutputBlockSize) {
         return new PushBasedExecPlanSamplingTaskForNaryOperator(op, childTasks, execCxt, preferredOutputBlockSize);
     }
 

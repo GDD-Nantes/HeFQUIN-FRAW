@@ -2,13 +2,12 @@ package se.liu.ida.hefquin.engine.queryproc.impl.compiler;
 
 import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
 import se.liu.ida.hefquin.engine.queryplan.executable.*;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanSamplingTaskBase;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTask;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.TaskBasedExecutablePlanImpl;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.TaskBasedExecutableSamplingPlanImpl;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.pushbased.PushBasedExecPlanSamplingTaskBase;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.pushbased.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.*;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
-import se.liu.ida.hefquin.engine.queryproc.QueryCompilationException;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
 
 import java.util.LinkedList;
@@ -47,10 +46,10 @@ public abstract class TaskBasedSamplingQueryPlanCompilerBase extends QueryPlanCo
             tasks.addFirst(newTask);
         }
 
-        protected ExecPlanTask _createTasks( final PhysicalPlan qep,
-                                             final LinkedList<ExecPlanTask> tasks,
-                                             final int preferredOutputBlockSize,
-                                             final ExecutionContext execCxt) {
+        protected ExecPlanTask _createTasks(final PhysicalPlan qep,
+                                            final LinkedList<ExecPlanTask> tasks,
+                                            final int preferredOutputBlockSize,
+                                            final ExecutionContext execCxt) {
             final PhysicalOperator pop = qep.getRootOperator();
             if ( pop instanceof NullaryPhysicalOp)
             {
@@ -66,7 +65,14 @@ public abstract class TaskBasedSamplingQueryPlanCompilerBase extends QueryPlanCo
                 createTasks( subPlan, tasks, execOp.preferredInputBlockSize(), execCxt );
                 final ExecPlanTask childTask = tasks.getFirst();
 
-                return createTaskForUnaryExecOp(execOp, childTask, execCxt, preferredOutputBlockSize);
+                PushBasedExecPlanSamplingTaskForUnaryOperator returnTask = createTaskForUnaryExecOp(execOp, childTask, execCxt, preferredOutputBlockSize);
+                try{
+                    ((PushBasedExecPlanSamplingTaskBase) childTask).setUpper(returnTask);
+                }catch (Exception e) {
+                    System.out.println("couldn't cast ExecPlanTask to PushBasedExecPlanSamplingTaskBase");
+                    e.printStackTrace(System.out);
+                }
+                return returnTask;
             }
             else if ( pop instanceof BinaryPhysicalOp)
             {
@@ -84,7 +90,15 @@ public abstract class TaskBasedSamplingQueryPlanCompilerBase extends QueryPlanCo
                 createTasks( subPlan2, tasks, execOp.preferredInputBlockSizeFromChild2(), execCxt );
                 final ExecPlanTask childTask2 = tasks.getFirst();
 
-                return createTaskForBinaryExecOp(execOp, childTask1, childTask2, execCxt, preferredOutputBlockSize);
+                PushBasedExecPlanSamplingTaskForBinaryOperator returnTask = createTaskForBinaryExecOp(execOp, childTask1, childTask2, execCxt, preferredOutputBlockSize);
+                try{
+                    ((PushBasedExecPlanSamplingTaskBase) childTask1).setUpper(returnTask);
+                    ((PushBasedExecPlanSamplingTaskBase) childTask1).setUpper(returnTask);
+                }catch (Exception e) {
+                    System.out.println("couldn't cast ExecPlanTask to PushBasedExecPlanSamplingTaskBase");
+                    e.printStackTrace(System.out);
+                }
+                return returnTask;
             }
             else if ( pop instanceof NaryPhysicalOp )
             {
@@ -105,7 +119,16 @@ public abstract class TaskBasedSamplingQueryPlanCompilerBase extends QueryPlanCo
                     childTasks[i] = tasks.getFirst();
                 }
 
-                return createTaskForNaryExecOp(execOp, childTasks, execCxt, preferredOutputBlockSize);
+                PushBasedExecPlanSamplingTaskForNaryOperator returnTask = createTaskForNaryExecOp(execOp, childTasks, execCxt, preferredOutputBlockSize);
+                for (ExecPlanTask childTask : childTasks) {
+                    try{
+                        ((PushBasedExecPlanSamplingTaskBase) childTask).setUpper(returnTask);
+                    }catch (Exception e) {
+                        System.out.println("couldn't cast ExecPlanTask to PushBasedExecPlanSamplingTaskBase");
+                        e.printStackTrace(System.out);
+                    }
+                }
+                return returnTask;
             }
             else
             {
@@ -115,23 +138,23 @@ public abstract class TaskBasedSamplingQueryPlanCompilerBase extends QueryPlanCo
 
     } // end of helper class Worker
 
-    protected abstract ExecPlanTask createTaskForNullaryExecOp( NullaryExecutableOp op,
-                                                                ExecutionContext execCxt,
-                                                                int preferredOutputBlockSize );
+    protected abstract PushBasedExecPlanSamplingTaskForNullaryOperator createTaskForNullaryExecOp(NullaryExecutableOp op,
+                                                                                                  ExecutionContext execCxt,
+                                                                                                  int preferredOutputBlockSize);
 
-    protected abstract ExecPlanTask createTaskForUnaryExecOp( UnaryExecutableOp op,
-                                                              ExecPlanTask childTask,
-                                                              ExecutionContext execCxt,
-                                                              int preferredOutputBlockSize );
+    protected abstract PushBasedExecPlanSamplingTaskForUnaryOperator createTaskForUnaryExecOp(UnaryExecutableOp op,
+                                                                                              ExecPlanTask childTask,
+                                                                                              ExecutionContext execCxt,
+                                                                                              int preferredOutputBlockSize);
 
-    protected abstract ExecPlanTask createTaskForBinaryExecOp( BinaryExecutableOp op,
-                                                               ExecPlanTask childTask1,
-                                                               ExecPlanTask childTask2,
-                                                               ExecutionContext execCxt,
-                                                               int preferredOutputBlockSize );
+    protected abstract PushBasedExecPlanSamplingTaskForBinaryOperator createTaskForBinaryExecOp(BinaryExecutableOp op,
+                                                                                                ExecPlanTask childTask1,
+                                                                                                ExecPlanTask childTask2,
+                                                                                                ExecutionContext execCxt,
+                                                                                                int preferredOutputBlockSize);
 
-    protected abstract ExecPlanTask createTaskForNaryExecOp( NaryExecutableOp op,
-                                                             ExecPlanTask[] childTasks,
-                                                             ExecutionContext execCxt,
-                                                             int preferredOutputBlockSize);
+    protected abstract PushBasedExecPlanSamplingTaskForNaryOperator createTaskForNaryExecOp(NaryExecutableOp op,
+                                                                                            ExecPlanTask[] childTasks,
+                                                                                            ExecutionContext execCxt,
+                                                                                            int preferredOutputBlockSize);
 }

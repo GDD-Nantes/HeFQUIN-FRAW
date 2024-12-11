@@ -27,6 +27,11 @@ public abstract class ExecPlanSamplingTaskBase implements ExecPlanTask{
         RUNNING,
 
         /**
+         * The task is running, has already produced a batch and is ready to produce a new one if need be.
+         */
+        READY_NEXT_BATCH,
+
+        /**
          * The execution of the task for the current batch of samples was completed successfully
          * but its results have not yet been consumed completely.
          */
@@ -99,7 +104,7 @@ public abstract class ExecPlanSamplingTaskBase implements ExecPlanTask{
     @Override
     public boolean isCompleted() {
         synchronized (availableResultBlocks) {
-            return (status == Status.TASK_COMPLETED_NOT_CONSUMED || status == Status.TASK_COMPLETED_AND_CONSUMED);
+            return status == Status.TASK_COMPLETED_AND_CONSUMED;
         }
     }
 
