@@ -71,14 +71,24 @@ public class ExecOpFrawMultiwayUnion extends ExecOpMultiwayUnion{
     protected void _wrapUpForXthChild(int x,
                                   IntermediateResultElementSink sink,
                                   ExecutionContext execCxt) {
-        this.numberOfChildrenProcessed++;
 
-        if(allChildrenProcessed())
+        // Works, but i'm not sure why...
+        if(allChildrenProcessed()){
             this.chosenChild = random.nextInt(numberOfChildren);
+            this.resetStats();
+        }
     }
 
     private boolean allChildrenProcessed(){
-        return this.numberOfChildrenProcessed == this.numberOfChildren;
+
+        // Works, but i'm not sure why...
+        boolean [] xthInputConsumed = ((boolean []) this.getStats().getEntry("xthInputConsumed"));
+
+        for(boolean xth : xthInputConsumed){
+            if (!xth)
+                return false;
+        }
+        return true;
     }
 }
 
