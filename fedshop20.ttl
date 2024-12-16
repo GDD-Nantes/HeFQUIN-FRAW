@@ -1,0 +1,242 @@
+PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
+PREFIX fd:     <http://www.example.org/se/liu/ida/hefquin/fd#>
+PREFIX ex:     <http://example.org/>
+
+ex:rawVendor0
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor0.fr/> ] .
+
+
+ex:rawVendor1
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor1.fr/> ] .
+
+
+ex:rawVendor2
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor2.fr/> ] .
+
+
+ex:rawVendor3
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor3.fr/> ] .
+
+
+ex:rawVendor4
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor4.fr/> ] .
+
+
+ex:rawVendor5
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor5.fr/> ] .
+
+
+ex:rawVendor6
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor6.fr/> ] .
+
+
+ex:rawVendor7
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor7.fr/> ] .
+
+
+ex:rawVendor8
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor8.fr/> ] .
+
+
+ex:rawVendor9
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor9.fr/> ] .
+
+
+ex:rawVendor10
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor10.fr/> ] .
+
+
+ex:rawVendor11
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor11.fr/> ] .
+
+
+ex:rawVendor12
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor12.fr/> ] .
+
+
+ex:rawVendor13
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor13.fr/> ] .
+
+
+ex:rawVendor14
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor14.fr/> ] .
+
+
+ex:rawVendor15
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor15.fr/> ] .
+
+
+ex:rawVendor16
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor16.fr/> ] .
+
+
+ex:rawVendor17
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor17.fr/> ] .
+
+
+ex:rawVendor18
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor18.fr/> ] .
+
+
+ex:rawVendor19
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.vendor19.fr/> ] .
+
+ex:rawRatingSite0
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite0.fr/> ] .
+
+
+ex:rawRatingSite1
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite1.fr/> ] .
+
+
+ex:rawRatingSite2
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite2.fr/> ] .
+
+
+ex:rawRatingSite3
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite3.fr/> ] .
+
+
+ex:rawRatingSite4
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite4.fr/> ] .
+
+
+ex:rawRatingSite5
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite5.fr/> ] .
+
+
+ex:rawRatingSite6
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite6.fr/> ] .
+
+
+ex:rawRatingSite7
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite7.fr/> ] .
+
+
+ex:rawRatingSite8
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite8.fr/> ] .
+
+
+ex:rawRatingSite9
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite9.fr/> ] .
+
+
+ex:rawRatingSite10
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite10.fr/> ] .
+
+
+ex:rawRatingSite11
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite11.fr/> ] .
+
+
+ex:rawRatingSite12
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite12.fr/> ] .
+
+
+ex:rawRatingSite13
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite13.fr/> ] .
+
+
+ex:rawRatingSite14
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite14.fr/> ] .
+
+
+ex:rawRatingSite15
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite15.fr/> ] .
+
+
+ex:rawRatingSite16
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite16.fr/> ] .
+
+
+ex:rawRatingSite17
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite17.fr/> ] .
+
+
+ex:rawRatingSite18
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite18.fr/> ] .
+
+
+ex:rawRatingSite19
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite19.fr/> ] .

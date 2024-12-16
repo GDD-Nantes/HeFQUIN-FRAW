@@ -70,6 +70,13 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
     }
 
     @Override
+    public boolean isPreviousBatchDone() {
+//        boolean extraConnectorsDone = Objects.isNull(extraConnectors) ? true : extraConnectors.stream().allMatch(ec -> ec.isPreviousBatchDone());
+        boolean inputsDone = Arrays.stream(inputs).allMatch(i -> i.isPreviousBatchDone());
+        return inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+//        return extraConnectorsDone && inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+    }
+
     protected void produceOutputFromRandomInput( final IntermediateResultElementSink sink )
             throws ExecOpExecutionException, ExecPlanTaskInputException, ExecPlanTaskInterruptionException {
         int chosen = rand.nextInt(inputs.length);

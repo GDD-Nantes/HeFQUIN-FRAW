@@ -3,16 +3,6 @@ PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
 PREFIX fd:     <http://www.example.org/se/liu/ida/hefquin/fd#>
 PREFIX ex:     <http://example.org/>
 
-ex:dbpediaSPARQL
-      a            fd:FederationMember ;
-      fd:interface [ a                  fd:SPARQLEndpointInterface ;
-                     fd:endpointAddress <http://dbpedia.org/sparql> ] .
-
-ex:watdiv
-      a            fd:FederationMember ;
-      fd:interface [ a                  fd:SPARQLEndpointInterface ;
-                     fd:endpointAddress <http://localhost:3331/watdiv10M.jnl/passage> ] .
-
 ex:rawVendor0
       a            fd:FederationMember ;
       fd:interface [ a                  fd:SPARQLEndpointInterface ;
@@ -1212,20 +1202,6 @@ ex:rawRatingSite99
       fd:interface [ a                  fd:SPARQLEndpointInterface ;
                      fd:endpointAddress <http://localhost:3331/blazegraph.jnl/raw?default-graph-uri=http://www.ratingsite99.fr/> ] .
 
-ex:dbpediaTPF
-      a            fd:FederationMember ;
-      fd:interface [ a                         fd:TPFInterface ;
-                     fd:exampleFragmentAddress <http://fragments.dbpedia.org/2016-04/en> ] .
-
-ex:wikidataSPARQL
-      a            fd:FederationMember ;
-      fd:interface [ a                  fd:SPARQLEndpointInterface ;
-                     fd:endpointAddress <https://query.wikidata.org/sparql> ] .
-
-ex:europaSPARQL
-      a            fd:FederationMember ;
-      fd:interface [ a                  fd:SPARQLEndpointInterface ;
-                     fd:endpointAddress <https://data.europa.eu/sparql> ] .
 
 #ex:neo4jTest
 #      a            fd:FederationMember ;
