@@ -17,5 +17,11 @@
       <artifactId>hefquin-base</artifactId>
       <version>0.0.4-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-core</artifactId>
+      <type>pom</type>
+      <version>4.10.0-FRAW</version>
+    </dependency>
   </dependencies>
 </project>

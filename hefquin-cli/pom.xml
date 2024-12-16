@@ -23,6 +23,12 @@
       <artifactId>hefquin-service</artifactId>
       <version>0.0.4-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>fr.gdd</groupId>
+      <artifactId>fedup</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <build>
