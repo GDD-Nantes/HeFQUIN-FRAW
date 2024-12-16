@@ -1,14 +1,16 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.pushbased;
 
+import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecOpExecutionException;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutableOperator;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.CollectingIntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTaskInputException;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTaskInterruptionException;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 
-import java.util.Arrays;
+import java.util.*;
 
 public class PushBasedExecPlanSamplingTaskForNullaryOperator extends PushBasedExecPlanSamplingTaskBase{
 
@@ -34,7 +36,8 @@ public class PushBasedExecPlanSamplingTaskForNullaryOperator extends PushBasedEx
         boolean failed = false;
 
         try {
-            op.execute(sink, execCxt);
+//            op.execute(sink, execCxt);
+            produceOutputOneMapping(sink);
         }
         catch ( final ExecOpExecutionException e ) {
             setCauseOfFailure(e);
@@ -42,6 +45,13 @@ public class PushBasedExecPlanSamplingTaskForNullaryOperator extends PushBasedEx
         }
 
         wrapUpBatch(failed, false);
+//
+//        if ( extraConnectors != null ) {
+//            for ( final SamplingConnectorForAdditionalConsumer c : extraConnectors ) {
+//                c.wrapUpBatch(failed, false);
+//            }
+//        }
+    }
 
     protected void produceOutputOneMapping( final IntermediateResultElementSink sink ) throws ExecOpExecutionException {
         Random rand = new Random();
@@ -59,14 +69,25 @@ public class PushBasedExecPlanSamplingTaskForNullaryOperator extends PushBasedEx
     @Override
     protected void propagateNextBatch() {
         synchronized (availableResultBlocks){
+//            if(Objects.nonNull(this.extraConnectors))
+//                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
+            // we clear the queue to start off of a clean, new batch
+            this.availableResultBlocks.clear();
             this.setStatus(Status.READY_NEXT_BATCH);
         }
     }
 
     @Override
-    protected boolean isPreviousBatchDone() {
-        synchronized (availableResultBlocks){
-            return getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+    public boolean isPreviousBatchDone() {
+//        boolean extraConnectorsDone = Objects.isNull(extraConnectors) ? true : extraConnectors.stream().allMatch(ec -> ec.isPreviousBatchDone());
+        return getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+//        return extraConnectorsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+    }
+
+    @Override
+    public void clearAvailableBlocks() {
+        synchronized (availableResultBlocks) {
+            availableResultBlocks.clear();
         }
     }
 }

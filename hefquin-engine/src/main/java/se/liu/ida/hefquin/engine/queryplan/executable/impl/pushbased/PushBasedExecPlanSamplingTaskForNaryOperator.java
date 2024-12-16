@@ -1,12 +1,11 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.pushbased;
 
+import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.engine.queryplan.executable.*;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTask;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTaskInputException;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTaskInterruptionException;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.*;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 
-import java.util.Arrays;
+import java.util.*;
 
 public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecPlanSamplingTaskBase {
 
@@ -52,19 +51,21 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
 
         wrapUpBatch(failed, interrupted);
 
-        if ( extraConnectors != null ) {
-            for ( final ConnectorForAdditionalConsumer c : extraConnectors ) {
-                c.wrapUp(failed, interrupted);
-            }
-        }
+//        if ( extraConnectors != null ) {
+//            for ( final SamplingConnectorForAdditionalConsumer c : extraConnectors ) {
+//                c.wrapUpBatch(failed, interrupted);
+//            }
+//        }
     }
 
     @Override
-    protected void propagateNextBatch() throws ExecPlanTaskInterruptionException, ExecPlanTaskInputException {
+    protected void propagateNextBatch() {
         synchronized (availableResultBlocks){
-            for (PushBasedExecPlanSamplingTaskBase input : this.inputs) {
-                input.propagateNextBatch();
-            }
+//            if(Objects.nonNull(this.extraConnectors))
+//                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
+            Arrays.stream(this.inputs).forEach(i -> i.propagateNextBatch());
+            // we clear the queue to start off of a clean, new batch
+            this.availableResultBlocks.clear();
             this.setStatus(Status.READY_NEXT_BATCH);
         }
     }
@@ -216,5 +217,12 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
         return op;
     }
 
+    @Override
+    public void clearAvailableBlocks() {
+        synchronized (availableResultBlocks) {
+            availableResultBlocks.clear();
+            Arrays.stream(inputs).forEach(i -> i.clearAvailableBlocks());
+        }
+    }
 
 }

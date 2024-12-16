@@ -63,14 +63,16 @@ public class PushBasedSamplingQueryPlanCompilerImpl extends TaskBasedSamplingQue
         final LinkedList<ExecPlanTask> tasks = super.createTasks(qep, execCxt);
 
         // remove all ConnectorForAdditionalConsumer from the list
-        final LinkedList<ExecPlanTask> tasks2 = new LinkedList<>();
-        for ( final ExecPlanTask t : tasks ) {
-            if ( ! (t instanceof ConnectorForAdditionalConsumer) ) {
-                tasks2.add(t);
-            }
-        }
+//        final LinkedList<ExecPlanTask> tasks2 = new LinkedList<>();
+//        for ( final ExecPlanTask t : tasks ) {
+//            if ( ! (t instanceof SamplingConnectorForAdditionalConsumer) ) {
+//                tasks2.add(t);
+//            }
+//        }
+//
+//        return tasks2;
 
-        return tasks2;
+        return tasks;
     }
 
     @Override
@@ -91,15 +93,8 @@ public class PushBasedSamplingQueryPlanCompilerImpl extends TaskBasedSamplingQue
                                  final int preferredOutputBlockSize,
                                  final ExecutionContext execCxt) {
             final ExecPlanTask newTask;
-            final ExecPlanTask probe = convertedSubPlans.get(qep);
-            if ( probe != null ) {
-                final PushBasedExecPlanTask t = (PushBasedExecPlanTask) probe;
-                newTask = t.addConnectorForAdditionalConsumer(preferredOutputBlockSize);
-            }
-            else {
-                newTask = _createTasks(qep, tasks, preferredOutputBlockSize, execCxt);
-                convertedSubPlans.put(qep, newTask);
-            }
+            newTask = _createTasks(qep, tasks, preferredOutputBlockSize, execCxt);
+            convertedSubPlans.put(qep, newTask);
 
             tasks.addFirst(newTask);
         }

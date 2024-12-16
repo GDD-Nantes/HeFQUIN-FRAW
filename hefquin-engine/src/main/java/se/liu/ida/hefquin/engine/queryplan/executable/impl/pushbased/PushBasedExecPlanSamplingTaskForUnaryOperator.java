@@ -53,12 +53,11 @@ public class PushBasedExecPlanSamplingTaskForUnaryOperator extends PushBasedExec
 
         wrapUpBatch(failed, interrupted);
 
-        if ( extraConnectors != null ) {
-            for ( final ConnectorForAdditionalConsumer c : extraConnectors ) {
-                c.wrapUp(failed, interrupted);
-            }
-        }
-
+//        if ( extraConnectors != null ) {
+//            for ( final SamplingConnectorForAdditionalConsumer c : extraConnectors ) {
+//                c.wrapUpBatch(failed, interrupted);
+//            }
+//        }
 
     }
 
@@ -92,18 +91,31 @@ public class PushBasedExecPlanSamplingTaskForUnaryOperator extends PushBasedExec
     }
 
     @Override
-    protected void propagateNextBatch() throws ExecPlanTaskInterruptionException, ExecPlanTaskInputException {
+    protected void propagateNextBatch() {
         synchronized (availableResultBlocks){
+//            if(Objects.nonNull(this.extraConnectors))
+//                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
             input.propagateNextBatch();
+
+            // we clear the queue to start off of a clean, new batch
+            this.availableResultBlocks.clear();
             setStatus(Status.READY_NEXT_BATCH);
         }
     }
 
     @Override
-    protected boolean isPreviousBatchDone() {
-        synchronized (availableResultBlocks){
-            boolean inputsDone = input.isPreviousBatchDone();
-            return inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+    public boolean isPreviousBatchDone() {
+//        boolean extraConnectorsDone = Objects.isNull(extraConnectors) ? true : extraConnectors.stream().allMatch(ec -> ec.isPreviousBatchDone());
+        boolean inputsDone = input.isPreviousBatchDone();
+        return inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+//        return extraConnectorsDone && inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+    }
+
+    @Override
+    public void clearAvailableBlocks() {
+        synchronized (availableResultBlocks) {
+            availableResultBlocks.clear();
+            input.clearAvailableBlocks();
         }
     }
 }

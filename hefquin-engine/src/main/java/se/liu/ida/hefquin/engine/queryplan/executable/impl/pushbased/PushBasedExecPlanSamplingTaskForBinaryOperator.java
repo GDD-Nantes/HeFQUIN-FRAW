@@ -58,11 +58,11 @@ public class PushBasedExecPlanSamplingTaskForBinaryOperator extends PushBasedExe
 
         wrapUpBatch(failed, interrupted);
 
-        if ( extraConnectors != null ) {
-            for ( final ConnectorForAdditionalConsumer c : extraConnectors ) {
-                c.wrapUp(failed, interrupted);
-            }
-        }
+//        if ( extraConnectors != null ) {
+//            for ( final SamplingConnectorForAdditionalConsumer c : extraConnectors ) {
+//                c.wrapUpBatch(failed, interrupted);
+//            }
+//        }
 
         wrapUpBatch(failed, interrupted);
     }
@@ -76,10 +76,14 @@ public class PushBasedExecPlanSamplingTaskForBinaryOperator extends PushBasedExe
     }
 
     @Override
-    protected void propagateNextBatch() throws ExecPlanTaskInterruptionException, ExecPlanTaskInputException {
+    protected void propagateNextBatch() {
         synchronized (availableResultBlocks){
+//            if(Objects.nonNull(this.extraConnectors))
+//                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
             this.input1.propagateNextBatch();
             this.input2.propagateNextBatch();
+            // we clear the queue to start off of a clean, new batch
+            this.availableResultBlocks.clear();
             this.setStatus(Status.READY_NEXT_BATCH);
         }
     }
@@ -195,10 +199,19 @@ public class PushBasedExecPlanSamplingTaskForBinaryOperator extends PushBasedExe
     }
 
     @Override
-    protected boolean isPreviousBatchDone() {
-        synchronized (availableResultBlocks){
-            boolean inputsDone = input1.isPreviousBatchDone() && input2.isPreviousBatchDone();
-            return inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+    public boolean isPreviousBatchDone() {
+//        boolean extraConnectorsDone = Objects.isNull(extraConnectors) ? true : extraConnectors.stream().allMatch(ec -> ec.isPreviousBatchDone());
+        boolean inputsDone = input1.isPreviousBatchDone() && input2.isPreviousBatchDone();
+        return inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+//        return inputsDone && extraConnectorsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+    }
+
+    @Override
+    public void clearAvailableBlocks() {
+        synchronized (availableResultBlocks) {
+            availableResultBlocks.clear();
+            input1.clearAvailableBlocks();
+            input2.clearAvailableBlocks();
         }
     }
 }

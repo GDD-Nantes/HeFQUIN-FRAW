@@ -103,9 +103,7 @@ public abstract class ExecPlanSamplingTaskBase implements ExecPlanTask{
 
     @Override
     public boolean isCompleted() {
-        synchronized (availableResultBlocks) {
-            return status == Status.TASK_COMPLETED_AND_CONSUMED;
-        }
+        return status == Status.TASK_COMPLETED_AND_CONSUMED;
     }
 
     @Override
