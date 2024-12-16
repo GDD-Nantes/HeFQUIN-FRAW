@@ -351,6 +351,12 @@ public class QueryPatternUtils
 		return varLeft;
 	}
 
+	public static Set<Var> getVariablesInPattern( final OpSequence op) {
+		final Set<Var> result = new HashSet<>();
+		op.getElements().stream().map(e -> result.addAll(getVariablesInPattern(e)));
+		return result;
+	}
+
 	/**
 	 * Ignores variables in FILTER expressions.
 	 */
@@ -366,6 +372,9 @@ public class QueryPatternUtils
 		}
 		else if ( op instanceof OpFilter ){
 			return getVariablesInPattern( ((OpFilter) op).getSubOp());
+		}
+		else if ( op instanceof OpSequence ){
+			return getVariablesInPattern( (OpSequence) op );
 		}
 		else {
 			throw new UnsupportedOperationException("Getting the variables from arbitrary SPARQL patterns is an open TODO (type of Jena Op in the current case: " + op.getClass().getName() + ").");
