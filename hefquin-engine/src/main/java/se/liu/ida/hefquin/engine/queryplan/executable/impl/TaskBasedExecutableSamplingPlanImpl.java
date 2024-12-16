@@ -1,6 +1,7 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl;
 
 import se.liu.ida.hefquin.base.data.SolutionMapping;
+import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 import se.liu.ida.hefquin.base.utils.StatsPrinter;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlan;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlanStats;
@@ -63,16 +64,12 @@ public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
         // consume all solution mappings from the root operator and send them to the result sink
         try {
             final ExecPlanTask rootTask = tasks.getFirst();
-            boolean exhausted = false;
-            while ( ! exhausted || tasks.stream().allMatch(t -> !t.isCompleted()) ) {
+            while ( tasks.stream().anyMatch(t -> ! t.isCompleted()) ) {
                 IntermediateResultBlock block = rootTask.getNextIntermediateResultBlock();
                 if ( block != null ) {
                     for ( final SolutionMapping sm : block.getSolutionMappings() ) {
                         resultSink.send(sm);
                     }
-                }
-                else {
-                    exhausted = true;
                 }
             }
         }
@@ -90,6 +87,9 @@ public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
             }
             throw new ExecutionException("Consuming the solution mappings caused an exception.", e);
         }
+
+        // System.out.println(tasks.stream().allMatch(t -> t.isCompleted()));
+        // tasks.stream().filter(t -> !t.isCompleted()).toList()
 
         // check whether all tasks have completed successfully and kill
         // the ones that are still running (which they should not), again
