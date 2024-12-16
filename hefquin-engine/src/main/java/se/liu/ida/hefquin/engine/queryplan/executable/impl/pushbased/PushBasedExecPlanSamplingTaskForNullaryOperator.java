@@ -43,11 +43,17 @@ public class PushBasedExecPlanSamplingTaskForNullaryOperator extends PushBasedEx
 
         wrapUpBatch(failed, false);
 
-        if ( extraConnectors != null ) {
-            for ( final ConnectorForAdditionalConsumer c : extraConnectors ) {
-                c.wrapUp(failed, false);
-            }
-        }
+    protected void produceOutputOneMapping( final IntermediateResultElementSink sink ) throws ExecOpExecutionException {
+        Random rand = new Random();
+
+        CollectingIntermediateResultElementSink tempSink = new CollectingIntermediateResultElementSink();
+        op.execute(tempSink, execCxt);
+        List<SolutionMapping> tempResults = (ArrayList) tempSink.getCollectedSolutionMappings();
+
+        // in the implementation, getCollectedSolutionMappings always return an ArrayList, so this cast shouldn't be an
+        // issue. Still, it would be better to have a dedicated sink that returns specifically a List
+        // TODO :
+        sink.send( tempResults.get( rand.nextInt( tempResults.size() ) ) );
     }
 
     @Override

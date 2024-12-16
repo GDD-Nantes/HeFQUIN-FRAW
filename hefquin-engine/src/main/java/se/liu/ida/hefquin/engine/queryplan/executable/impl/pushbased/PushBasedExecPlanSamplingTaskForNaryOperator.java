@@ -13,6 +13,8 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
     protected final NaryExecutableOp op;
     protected final PushBasedExecPlanSamplingTaskBase[] inputs;
 
+    protected final Random rand;
+
     public PushBasedExecPlanSamplingTaskForNaryOperator( final NaryExecutableOp op,
                                                  final ExecPlanTask[] inputs,
                                                  final ExecutionContext execCxt,
@@ -22,6 +24,8 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
         assert op != null;
         assert inputs != null;
         assert inputs.length > 0;
+
+        rand = new Random();
 
         this.op = op;
         // TODO : not pretty
@@ -35,7 +39,7 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
         boolean interrupted  = false;
 
         try {
-            produceOutputByConsumingAllInputsInParallel(sink);
+            produceOutputFromRandomInputOneMapping(sink);
         }
         catch ( final ExecOpExecutionException | ExecPlanTaskInputException e ) {
             setCauseOfFailure(e);
@@ -66,11 +70,60 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
     }
 
     @Override
-    protected boolean isPreviousBatchDone() {
-        synchronized (availableResultBlocks){
-            boolean inputsDone = Arrays.stream(inputs).allMatch(i -> i.isPreviousBatchDone());
-            return inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+    protected void produceOutputFromRandomInput( final IntermediateResultElementSink sink )
+            throws ExecOpExecutionException, ExecPlanTaskInputException, ExecPlanTaskInterruptionException {
+        int chosen = rand.nextInt(inputs.length);
+
+        boolean lastInputBlockConsumed = false;
+        while ( ! lastInputBlockConsumed ) {
+            final IntermediateResultBlock nextInputBlock = inputs[chosen].getNextIntermediateResultBlock();
+            if ( nextInputBlock != null ) {
+                op.processBlockFromXthChild(chosen, nextInputBlock, sink, execCxt);
+            }
+            else {
+                op.wrapUpForXthChild(chosen, sink, execCxt);
+                lastInputBlockConsumed = true;
+            }
         }
+    }
+
+    protected void produceOutputFromRandomInputOneMapping( final IntermediateResultElementSink sink )
+            throws ExecOpExecutionException, ExecPlanTaskInputException, ExecPlanTaskInterruptionException {
+        int chosen = rand.nextInt(inputs.length);
+
+        boolean lastInputBlockConsumed = false;
+        while ( ! lastInputBlockConsumed ) {
+            final IntermediateResultBlock nextInputBlock = inputs[chosen].getNextIntermediateResultBlock();
+            if ( nextInputBlock != null ) {
+                op.processBlockFromXthChild(chosen, nextInputBlock, sink, execCxt);
+                lastInputBlockConsumed = true;
+            }
+            else {
+                op.wrapUpForXthChild(chosen, sink, execCxt);
+                lastInputBlockConsumed = true;
+            }
+        }
+
+        // We simulate consuming all inputs, even though we only consumed one
+        Arrays.stream(inputs).forEach(i -> {
+            i.setStatus(Status.BATCH_COMPLETED_AND_CONSUMED);
+            i.clearAvailableBlocks();
+        });
+    }
+
+    protected void produceAllOutputByConsumingAllInputsInParallelOneMapping( final IntermediateResultElementSink sink ) throws ExecPlanTaskInputException, ExecOpExecutionException, ExecPlanTaskInterruptionException {
+
+        // optimization of produceOneOutputFromRandomInput ?
+        CollectingIntermediateResultElementSink tempSink = new CollectingIntermediateResultElementSink();
+
+        produceOutputByConsumingAllInputsInParallel(tempSink);
+
+        // in the implementation, getCollectedSolutionMappings always return an ArrayList, so this cast shouldn't be an
+        // issue. Still, it would be better to have a dedicated sink that returns specifically a List
+        // TODO :
+        List<SolutionMapping> tempResults = (ArrayList) tempSink.getCollectedSolutionMappings();
+
+        if (!tempResults.isEmpty()) sink.send( tempResults.get( rand.nextInt( tempResults.size() ) ) );
     }
 
     /**

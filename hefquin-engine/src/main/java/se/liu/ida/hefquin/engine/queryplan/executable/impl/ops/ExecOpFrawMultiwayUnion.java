@@ -1,8 +1,8 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
 
 import org.apache.jena.datatypes.xsd.XSDDatatype;
-import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
@@ -25,7 +25,6 @@ public class ExecOpFrawMultiwayUnion extends ExecOpMultiwayUnion{
 
     private int chosenChild;
     private Random random;
-    private int numberOfChildrenProcessed;
 
     public ExecOpFrawMultiwayUnion(int numberOfChildren, boolean collectExceptions) {
         super(numberOfChildren, collectExceptions);
@@ -39,32 +38,30 @@ public class ExecOpFrawMultiwayUnion extends ExecOpMultiwayUnion{
                                               final IntermediateResultElementSink sink,
                                               final ExecutionContext execCxt) {
 
-        if(chosenChild == x){
-            CollectingIntermediateResultElementSink tempSink = new CollectingIntermediateResultElementSink();
+        CollectingIntermediateResultElementSink tempSink = new CollectingIntermediateResultElementSink();
 
-            super._processBlockFromXthChild(x, input, tempSink, execCxt);
+        super._processBlockFromXthChild(x, input, tempSink, execCxt);
 
-            tempSink.getCollectedSolutionMappings().forEach(
-                    solutionMapping -> {
-                        Binding binding = solutionMapping.asJenaBinding();
+        tempSink.getCollectedSolutionMappings().forEach(
+                solutionMapping -> {
+                    Binding binding = solutionMapping.asJenaBinding();
 
-                        BindingBuilder bb = BindingBuilder.create();
+                    BindingBuilder bb = BindingBuilder.create();
 
-                        for (Iterator<Var> it = binding.vars(); it.hasNext(); ) {
-                            Var var = it.next();
-                            if(!var.equals(MAPPING_PROBABILITY)){
-                                Node node = binding.get(var);
-                                bb.add(var, node);
-                            }else if(!bb.contains(MAPPING_PROBABILITY)) {
-                                Double newProbability = ((Double) binding.get(MAPPING_PROBABILITY).getLiteralValue()) / numberOfChildren;
-                                bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(newProbability), XSDDatatype.XSDdouble));
-                            }
+                    for (Iterator<Var> it = binding.vars(); it.hasNext(); ) {
+                        Var var = it.next();
+                        if(!var.equals(MAPPING_PROBABILITY)){
+                            Node node = binding.get(var);
+                            bb.add(var, node);
+                        }else if(!bb.contains(MAPPING_PROBABILITY)) {
+                            Double newProbability = ((Double) binding.get(MAPPING_PROBABILITY).getLiteralValue()) / numberOfChildren;
+                            bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(newProbability), XSDDatatype.XSDdouble));
                         }
-
-                        sink.send(new SolutionMappingImpl(bb.build()));
                     }
-            );
-        }
+
+                    sink.send(new SolutionMappingImpl(bb.build()));
+                }
+        );
     }
 
     @Override
@@ -72,23 +69,6 @@ public class ExecOpFrawMultiwayUnion extends ExecOpMultiwayUnion{
                                   IntermediateResultElementSink sink,
                                   ExecutionContext execCxt) {
 
-        // Works, but i'm not sure why...
-        if(allChildrenProcessed()){
-            this.chosenChild = random.nextInt(numberOfChildren);
-            this.resetStats();
-        }
-    }
-
-    private boolean allChildrenProcessed(){
-
-        // Works, but i'm not sure why...
-        boolean [] xthInputConsumed = ((boolean []) this.getStats().getEntry("xthInputConsumed"));
-
-        for(boolean xth : xthInputConsumed){
-            if (!xth)
-                return false;
-        }
-        return true;
     }
 }
 

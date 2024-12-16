@@ -76,6 +76,21 @@ public class PushBasedExecPlanSamplingTaskForUnaryOperator extends PushBasedExec
         }
     }
 
+    private void _produceOutputOneMapping(IntermediateResultElementSink sink) throws ExecPlanTaskInputException, ExecPlanTaskInterruptionException, ExecOpExecutionException {
+        boolean lastInputBlockConsumed = false;
+        while ( ! lastInputBlockConsumed ) {
+            final IntermediateResultBlock nextInputBlock = input.getNextIntermediateResultBlock();
+            if ( nextInputBlock != null ) {
+                op.process(nextInputBlock, sink, execCxt);
+                lastInputBlockConsumed = true;
+            }
+            else {
+                op.concludeExecution(sink, execCxt);
+                lastInputBlockConsumed = true;
+            }
+        }
+    }
+
     @Override
     protected void propagateNextBatch() throws ExecPlanTaskInterruptionException, ExecPlanTaskInputException {
         synchronized (availableResultBlocks){
