@@ -624,11 +624,13 @@ public class PhysicalPlanFactory
 
 			return PhysicalPlanFactory.createPlan( l2gPOP, addOpPlan );
 		}
-		else if ( (oldSubPlanRootOp instanceof PhysicalOpBinaryUnion || oldSubPlanRootOp instanceof PhysicalOpMultiwayUnion)
-				&& PhysicalPlanFactory.checkUnaryOpApplicableToUnionPlan(nextPlan)){
-			
-			return PhysicalPlanFactory.createPlanWithUnaryOpForUnionPlan( inputPlan, nextPlan );
-		}
+		// Commented because we do not want to have a "developped" physical plan, where a logical join between a Graph
+		// Pattern and a union ends up turning into physical union of joins (see method description)
+//		else if ( (oldSubPlanRootOp instanceof PhysicalOpBinaryUnion || oldSubPlanRootOp instanceof PhysicalOpMultiwayUnion)
+//				&& PhysicalPlanFactory.checkUnaryOpApplicableToUnionPlan(nextPlan)){
+//
+//			return PhysicalPlanFactory.createPlanWithUnaryOpForUnionPlan( inputPlan, nextPlan );
+//		}
 		else
 			return createPlanWithJoin(inputPlan, nextPlan);
 	}

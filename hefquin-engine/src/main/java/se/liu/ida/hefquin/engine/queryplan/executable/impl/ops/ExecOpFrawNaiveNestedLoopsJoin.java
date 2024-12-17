@@ -53,7 +53,7 @@ public class ExecOpFrawNaiveNestedLoopsJoin extends BinaryExecutableOpBase{
         for ( final SolutionMapping smR : input.getSolutionMappings() ) {
             for ( final SolutionMapping smL : inputLHS ) {
                 if ( FrawUtils.compatible(smL,smR) ) {
-                    sink.send( SolutionMappingUtils.merge(smL,smR) );
+                    sink.send( FrawUtils.merge(smL,smR) );
                 }
             }
         }

@@ -20,6 +20,6 @@ public class PhysicalOpFrawJoin extends BaseForPhysicalOpBinaryJoin{
 
     @Override
     public void visit(PhysicalPlanVisitor visitor) {
-
+        visitor.visit(this);
     }
 }

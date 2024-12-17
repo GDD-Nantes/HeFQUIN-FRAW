@@ -76,6 +76,13 @@ public class TextBasedPhysicalPlanPrinterImpl extends BaseForTextBasedPlanPrinte
 		public void setIndentLevelStringForOpDetail( final String s ) { indentLevelStringForOpDetail = s; }
 
 		@Override
+		public void visit( final PhysicalOpFrawJoin op ){
+			out.append( indentLevelString + "frawd naive join (" + op.getID() + ") " );
+			out.append( System.lineSeparator() );
+			printLogicalOperator( op, indentLevelStringForOpDetail + singleBase, out, lopNP );
+		}
+
+		@Override
 		public void visit( final PhysicalOpFrawBindJoin op ){
 			out.append( indentLevelString + "frawd bind join (" + op.getID() + ") " );
 			out.append( System.lineSeparator() );

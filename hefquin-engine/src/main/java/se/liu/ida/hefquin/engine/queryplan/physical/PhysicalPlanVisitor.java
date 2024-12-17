@@ -29,4 +29,5 @@ public interface PhysicalPlanVisitor
 	void visit( PhysicalOpGlobalToLocal op );
 	void visit( PhysicalOpFrawBindJoin op );
 	void visit( PhysicalOpFrawMultiwayUnion op);
+	void visit( PhysicalOpFrawJoin op );
 }
