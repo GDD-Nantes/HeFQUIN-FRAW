@@ -63,7 +63,7 @@ public class PushBasedExecPlanSamplingTaskForNullaryOperator extends PushBasedEx
         // in the implementation, getCollectedSolutionMappings always return an ArrayList, so this cast shouldn't be an
         // issue. Still, it would be better to have a dedicated sink that returns specifically a List
         // TODO :
-        sink.send( tempResults.get( rand.nextInt( tempResults.size() ) ) );
+        if ( !tempResults.isEmpty() ) sink.send( tempResults.get( rand.nextInt( tempResults.size() ) ) );
     }
 
     @Override
