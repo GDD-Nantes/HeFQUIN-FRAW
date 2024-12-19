@@ -21,12 +21,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 
 public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
-    protected final LinkedList<ExecPlanTask> tasks;
+    protected final LinkedList<PushBasedExecPlanSamplingTaskBase> tasks;
     protected ExecutorService threadPool;
 
     public TaskBasedExecutableSamplingPlanImpl( final LinkedList<ExecPlanTask> tasks, final ExecutionContext ctx ) {
         assert ! tasks.isEmpty();
-        this.tasks = tasks;
+
+        // ugly and very inefficient but only called once
+        this.tasks = new LinkedList<>(tasks.stream().map(t -> (PushBasedExecPlanSamplingTaskBase) t).toList());
 
         threadPool = ctx.getExecutorServiceForPlanTasks();
     }
@@ -42,7 +44,7 @@ public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
         // track their progress (each 'Future' has the same index in
         // 'futures' array as its corresponding task has in the 'tasks'
         // list)
-        final Iterator<ExecPlanTask> it = tasks.descendingIterator();
+        final Iterator<PushBasedExecPlanSamplingTaskBase> it = tasks.descendingIterator();
         int i = tasks.size();
         final Future<?>[] futures = new Future<?>[tasks.size()];
         while ( it.hasNext() ) {
@@ -63,8 +65,15 @@ public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
 
         // consume all solution mappings from the root operator and send them to the result sink
         try {
-            final ExecPlanTask rootTask = tasks.getFirst();
-            while ( tasks.stream().anyMatch(t -> ! t.isCompleted()) ) {
+            final PushBasedExecPlanSamplingTaskBase rootTask = tasks.getFirst();
+            rootTask.initializeFirstBatch();
+            for(int j = 0; j < 10; j++){
+                rootTask.propagateNextBatch();
+                tasks.stream().forEach(task -> {
+                    synchronized(task.lock) {
+                        task.lock.notify();
+                    }
+                });
                 IntermediateResultBlock block = rootTask.getNextIntermediateResultBlock();
                 if ( block != null ) {
                     for ( final SolutionMapping sm : block.getSolutionMappings() ) {
@@ -72,6 +81,12 @@ public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
                     }
                 }
             }
+            tasks.stream().forEach(t -> {
+                t.enoughWalks();
+                synchronized(t.lock) {
+                    t.lock.notify();
+                }
+            });
         }
         catch ( final Exception e ) {
             // try to cancel the tasks in order to free up the

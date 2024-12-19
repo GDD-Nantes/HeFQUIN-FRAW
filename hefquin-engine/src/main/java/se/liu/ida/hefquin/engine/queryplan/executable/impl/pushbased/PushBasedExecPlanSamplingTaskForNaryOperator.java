@@ -13,7 +13,10 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
     protected final PushBasedExecPlanSamplingTaskBase[] inputs;
 
     protected final Random rand;
+    protected int chosen;
 
+    // Currently, should only be used for multiwayunion, not multiwayjoin, since every batch, a single child is
+    // chosen to produce output.
     public PushBasedExecPlanSamplingTaskForNaryOperator( final NaryExecutableOp op,
                                                  final ExecPlanTask[] inputs,
                                                  final ExecutionContext execCxt,
@@ -38,7 +41,7 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
         boolean interrupted  = false;
 
         try {
-            produceOutputFromRandomInputOneMapping(sink);
+            produceOutputFromRandomInput(sink);
         }
         catch ( final ExecOpExecutionException | ExecPlanTaskInputException e ) {
             setCauseOfFailure(e);
@@ -58,30 +61,8 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
 //        }
     }
 
-    @Override
-    protected void propagateNextBatch() {
-        synchronized (availableResultBlocks){
-//            if(Objects.nonNull(this.extraConnectors))
-//                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
-            Arrays.stream(this.inputs).forEach(i -> i.propagateNextBatch());
-            // we clear the queue to start off of a clean, new batch
-            this.availableResultBlocks.clear();
-            this.setStatus(Status.READY_NEXT_BATCH);
-        }
-    }
-
-    @Override
-    public boolean isPreviousBatchDone() {
-//        boolean extraConnectorsDone = Objects.isNull(extraConnectors) ? true : extraConnectors.stream().allMatch(ec -> ec.isPreviousBatchDone());
-        boolean inputsDone = Arrays.stream(inputs).allMatch(i -> i.isPreviousBatchDone());
-        return inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
-//        return extraConnectorsDone && inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
-    }
-
     protected void produceOutputFromRandomInput( final IntermediateResultElementSink sink )
             throws ExecOpExecutionException, ExecPlanTaskInputException, ExecPlanTaskInterruptionException {
-        int chosen = rand.nextInt(inputs.length);
-
         boolean lastInputBlockConsumed = false;
         while ( ! lastInputBlockConsumed ) {
             final IntermediateResultBlock nextInputBlock = inputs[chosen].getNextIntermediateResultBlock();
@@ -97,8 +78,6 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
 
     protected void produceOutputFromRandomInputOneMapping( final IntermediateResultElementSink sink )
             throws ExecOpExecutionException, ExecPlanTaskInputException, ExecPlanTaskInterruptionException {
-        int chosen = rand.nextInt(inputs.length);
-
         boolean lastInputBlockConsumed = false;
         while ( ! lastInputBlockConsumed ) {
             final IntermediateResultBlock nextInputBlock = inputs[chosen].getNextIntermediateResultBlock();
@@ -114,7 +93,7 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
 
         // We simulate consuming all inputs, even though we only consumed one
         Arrays.stream(inputs).forEach(i -> {
-            i.setStatus(Status.BATCH_COMPLETED_AND_CONSUMED);
+            i.setStatus(Status.AVAILABLE);
             i.clearAvailableBlocks();
         });
     }
@@ -217,11 +196,55 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
         return op;
     }
 
+
+
+    @Override
+    public void propagateNextBatch() {
+        synchronized (availableResultBlocks){
+//            if(Objects.nonNull(this.extraConnectors))
+//                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
+
+            // Let's only start a task if it's going to be used in the next batch. That is, we pick the branch of the
+            // union that we're going to use for the next batch here
+
+            chosen = rand.nextInt(this.inputs.length);
+            PushBasedExecPlanSamplingTaskBase chosenInput = this.inputs[chosen];
+
+            chosenInput.propagateNextBatch();
+
+            //Arrays.stream(this.inputs).forEach(i -> i.propagateNextBatch());
+            // we clear the queue to start off of a clean, new batch
+            this.availableResultBlocks.clear();
+
+            this.setStatus(Status.READY_NEXT_BATCH);
+        }
+    }
+
+    @Override
+    public boolean isPreviousBatchDone() {
+//        boolean extraConnectorsDone = Objects.isNull(extraConnectors) ? true : extraConnectors.stream().allMatch(ec -> ec.isPreviousBatchDone());
+        synchronized (availableResultBlocks){
+            if (getStatus() != Status.AVAILABLE) return false;
+            return inputs[chosen].isPreviousBatchDone();
+        }
+//        return extraConnectorsDone && inputsDone && getStatus() == Status.AVAILABLE;
+    }
+
     @Override
     public void clearAvailableBlocks() {
         synchronized (availableResultBlocks) {
             availableResultBlocks.clear();
-            Arrays.stream(inputs).forEach(i -> i.clearAvailableBlocks());
+            inputs[chosen].clearAvailableBlocks();
+        }
+    }
+
+    @Override
+    public void initializeFirstBatch() {
+        synchronized (availableResultBlocks) {
+            for (PushBasedExecPlanSamplingTaskBase task : inputs){
+                task.initializeFirstBatch();
+            }
+            this.setStatus(Status.AVAILABLE);
         }
     }
 

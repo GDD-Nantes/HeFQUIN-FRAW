@@ -41,7 +41,7 @@ public abstract class ExecPlanSamplingTaskBase implements ExecPlanTask{
          * The execution of the task for the current batch of samples was completed successfully
          * and its results have been consumed completely.
          */
-        BATCH_COMPLETED_AND_CONSUMED,
+        AVAILABLE,
 
         /**
          * The execution of the task was completed successfully
@@ -53,7 +53,7 @@ public abstract class ExecPlanSamplingTaskBase implements ExecPlanTask{
          * The execution of the task was completed successfully
          * and its results have been consumed completely.
          */
-        TASK_COMPLETED_AND_CONSUMED,
+        FINISHED,
 
         /**
          * The execution of the task failed with an exception;
@@ -103,7 +103,7 @@ public abstract class ExecPlanSamplingTaskBase implements ExecPlanTask{
 
     @Override
     public boolean isCompleted() {
-        return status == Status.TASK_COMPLETED_AND_CONSUMED;
+        return status == Status.FINISHED;
     }
 
     @Override
@@ -141,7 +141,10 @@ public abstract class ExecPlanSamplingTaskBase implements ExecPlanTask{
 
     public void setStatus(final ExecPlanSamplingTaskBase.Status newStatus) {
         synchronized (availableResultBlocks) {
-            status = newStatus;
+            if(this.status != Status.FINISHED) {
+                this.history.add(newStatus);
+                status = newStatus;
+            }
         }
     }
 

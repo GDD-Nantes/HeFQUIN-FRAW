@@ -7,7 +7,10 @@ import se.liu.ida.hefquin.engine.queryplan.executable.*;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.*;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.locks.Lock;
 
 public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSamplingTaskBase
         implements PushBasedExecPlanTask, IntermediateResultElementSink {
@@ -22,17 +25,17 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
 
     protected PushBasedExecPlanSamplingTaskBase upper;
 
-    protected final int numberOfRandomWalksToAttempt;
-
+    // debugging purpose only
     protected int attemptedRandomWalks = 0;
+
+    private boolean producedEnoughWalks = false;
+
+    public Object lock = new Object();
 
     protected PushBasedExecPlanSamplingTaskBase( final ExecutionContext execCxt, final int preferredMinimumBlockSize ) {
         super(execCxt, preferredMinimumBlockSize);
 
         this.upper = null;
-
-        // Hardcoded, TODO : make it config dependent
-        this.numberOfRandomWalksToAttempt = 10;
 
         // ??? why can't a block be a size of one mapping ???
         if ( preferredMinimumBlockSize == 1 )
@@ -60,8 +63,6 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
     @Override
     public final void run() {
         try {
-            setStatus(Status.RUNNING);
-
 //            if ( extraConnectors != null ) {
 //                for ( final SamplingConnectorForAdditionalConsumer c : extraConnectors ) {
 //                     c.setStatus(Status.RUNNING);
@@ -70,18 +71,31 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
 
             final IntermediateResultElementSink sink = this;
 
-            produceOutput(sink);
+//            produceOutput(sink);
 
 
-            while(!shouldStop()){
-                if(isRoot() && isPreviousBatchDone()){
-                    propagateNextBatch();
-                }
 
+            while( ! ( shouldStop() ) ){
                 if(isReadyForNextBatch()){
+                    setStatus(Status.RUNNING);
                     produceOutput(sink);
+                }else {
+                    synchronized (lock){
+                        lock.wait();
+                    }
                 }
             }
+
+//            initializeFirstBatch();
+
+//            while ( !shouldStop() ){
+//                if (isRoot()) {
+//                    while(!isPreviousBatchDone()) {}
+//                    propagateNextBatch();
+//                } else {
+//                }
+//                produceOutput(sink);
+//            }
 
             wrapUpTask();
         }
@@ -96,11 +110,11 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
         }
     }
 
-    private boolean shouldStop(){
+    public boolean shouldStop(){
         // for root operator : timeout or enough results
         // for not root operators : upper operator is completed
         if(isRoot())
-            return attemptedRandomWalks >= numberOfRandomWalksToAttempt || false; // !timeout && !enough results TODO : timeout
+            return producedEnoughWalks || false; // !timeout && !enough results TODO : timeout
         else
             return upper.shouldStop();
     }
@@ -154,7 +168,7 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
                     // status depending on whether there still are output
                     // result blocks available to be consumed
                     if ( availableResultBlocks.isEmpty() )
-                        setStatus(Status.BATCH_COMPLETED_AND_CONSUMED);
+                        setStatus(Status.AVAILABLE);
                     else
                         setStatus(Status.BATCH_COMPLETED_NOT_CONSUMED);
                 }
@@ -184,7 +198,7 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
                     // status depending on whether there still are output
                     // result blocks available to be consumed
                     if ( availableResultBlocks.isEmpty() )
-                        setStatus(Status.TASK_COMPLETED_AND_CONSUMED);
+                        setStatus(Status.FINISHED);
                     else {
                         setStatus(Status.TASK_COMPLETED_NOT_CONSUMED);
                     }
@@ -202,7 +216,7 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
         synchronized (availableResultBlocks) {
 
             IntermediateResultBlock nextBlock = null;
-            while ( nextBlock == null && getStatus() != Status.BATCH_COMPLETED_AND_CONSUMED && getStatus() != Status.TASK_COMPLETED_AND_CONSUMED) {
+            while ( nextBlock == null && getStatus() != Status.AVAILABLE && getStatus() != Status.FINISHED) {
                 // before trying to get the next block, make sure that
                 // we have not already reached some problematic status
                 final Status currentStatus = getStatus();
@@ -227,17 +241,17 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
 
                 // Did we reach the end of all result blocks to be expected?
                 if ( currentStatus == Status.BATCH_COMPLETED_NOT_CONSUMED && availableResultBlocks.isEmpty() ) {
-                    setStatus(Status.BATCH_COMPLETED_AND_CONSUMED); // yes, we did
+                    setStatus(Status.AVAILABLE); // yes, we did
                 }
 
                 // Did we reach the end of all result blocks to be expected?
                 if ( currentStatus == Status.TASK_COMPLETED_NOT_CONSUMED && availableResultBlocks.isEmpty() ) {
-                    setStatus(Status.TASK_COMPLETED_AND_CONSUMED); // yes, we did
+                    setStatus(Status.FINISHED); // yes, we did
                 }
 
                 if ( nextBlock == null
-                        && getStatus() != Status.BATCH_COMPLETED_AND_CONSUMED
-                        && getStatus() != Status.TASK_COMPLETED_AND_CONSUMED ) {
+                        && getStatus() != Status.AVAILABLE
+                        && getStatus() != Status.FINISHED ) {
                     // if no next block was available and the producing
                     // thread is still active, wait for the notification
                     // that a new block has become available
@@ -250,7 +264,7 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
             }
 
 
-            if( isRoot() && attemptedRandomWalks < numberOfRandomWalksToAttempt && nextBlock == null ){
+            if( isRoot() && !producedEnoughWalks && nextBlock == null ){
                 // only works if a batch is always one mapping only
                 blockBuilder.add(new SolutionMappingImpl());
                 nextBlock = blockBuilder.finishCurrentBlock();
@@ -262,9 +276,7 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
     }
 
     protected boolean isReadyForNextBatch(){
-        synchronized (availableResultBlocks) {
-            return getStatus() == Status.READY_NEXT_BATCH;
-        }
+        return getStatus() == Status.READY_NEXT_BATCH;
     }
 
     protected boolean isRoot(){
@@ -275,7 +287,11 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
         this.upper = upper;
     }
 
-    protected abstract void propagateNextBatch();
+    public void enoughWalks(){
+        this.producedEnoughWalks = true;
+    }
+
+    public abstract void propagateNextBatch();
 
     public abstract boolean isPreviousBatchDone();
 
@@ -283,4 +299,6 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
             throws ExecOpExecutionException, ExecPlanTaskInputException, ExecPlanTaskInterruptionException;
 
     public abstract void clearAvailableBlocks();
+
+    public abstract void initializeFirstBatch();
 }

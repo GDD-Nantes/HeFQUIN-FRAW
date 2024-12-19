@@ -67,7 +67,7 @@ public class PushBasedExecPlanSamplingTaskForNullaryOperator extends PushBasedEx
     }
 
     @Override
-    protected void propagateNextBatch() {
+    public void propagateNextBatch() {
         synchronized (availableResultBlocks){
 //            if(Objects.nonNull(this.extraConnectors))
 //                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
@@ -80,14 +80,23 @@ public class PushBasedExecPlanSamplingTaskForNullaryOperator extends PushBasedEx
     @Override
     public boolean isPreviousBatchDone() {
 //        boolean extraConnectorsDone = Objects.isNull(extraConnectors) ? true : extraConnectors.stream().allMatch(ec -> ec.isPreviousBatchDone());
-        return getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
-//        return extraConnectorsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+        synchronized (availableResultBlocks){
+            return getStatus() == Status.AVAILABLE;
+        }
+//        return extraConnectorsDone && getStatus() == Status.AVAILABLE;
     }
 
     @Override
     public void clearAvailableBlocks() {
         synchronized (availableResultBlocks) {
             availableResultBlocks.clear();
+        }
+    }
+
+    @Override
+    public void initializeFirstBatch() {
+        synchronized (availableResultBlocks) {
+            this.setStatus(Status.AVAILABLE);
         }
     }
 }

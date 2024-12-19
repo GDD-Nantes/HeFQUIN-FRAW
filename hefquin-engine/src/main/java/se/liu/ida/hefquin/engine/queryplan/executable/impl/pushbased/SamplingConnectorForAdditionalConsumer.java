@@ -22,26 +22,33 @@ public class SamplingConnectorForAdditionalConsumer extends PushBasedExecPlanSam
     protected void produceOutput( final IntermediateResultElementSink sink ) { throw new UnsupportedOperationException(); }
 
     @Override
-    protected void propagateNextBatch() {
-        synchronized (availableResultBlocks){
-            // we clear the queue to start off of a clean, new batch
-            this.availableResultBlocks.clear();
-            this.setStatus(Status.READY_NEXT_BATCH);
-        }
-    }
-
-    @Override
     public ExecPlanTask addConnectorForAdditionalConsumer(final int preferredMinimumBlockSize ) { throw new UnsupportedOperationException(); }
 
     @Override
     public boolean isPreviousBatchDone() {
-        return getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+        return getStatus() == Status.AVAILABLE;
     }
 
     @Override
     public void clearAvailableBlocks() {
         synchronized (availableResultBlocks) {
             availableResultBlocks.clear();
+        }
+    }
+
+    @Override
+    public void initializeFirstBatch() {
+        synchronized (availableResultBlocks) {
+            this.setStatus(Status.AVAILABLE);
+        }
+    }
+
+    @Override
+    public void propagateNextBatch() {
+        synchronized (availableResultBlocks){
+            // we clear the queue to start off of a clean, new batch
+            this.availableResultBlocks.clear();
+            this.setStatus(Status.READY_NEXT_BATCH);
         }
     }
 }

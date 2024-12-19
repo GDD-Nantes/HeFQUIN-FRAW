@@ -6,8 +6,6 @@ import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTaskInputExce
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTaskInterruptionException;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 
-import java.util.Arrays;
-
 public class PushBasedExecPlanSamplingTaskForUnaryOperator extends PushBasedExecPlanSamplingTaskBase{
     protected final UnaryExecutableOp op;
     protected final PushBasedExecPlanSamplingTaskBase input;
@@ -91,7 +89,7 @@ public class PushBasedExecPlanSamplingTaskForUnaryOperator extends PushBasedExec
     }
 
     @Override
-    protected void propagateNextBatch() {
+    public void propagateNextBatch() {
         synchronized (availableResultBlocks){
 //            if(Objects.nonNull(this.extraConnectors))
 //                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
@@ -99,16 +97,18 @@ public class PushBasedExecPlanSamplingTaskForUnaryOperator extends PushBasedExec
 
             // we clear the queue to start off of a clean, new batch
             this.availableResultBlocks.clear();
-            setStatus(Status.READY_NEXT_BATCH);
+            this.setStatus(Status.READY_NEXT_BATCH);
         }
     }
 
     @Override
     public boolean isPreviousBatchDone() {
 //        boolean extraConnectorsDone = Objects.isNull(extraConnectors) ? true : extraConnectors.stream().allMatch(ec -> ec.isPreviousBatchDone());
-        boolean inputsDone = input.isPreviousBatchDone();
-        return inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
-//        return extraConnectorsDone && inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+        synchronized (availableResultBlocks){
+            if (getStatus() != Status.AVAILABLE) return false;
+            return input.isPreviousBatchDone();
+        }
+//        return extraConnectorsDone && inputsDone && getStatus() == Status.AVAILABLE;
     }
 
     @Override
@@ -116,6 +116,14 @@ public class PushBasedExecPlanSamplingTaskForUnaryOperator extends PushBasedExec
         synchronized (availableResultBlocks) {
             availableResultBlocks.clear();
             input.clearAvailableBlocks();
+        }
+    }
+
+    @Override
+    public void initializeFirstBatch() {
+        synchronized (availableResultBlocks) {
+            this.input.initializeFirstBatch();
+            this.setStatus(Status.AVAILABLE);
         }
     }
 }

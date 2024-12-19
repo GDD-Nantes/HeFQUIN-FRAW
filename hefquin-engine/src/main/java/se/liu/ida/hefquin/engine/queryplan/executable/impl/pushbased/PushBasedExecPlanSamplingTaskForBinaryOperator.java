@@ -6,8 +6,6 @@ import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTaskInputExce
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTaskInterruptionException;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 
-import java.util.Arrays;
-
 public class PushBasedExecPlanSamplingTaskForBinaryOperator extends PushBasedExecPlanSamplingTaskBase {
 
     protected final BinaryExecutableOp op;
@@ -73,19 +71,6 @@ public class PushBasedExecPlanSamplingTaskForBinaryOperator extends PushBasedExe
         else
             //produceOutputByConsumingBothInputsInParallel(sink);
             produceOutputByConsumingInput1First(sink);
-    }
-
-    @Override
-    protected void propagateNextBatch() {
-        synchronized (availableResultBlocks){
-//            if(Objects.nonNull(this.extraConnectors))
-//                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
-            this.input1.propagateNextBatch();
-            this.input2.propagateNextBatch();
-            // we clear the queue to start off of a clean, new batch
-            this.availableResultBlocks.clear();
-            this.setStatus(Status.READY_NEXT_BATCH);
-        }
     }
 
     /**
@@ -201,9 +186,11 @@ public class PushBasedExecPlanSamplingTaskForBinaryOperator extends PushBasedExe
     @Override
     public boolean isPreviousBatchDone() {
 //        boolean extraConnectorsDone = Objects.isNull(extraConnectors) ? true : extraConnectors.stream().allMatch(ec -> ec.isPreviousBatchDone());
-        boolean inputsDone = input1.isPreviousBatchDone() && input2.isPreviousBatchDone();
-        return inputsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
-//        return inputsDone && extraConnectorsDone && getStatus() == Status.BATCH_COMPLETED_AND_CONSUMED;
+        synchronized (availableResultBlocks) {
+            if (getStatus() != Status.AVAILABLE) return false;
+            return input2.isPreviousBatchDone() && input1.isPreviousBatchDone();
+        }
+//        return inputsDone && extraConnectorsDone && getStatus() == Status.AVAILABLE;
     }
 
     @Override
@@ -212,6 +199,29 @@ public class PushBasedExecPlanSamplingTaskForBinaryOperator extends PushBasedExe
             availableResultBlocks.clear();
             input1.clearAvailableBlocks();
             input2.clearAvailableBlocks();
+        }
+    }
+
+    @Override
+    public void initializeFirstBatch() {
+        synchronized (availableResultBlocks) {
+            this.input1.initializeFirstBatch();
+            this.input2.initializeFirstBatch();
+            this.setStatus(Status.AVAILABLE);
+        }
+    }
+
+    @Override
+    public void propagateNextBatch() {
+        synchronized (availableResultBlocks){
+//            if(Objects.nonNull(this.extraConnectors))
+//                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
+            this.input1.propagateNextBatch();
+            this.input2.propagateNextBatch();
+            // we clear the queue to start off of a clean, new batch
+            this.availableResultBlocks.clear();
+
+            this.setStatus(Status.READY_NEXT_BATCH);
         }
     }
 }
