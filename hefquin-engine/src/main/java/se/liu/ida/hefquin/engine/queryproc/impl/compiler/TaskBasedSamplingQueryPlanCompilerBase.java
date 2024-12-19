@@ -93,7 +93,7 @@ public abstract class TaskBasedSamplingQueryPlanCompilerBase extends QueryPlanCo
                 PushBasedExecPlanSamplingTaskForBinaryOperator returnTask = createTaskForBinaryExecOp(execOp, childTask1, childTask2, execCxt, preferredOutputBlockSize);
                 try{
                     ((PushBasedExecPlanSamplingTaskBase) childTask1).setUpper(returnTask);
-                    ((PushBasedExecPlanSamplingTaskBase) childTask1).setUpper(returnTask);
+                    ((PushBasedExecPlanSamplingTaskBase) childTask2).setUpper(returnTask);
                 }catch (Exception e) {
                     System.out.println("couldn't cast ExecPlanTask to PushBasedExecPlanSamplingTaskBase");
                     e.printStackTrace(System.out);
