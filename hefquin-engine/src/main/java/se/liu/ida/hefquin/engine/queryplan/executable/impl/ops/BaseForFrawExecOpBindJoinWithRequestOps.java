@@ -45,7 +45,7 @@ public class BaseForFrawExecOpBindJoinWithRequestOps extends BaseForExecOpBindJo
                                                        final IntermediateResultElementSink sink,
                                                        final ExecutionContext execCxt ) throws ExecOpExecutionException
     {
-        final NullaryExecutableOp reqOp = createExecutableRequestOperator(joinableInputSMs);
+        final NullaryExecutableOp reqOp = createExecutableReqOp(joinableInputSMs);
 
         if ( reqOp != null ) {
             numberOfRequestOpsUsed++;
