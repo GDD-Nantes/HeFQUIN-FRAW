@@ -353,7 +353,7 @@ public class QueryPatternUtils
 
 	public static Set<Var> getVariablesInPattern( final OpSequence op) {
 		final Set<Var> result = new HashSet<>();
-		op.getElements().stream().map(e -> result.addAll(getVariablesInPattern(e)));
+		op.getElements().stream().forEach(e -> result.addAll(getVariablesInPattern(e)));
 		return result;
 	}
 
@@ -376,7 +376,9 @@ public class QueryPatternUtils
 		else if ( op instanceof OpSequence ){
 			return getVariablesInPattern( (OpSequence) op );
 		}
-		else {
+		else if (op instanceof OpTriple) {
+			return getVariablesInPattern( ((OpTriple) op).getTriple() );
+		} else {
 			throw new UnsupportedOperationException("Getting the variables from arbitrary SPARQL patterns is an open TODO (type of Jena Op in the current case: " + op.getClass().getName() + ").");
 		}
 	}
