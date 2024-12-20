@@ -43,6 +43,7 @@ public class FrawUtils {
         // Create binding from LHS
         BindingBuilder builder = Binding.builder(bind1);
         Iterator<Var> vIter = bind2.vars();
+        boolean computedProba = false;
         // Add any variables from the RHS
         for ( ; vIter.hasNext() ; ) {
             Var v = vIter.next();
@@ -52,8 +53,15 @@ public class FrawUtils {
                 // Checking!
                 Node n1 = bind1.get(v);
                 Node n2 = bind2.get(v);
-                if(v.equals(MAPPING_PROBABILITY) && !builder.contains(MAPPING_PROBABILITY)){
-                    builder.add(v, NodeFactory.createLiteral(String.valueOf((Double) n1.getLiteralValue() * (Double) n2.getLiteralValue()), XSDDatatype.XSDdouble));
+                if(v.equals(MAPPING_PROBABILITY)){
+                    if(!computedProba){
+                        builder.add(v, NodeFactory.createLiteral(String.valueOf((Double) n1.getLiteralValue() * (Double) n2.getLiteralValue()), XSDDatatype.XSDdouble));
+                    } else {
+                        System.out.println("Tried to compute probability of joined binding twice! This shouldn't happen");
+                    }
+                    // Makes sure we only compute and add the probability once. A binding should only ever contain this variable once
+                    // and we only iterate over binding2 to build the joined binding, but we still check just in case.
+                    computedProba = true;
                 }
                 if ( !n1.equals(n2) && !v.equals(MAPPING_PROBABILITY))
                     Log.warn(BindingLib.class, "merge: Mismatch : " + n1 + " != " + n2);
