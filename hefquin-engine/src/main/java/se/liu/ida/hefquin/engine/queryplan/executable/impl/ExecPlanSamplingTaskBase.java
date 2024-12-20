@@ -142,7 +142,6 @@ public abstract class ExecPlanSamplingTaskBase implements ExecPlanTask{
     public void setStatus(final ExecPlanSamplingTaskBase.Status newStatus) {
         synchronized (availableResultBlocks) {
             if(this.status != Status.FINISHED) {
-                this.history.add(newStatus);
                 status = newStatus;
             }
         }
