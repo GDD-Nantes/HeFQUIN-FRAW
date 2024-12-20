@@ -13,20 +13,24 @@ import se.liu.ida.hefquin.engine.queryproc.SourcePlanningException;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanningStats;
 
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class FedupBasedSourcePlannerImpl extends ServiceClauseBasedSourcePlannerImpl {
 
     FedUP fedup;
-    int nbResults;
-
-    public FedupBasedSourcePlannerImpl(QueryProcContext qpc){
+    public FedupBasedSourcePlannerImpl(QueryProcContext qpc, String summaries, String lambdaString){
         super(qpc);
-        Summary summary = new Summary(new ModuloOnSuffix(1), Location.create(Path.of("fedshop200-h0")));
+
+        Summary summary = new Summary(new ModuloOnSuffix(1), Location.create(Path.of(summaries)));
         fedup = new FedUP(summary);
 
-        // Hardcoded, TODO : make it config dependent
-        Function<String, String> lambda = (e)->"http://localhost:3331/blazegraph.jnl/raw?default-graph-uri="+(e);
+        Function<String, String> lambda =
+                InMemoryLambdaJavaFileObject.getLambda("ModifyEndpoints",
+                        lambdaString, "String");
+        if (Objects.isNull(lambda)) {
+            throw new UnsupportedOperationException("The lambda expression does not seem valid.");
+        }
         fedup.modifyEndpoints(lambda);
     }
 

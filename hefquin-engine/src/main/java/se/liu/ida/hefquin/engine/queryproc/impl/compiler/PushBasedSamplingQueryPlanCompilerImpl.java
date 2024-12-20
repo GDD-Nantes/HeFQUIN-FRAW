@@ -14,15 +14,18 @@ import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
 
 public class PushBasedSamplingQueryPlanCompilerImpl extends TaskBasedSamplingQueryPlanCompilerBase
 {
-    public PushBasedSamplingQueryPlanCompilerImpl( final QueryProcContext ctxt ) {
+    final int numberOfWalks;
+
+    public PushBasedSamplingQueryPlanCompilerImpl( final QueryProcContext ctxt, final int numberOfWalks ) {
         super(ctxt);
+        this.numberOfWalks = numberOfWalks;
     }
 
     @Override
     public ExecutablePlan compile(PhysicalPlan qep) {
         final ExecutionContext execCtxt = createExecContext();
         final LinkedList<ExecPlanTask> tasks = createTasks(qep, execCtxt);
-        return new TaskBasedExecutableSamplingPlanImpl(tasks, execCtxt);
+        return new TaskBasedExecutableSamplingPlanImpl(tasks, execCtxt, numberOfWalks);
     }
 
     @Override

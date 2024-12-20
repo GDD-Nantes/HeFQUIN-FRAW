@@ -23,14 +23,17 @@ import java.util.concurrent.RejectedExecutionException;
 public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
     protected final LinkedList<PushBasedExecPlanSamplingTaskBase> tasks;
     protected ExecutorService threadPool;
+    int numberOfWalksToAttempt;
 
-    public TaskBasedExecutableSamplingPlanImpl( final LinkedList<ExecPlanTask> tasks, final ExecutionContext ctx ) {
+    public TaskBasedExecutableSamplingPlanImpl( final LinkedList<ExecPlanTask> tasks, final ExecutionContext ctx, final int numberOfWalksToAttempt ) {
         assert ! tasks.isEmpty();
 
         // ugly and very inefficient but only called once
         this.tasks = new LinkedList<>(tasks.stream().map(t -> (PushBasedExecPlanSamplingTaskBase) t).toList());
 
         threadPool = ctx.getExecutorServiceForPlanTasks();
+
+        this.numberOfWalksToAttempt = numberOfWalksToAttempt;
     }
 
     @Override
@@ -67,7 +70,8 @@ public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
         try {
             final PushBasedExecPlanSamplingTaskBase rootTask = tasks.getFirst();
             rootTask.initializeFirstBatch();
-            for(int j = 0; j < 10; j++){
+
+            for(int j = 0; j < numberOfWalksToAttempt; j++){
                 rootTask.propagateNextBatch();
                 tasks.stream().forEach(task -> {
                     synchronized(task.lock) {
