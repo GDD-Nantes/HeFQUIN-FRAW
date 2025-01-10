@@ -233,8 +233,12 @@ public class QueryPatternUtils
 					tps.add(new TriplePatternImpl(((OpTriple) element).getTriple()));
 			}
 			return tps;
-		}
-		else {
+		} else if (op instanceof OpTriple) {
+			tps.add(new TriplePatternImpl(((OpTriple) op).getTriple()));
+			return tps;
+		} else if (op instanceof OpFilter) {
+			return getTPsInPattern( ((OpFilter) op).getSubOp() );
+		} else {
 			throw new UnsupportedOperationException("Getting the triple patterns from arbitrary SPARQL patterns is an open TODO (type of Jena Op in the current case: " + op.getClass().getName() + ").");
 		}
 	}
