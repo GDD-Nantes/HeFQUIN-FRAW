@@ -2,6 +2,7 @@ package se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.utils;
 
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
+import org.apache.jena.sparql.expr.ExprList;
 import se.liu.ida.hefquin.base.query.TriplePattern;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
@@ -9,11 +10,14 @@ import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryplan.utils.LogicalOpUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class JOUQueryAnalyzer {
     MultiValuedMap<TriplePattern, FederationMember> tpsl = new HashSetValuedHashMap<>();
+    List<LogicalOpFilter> filters = new ArrayList<>();
 
 
     public JOUQueryAnalyzer(LogicalPlan plan) {
@@ -43,6 +47,7 @@ public class JOUQueryAnalyzer {
             }
             return ret;
         } else if( lop instanceof LogicalOpFilter ) {
+            filters.add(((LogicalOpFilter) lop));
             return extractTriplePatternBasedSourceSelection( plan.getSubPlan(0) );
         }
         else
@@ -58,4 +63,7 @@ public class JOUQueryAnalyzer {
         return tpsl;
     }
 
+    public List<LogicalOpFilter> getFilters() {
+        return filters;
+    }
 }

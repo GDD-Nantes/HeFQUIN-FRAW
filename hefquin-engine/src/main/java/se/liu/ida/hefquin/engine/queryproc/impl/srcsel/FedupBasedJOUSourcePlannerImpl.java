@@ -9,15 +9,18 @@ import org.apache.commons.logging.Log;
 import org.apache.jena.dboe.base.file.Location;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.OpProject;
+import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprList;
 import se.liu.ida.hefquin.base.query.TriplePattern;
 import se.liu.ida.hefquin.base.utils.Pair;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
+import se.liu.ida.hefquin.engine.federation.access.BGPRequest;
+import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.engine.federation.access.SPARQLRequest;
+import se.liu.ida.hefquin.engine.federation.access.TriplePatternRequest;
 import se.liu.ida.hefquin.engine.federation.access.impl.req.SPARQLRequestImpl;
 import se.liu.ida.hefquin.engine.federation.access.utils.SPARQLRequestUtils;
-import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
-import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlanWithNullaryRoot;
+import se.liu.ida.hefquin.engine.queryplan.logical.*;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanningException;
@@ -67,9 +70,10 @@ public class FedupBasedJOUSourcePlannerImpl extends ServiceClauseBasedSourcePlan
     }
 
     protected LogicalPlan unionOverJoin2JoinOverUnion(LogicalPlan lp){
-        // TODO : handle optionals / left join
+        // TODO : handle optionals / left join and filters
         JOUQueryAnalyzer eqa = new JOUQueryAnalyzer(lp);
         MultiValuedMap<TriplePattern, FederationMember> tpsl = eqa.getTpsl();
+        List<LogicalOpFilter> filters = eqa.getFilters();
 
         List<LogicalPlan> rootJoinChildren = new ArrayList<>();
 
@@ -96,6 +100,63 @@ public class FedupBasedJOUSourcePlannerImpl extends ServiceClauseBasedSourcePlan
         LogicalPlan rootPlanJoin =
                 new LogicalPlanWithNaryRootImpl(LogicalOpMultiwayJoin.getInstance(), rootJoinChildren);
 
-        return rootPlanJoin;
+        Set<Expr> filterExpressions = new HashSet<>();
+        for(LogicalOpFilter filter : filters){
+            if(filterExpressions.addAll(filter.getFilterExpressions().getList()));
+        }
+
+        if(filterExpressions.isEmpty()){
+            // there are no filters in the plan, we just return the join of unions
+            return rootPlanJoin;
+        }
+
+        // there are filters to apply, we create a filter operator atop the root join to create a plan that we return.
+        // this is always semantically correct, and filter push down optimizations are applied later
+        return new LogicalPlanWithUnaryRootImpl(new LogicalOpFilter(ExprList.create(filterExpressions)), rootPlanJoin);
     }
+
+//    static public class TripleToUnionOfTriplesVisitor {
+//
+//        MultiValuedMap<TriplePattern, FederationMember> tpsl;
+//
+//        public TripleToUnionOfTriplesVisitor(MultiValuedMap<TriplePattern, FederationMember> tpsl) {
+//            this.tpsl = tpsl;
+//        }
+//
+//        public void visit( final LogicalPlan lp){
+//            if( lp instanceof LogicalPlanWithNullaryRootImpl){
+//                this.visit((LogicalPlanWithNullaryRootImpl) lp);
+//            }
+//            if( lp instanceof LogicalPlanWithUnaryRootImpl){
+//                this.visit( (LogicalPlanWithUnaryRootImpl) lp );
+//            }
+//            if( lp instanceof LogicalPlanWithBinaryRoot){
+//                this.visit((LogicalPlanWithBinaryRoot) lp);
+//            }
+//            if( lp instanceof LogicalPlanWithNaryRootImpl){
+//                this.visit((LogicalPlanWithNaryRootImpl) lp);
+//            }
+//        }
+//
+//        public void visit( final LogicalPlanWithNullaryRoot op ) {
+//            if(op.getRootOperator() instanceof LogicalOpRequest<?,?>) {
+//
+//            }
+//        }
+//
+//        public void visit( final LogicalPlanWithUnaryRoot op ) {
+//            this.visit(op.getSubPlan());
+//        }
+//
+//        public void visit( final LogicalPlanWithBinaryRoot op ) {
+//            this.visit(op.getSubPlan1());
+//        }
+//
+//        public void visit( final LogicalPlanWithNaryRoot op ) {
+//            for (Iterator<LogicalPlan> it = op.getSubPlans(); it.hasNext(); ) {
+//                LogicalPlan plan = it.next();
+//                this.visit(plan);
+//            }
+//        }
+//    } // end of class SourceAssignmentChecker
 }
