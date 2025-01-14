@@ -54,8 +54,6 @@ public class PushBasedExecPlanSamplingTaskForBinaryOperator extends PushBasedExe
             interrupted = true;
         }
 
-        wrapUpBatch(failed, interrupted);
-
 //        if ( extraConnectors != null ) {
 //            for ( final SamplingConnectorForAdditionalConsumer c : extraConnectors ) {
 //                c.wrapUpBatch(failed, interrupted);
