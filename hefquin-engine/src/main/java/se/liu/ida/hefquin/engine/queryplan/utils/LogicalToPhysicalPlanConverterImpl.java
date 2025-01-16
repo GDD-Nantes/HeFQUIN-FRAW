@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
 import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
+import se.liu.ida.hefquin.engine.federation.FederationMember;
+import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.engine.queryplan.executable.NaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.logical.BinaryLogicalOp;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
@@ -20,6 +23,7 @@ import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
 import se.liu.ida.hefquin.engine.queryplan.physical.UnaryPhysicalOp;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.*;
+import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.rewriting.rules.IdentifyLogicalOp;
 
 public class LogicalToPhysicalPlanConverterImpl implements LogicalToPhysicalPlanConverter
 {
@@ -103,11 +107,58 @@ public class LogicalToPhysicalPlanConverterImpl implements LogicalToPhysicalPlan
 				if ( children.size() < 1 )
 					throw new IllegalArgumentException( "unexpected number of sub-plans: " + children.size() );
 
-				return createPhysicalPlanWithNaryRoot( (NaryLogicalOp) lop, children, keepMultiwayJoins );
+				PhysicalPlan physicalPlan = createPhysicalPlanWithNaryRoot( (NaryLogicalOp) lop, children, keepMultiwayJoins );
+
+				// Check if returned nary operator is a union of requests
+				// If it is, transform into a random federation member request operator
+				if(isNaryLogicalOpConvertibleIntoARandomRequestOperator(physicalPlan)){
+					physicalPlan = unionWithRequestsToRandomRequestOperator(physicalPlan);
+				}
+
+				return physicalPlan;
 			}
 			else {
 				throw new IllegalArgumentException( "unknown logical operator: " + lop.getClass().getName() );
 			}
+		}
+
+		public static boolean isNaryLogicalOpConvertibleIntoARandomRequestOperator(final PhysicalPlan root){
+
+			if(root.getRootOperator() instanceof PhysicalOpRequest<?,?>) return true;
+
+			if(!IdentifyLogicalOp.isMultiwayUnion(root.getRootOperator()) &&
+					!IdentifyLogicalOp.isUnion(root.getRootOperator())) return false;
+
+
+			for (int i = 0; i < root.numberOfSubPlans(); i++){
+				PhysicalPlan subPlan = root.getSubPlan(i);
+
+				if(!isNaryLogicalOpConvertibleIntoARandomRequestOperator(subPlan)) return false;
+			}
+
+			return true;
+		}
+
+		public static PhysicalPlan unionWithRequestsToRandomRequestOperator(PhysicalPlan unionOfRequests) {
+			Map<FederationMember, DataRetrievalRequest> memberToRequest = _unionWithRequestsToRandomRequestOperator(unionOfRequests);
+
+			return PhysicalPlanFactory.createPlan(PhysicalOpFrawRequest.instantiate(memberToRequest));
+		}
+
+		public static Map<FederationMember, DataRetrievalRequest> _unionWithRequestsToRandomRequestOperator(PhysicalPlan unionOfRequests){
+			if(unionOfRequests.getRootOperator() instanceof PhysicalOpRequest<?,?>) {
+				LogicalOpRequest lop = ((PhysicalOpRequest) unionOfRequests).getLogicalOperator();
+				return Map.of(lop.getFederationMember(), lop.getRequest());
+			}
+
+			Map<FederationMember, DataRetrievalRequest> reqMap = new HashMap<>();
+			for (int i = 0; i < unionOfRequests.numberOfSubPlans(); i++){
+				PhysicalPlan subPlan = unionOfRequests.getSubPlan(i);
+
+				reqMap.putAll(_unionWithRequestsToRandomRequestOperator(subPlan));
+			}
+
+			return reqMap;
 		}
 
 		protected PhysicalPlan createPhysicalPlanWithNullaryRoot( final NullaryLogicalOp lop ) {

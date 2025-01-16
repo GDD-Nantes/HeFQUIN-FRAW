@@ -1,9 +1,7 @@
 package se.liu.ida.hefquin.engine.queryplan.utils;
 
-import se.liu.ida.hefquin.engine.federation.BRTPFServer;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
-import se.liu.ida.hefquin.engine.federation.TPFServer;
+import se.liu.ida.hefquin.engine.federation.*;
+import se.liu.ida.hefquin.engine.federation.access.AgglomerationRequest;
 import se.liu.ida.hefquin.engine.queryplan.logical.BinaryLogicalOp;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.logical.NaryLogicalOp;
@@ -40,6 +38,11 @@ public class LogicalToPhysicalOpConverter
 	}
 
 	public static NullaryPhysicalOp convert( final LogicalOpRequest<?,?> lop ) {
+		if(lop.getRequest() instanceof AgglomerationRequest
+				&& lop.getFederationMember() instanceof FederationMemberAgglomeration){
+			return new PhysicalOpFrawRequest((LogicalOpRequest<AgglomerationRequest, FederationMemberAgglomeration>) lop);
+		}
+
 		return new PhysicalOpRequest<>(lop);
 	}
 
@@ -174,6 +177,6 @@ public class LogicalToPhysicalOpConverter
 
 	public static NaryPhysicalOp convert( final LogicalOpMultiwayUnion lop ) {
 		return new PhysicalOpFrawMultiwayUnion();
-	}
 
+	}
 }
