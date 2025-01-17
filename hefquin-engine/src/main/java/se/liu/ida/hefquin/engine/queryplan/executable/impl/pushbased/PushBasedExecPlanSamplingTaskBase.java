@@ -79,10 +79,9 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
                 if(isReadyForNextBatch()){
                     setStatus(Status.RUNNING);
                     produceOutput(sink);
-                }else {
-                    synchronized (lock){
-                        lock.wait();
-                    }
+                }
+                synchronized (lock){
+                    lock.wait();
                 }
             }
 

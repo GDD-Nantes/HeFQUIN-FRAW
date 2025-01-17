@@ -96,9 +96,19 @@ public class PushBasedSamplingQueryPlanCompilerImpl extends TaskBasedSamplingQue
                                  final int preferredOutputBlockSize,
                                  final ExecutionContext execCxt) {
             final ExecPlanTask newTask;
-            newTask = _createTasks(qep, tasks, preferredOutputBlockSize, execCxt);
-            convertedSubPlans.put(qep, newTask);
+            final ExecPlanTask probe = convertedSubPlans.get(qep);
+            if ( probe != null ) {
+                final PushBasedExecPlanTask t = (PushBasedExecPlanTask) probe;
+                newTask = t;
+            }
+            else {
+                newTask = _createTasks(qep, tasks, preferredOutputBlockSize, execCxt);
+                convertedSubPlans.put(qep, newTask);
+            }
 
+
+            // in case it's already present
+            tasks.remove(newTask);
             tasks.addFirst(newTask);
         }
     } // end of helper class Worker
