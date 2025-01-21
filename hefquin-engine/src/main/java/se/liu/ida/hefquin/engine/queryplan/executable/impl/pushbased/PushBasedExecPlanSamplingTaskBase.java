@@ -76,12 +76,13 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
 
 
             while( ! ( shouldStop() ) ){
-                if(isReadyForNextBatch()){
-                    setStatus(Status.RUNNING);
-                    produceOutput(sink);
-                }
                 synchronized (lock){
-                    lock.wait();
+                    if(isReadyForNextBatch()){
+                        setStatus(Status.RUNNING);
+                        produceOutput(sink);
+                    }else {
+                        lock.wait();
+                    }
                 }
             }
 
@@ -261,7 +262,6 @@ public abstract class PushBasedExecPlanSamplingTaskBase extends ExecPlanSampling
                     }
                 }
             }
-
 
             if( isRoot() && !producedEnoughWalks && nextBlock == null ){
                 // only works if a batch is always one mapping only

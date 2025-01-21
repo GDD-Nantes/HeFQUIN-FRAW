@@ -211,7 +211,7 @@ public class PushBasedExecPlanSamplingTaskForBinaryOperator extends PushBasedExe
 
     @Override
     public void propagateNextBatch() {
-        synchronized (availableResultBlocks){
+        synchronized (lock){
 //            if(Objects.nonNull(this.extraConnectors))
 //                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
             this.input1.propagateNextBatch();
@@ -220,6 +220,7 @@ public class PushBasedExecPlanSamplingTaskForBinaryOperator extends PushBasedExe
             this.availableResultBlocks.clear();
 
             this.setStatus(Status.READY_NEXT_BATCH);
+            lock.notify();
         }
     }
 }

@@ -68,12 +68,13 @@ public class PushBasedExecPlanSamplingTaskForNullaryOperator extends PushBasedEx
 
     @Override
     public void propagateNextBatch() {
-        synchronized (availableResultBlocks){
+        synchronized (lock){
 //            if(Objects.nonNull(this.extraConnectors))
 //                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
             // we clear the queue to start off of a clean, new batch
             this.availableResultBlocks.clear();
             this.setStatus(Status.READY_NEXT_BATCH);
+            lock.notify();
         }
     }
 
