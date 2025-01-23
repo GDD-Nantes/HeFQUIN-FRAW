@@ -21,7 +21,7 @@
       <groupId>org.apache.jena</groupId>
       <artifactId>jena-core</artifactId>
       <type>pom</type>
-      <version>4.10.0-FRAW</version>
+      <version>4.10.0</version>
     </dependency>
   </dependencies>
 </project>
