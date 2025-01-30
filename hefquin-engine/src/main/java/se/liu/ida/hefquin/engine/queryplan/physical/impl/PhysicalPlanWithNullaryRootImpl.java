@@ -12,6 +12,8 @@ public class PhysicalPlanWithNullaryRootImpl implements PhysicalPlanWithNullaryR
 {
 	private final NullaryPhysicalOp rootOp;
 
+	private ExpectedVariables expectedVariables;
+
 	/**
 	 * Instead of creating such a plan directly using
 	 * this constructor, use {@link PhysicalPlanFactory}.
@@ -45,7 +47,11 @@ public class PhysicalPlanWithNullaryRootImpl implements PhysicalPlanWithNullaryR
 
 	@Override
 	public ExpectedVariables getExpectedVariables() {
-		return rootOp.getExpectedVariables();
+		if(expectedVariables == null) {
+			expectedVariables = rootOp.getExpectedVariables();
+		}
+
+		return expectedVariables;
 	}
 
 	@Override

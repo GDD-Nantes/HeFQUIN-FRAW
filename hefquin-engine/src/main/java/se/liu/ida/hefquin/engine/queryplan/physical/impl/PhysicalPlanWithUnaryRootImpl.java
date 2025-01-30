@@ -13,6 +13,7 @@ public class PhysicalPlanWithUnaryRootImpl implements PhysicalPlanWithUnaryRoot
 	private final UnaryPhysicalOp rootOp;
 	private final PhysicalPlan subPlan;
 
+	private ExpectedVariables expectedVariables;
 	/**
 	 * Instead of creating such a plan directly using
 	 * this constructor, use {@link PhysicalPlanFactory}.
@@ -51,7 +52,11 @@ public class PhysicalPlanWithUnaryRootImpl implements PhysicalPlanWithUnaryRoot
 
 	@Override
 	public ExpectedVariables getExpectedVariables() {
-		return rootOp.getExpectedVariables( getSubPlan().getExpectedVariables() );
+		if( expectedVariables == null ) {
+			expectedVariables = rootOp.getExpectedVariables( getSubPlan().getExpectedVariables() );
+		}
+
+		return expectedVariables;
 	}
 
 	@Override
