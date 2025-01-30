@@ -19,14 +19,11 @@ PREFIX ex:     <http://example.org/>
 
 _:b1 ec:queryPlanner _:b2 ;
      ec:planCompiler [
-         #ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.compiler.PushBasedQueryPlanCompilerImpl" ;
-         #ec:constructorArguments ( ec:value:QueryProcContext )
-         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.compiler.PushBasedSamplingQueryPlanCompilerImpl" ;
-         ec:constructorArguments ( ec:value:QueryProcContext
-                                  10000 )
+         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.compiler.PushBasedQueryPlanCompilerImpl" ;
+         ec:constructorArguments ( ec:value:QueryProcContext )
      ] ;
      ec:executionEngine [
-         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.execution.FrawExecutionEngineImpl" ;
+         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.execution.ExecutionEngineImpl" ;
          ec:constructorArguments ( )
      ] .
 
@@ -55,8 +52,8 @@ _:bListOfHeuristics
         #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.MergeRequests" ]
         #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.FilterPushDown" ]
         #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.MergeRequests" ]
-        [ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.GreedyBasedReordering" ;
-          ec:constructorArguments (_:bFormulaForSelectivity) ]
+        #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.GreedyBasedReordering" ;
+        #  ec:constructorArguments (_:bFormulaForSelectivity) ]
         #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.ApplyVocabularyMappings" ]
         #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.CardinalityBasedJoinOrderingWithRequests" ;
         #  ec:constructorArguments (ec:value:QueryProcContext) ]
@@ -76,20 +73,14 @@ _:bFormulaForSelectivity
         "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.formula.FmAwareWeightedJoinAndUnboundVariableCount" .
 
 _:bServiceBasedSrcPlanner
-    ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ServiceClauseBasedSourcePlannerImpl" ;
-    #ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ExhaustiveSourcePlannerImpl" ;
-    ec:constructorArguments ( ec:value:QueryProcContext ) .
-    #ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedSourcePlannerImpl" ;
-    #ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedJOUSourcePlannerImpl" ;
-    #ec:constructorArguments ( ec:value:QueryProcContext
-    #                           "fedshop20-h0"
-    #                           "(e)->\"http://localhost:9999/blazegraph/sparql?default-graph-uri=\"+(e)") .
+    ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedSourcePlannerImpl" ;
+    ec:constructorArguments ( ec:value:QueryProcContext
+                               "fedshop20-h0"
+                               "(e)->\"http://localhost:9999/blazegraph/sparql?default-graph-uri=\"+(e)") .
     #                           "(e)->\"http://localhost:3331/fedshop200.jnl/raw?default-graph-uri=\"+(e)") .
 
 _:bExhaustiveSrcPlanner
     ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ExhaustiveSourcePlannerImpl" ;
-    #ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedSourcePlannerImpl" ;
-    #ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedJOUSourcePlannerImpl" ;
     ec:constructorArguments ( ec:value:QueryProcContext ) .
 
 _:bArgL2PConverter

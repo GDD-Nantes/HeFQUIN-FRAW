@@ -32,7 +32,7 @@
     <dependency>
       <groupId>fr.gdd</groupId>
       <artifactId>fedup</artifactId>
-      <version>1.0.0</version>
+      <version>0.0.1</version>
     </dependency>
   </dependencies>
 </project>

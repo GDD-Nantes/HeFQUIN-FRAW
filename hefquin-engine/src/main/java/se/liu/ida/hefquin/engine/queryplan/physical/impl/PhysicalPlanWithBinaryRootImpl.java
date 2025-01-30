@@ -14,6 +14,8 @@ public class PhysicalPlanWithBinaryRootImpl implements PhysicalPlanWithBinaryRoo
 	private final PhysicalPlan subPlan1;
 	private final PhysicalPlan subPlan2;
 
+	private ExpectedVariables expectedVariables;
+
 	/**
 	 * Instead of creating such a plan directly using
 	 * this constructor, use {@link PhysicalPlanFactory}.
@@ -56,9 +58,13 @@ public class PhysicalPlanWithBinaryRootImpl implements PhysicalPlanWithBinaryRoo
 
 	@Override
 	public ExpectedVariables getExpectedVariables() {
-		return rootOp.getExpectedVariables(
-				getSubPlan1().getExpectedVariables(),
-				getSubPlan2().getExpectedVariables() );
+		if (expectedVariables == null) {
+			this.expectedVariables = rootOp.getExpectedVariables(
+							getSubPlan1().getExpectedVariables(),
+							getSubPlan2().getExpectedVariables());
+		}
+
+		return expectedVariables;
 	}
 
 	@Override

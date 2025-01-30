@@ -96,6 +96,7 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 	                                   final PrintStream output ) throws Exception {
 		final ResultSet rs;
 		try {
+			qe.getContext().setIfUndef(ARQ.optimization, false);
 			rs = qe.execSelect();
 		}
 		catch ( final Exception e ) {

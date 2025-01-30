@@ -200,7 +200,7 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
 
     @Override
     public void propagateNextBatch() {
-        synchronized (availableResultBlocks){
+        synchronized (lock){
 //            if(Objects.nonNull(this.extraConnectors))
 //                this.extraConnectors.forEach(ec -> ec.propagateNextBatch());
 
@@ -217,6 +217,7 @@ public class PushBasedExecPlanSamplingTaskForNaryOperator extends PushBasedExecP
             this.availableResultBlocks.clear();
 
             this.setStatus(Status.READY_NEXT_BATCH);
+            lock.notify();
         }
     }
 

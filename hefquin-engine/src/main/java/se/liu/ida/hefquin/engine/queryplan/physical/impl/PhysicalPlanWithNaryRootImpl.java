@@ -16,6 +16,8 @@ public class PhysicalPlanWithNaryRootImpl implements PhysicalPlanWithNaryRoot
 	protected final NaryPhysicalOp rootOp;
 	protected final List<PhysicalPlan> subPlans;
 
+	private ExpectedVariables expectedVariables;
+
 	/**
 	 * Instead of creating such a plan directly using
 	 * this constructor, use {@link PhysicalPlanFactory}.
@@ -74,11 +76,16 @@ public class PhysicalPlanWithNaryRootImpl implements PhysicalPlanWithNaryRoot
 
 	@Override
 	public ExpectedVariables getExpectedVariables() {
-		final ExpectedVariables[] e = new ExpectedVariables[ subPlans.size() ];
-		for ( int i = 0; i < subPlans.size(); ++i ) {
-			e[i] = subPlans.get(i).getExpectedVariables();
+		if(expectedVariables == null) {
+			final ExpectedVariables[] e = new ExpectedVariables[ subPlans.size() ];
+			for ( int i = 0; i < subPlans.size(); ++i ) {
+				e[i] = subPlans.get(i).getExpectedVariables();
+			}
+
+			expectedVariables = rootOp.getExpectedVariables(e);
 		}
-		return rootOp.getExpectedVariables(e);
+
+		return expectedVariables;
 	}
 
 	@Override

@@ -84,6 +84,11 @@ public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
                         resultSink.send(sm);
                     }
                 }
+                tasks.stream().forEach(task -> {
+                    synchronized(task.lock) {
+                        task.lock.notify();
+                    }
+                });
             }
             tasks.stream().forEach(t -> {
                 t.enoughWalks();
