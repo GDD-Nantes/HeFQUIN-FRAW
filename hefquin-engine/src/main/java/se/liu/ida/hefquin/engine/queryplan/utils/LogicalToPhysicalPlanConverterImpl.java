@@ -1,29 +1,19 @@
 package se.liu.ida.hefquin.engine.queryplan.utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.collections4.MapUtils;
 import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
 import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.engine.queryplan.executable.NaryExecutableOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.BinaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
-import se.liu.ida.hefquin.engine.queryplan.logical.NaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.NullaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.UnaryLogicalOp;
+import se.liu.ida.hefquin.engine.queryplan.logical.*;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
-import se.liu.ida.hefquin.engine.queryplan.physical.NaryPhysicalOp;
-import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
-import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
-import se.liu.ida.hefquin.engine.queryplan.physical.UnaryPhysicalOp;
-import se.liu.ida.hefquin.engine.queryplan.physical.impl.*;
+import se.liu.ida.hefquin.engine.queryplan.physical.*;
+import se.liu.ida.hefquin.engine.queryplan.physical.impl.BaseForPhysicalOpMultiwayJoin;
+import se.liu.ida.hefquin.engine.queryplan.physical.impl.PhysicalOpFrawRequest;
+import se.liu.ida.hefquin.engine.queryplan.physical.impl.PhysicalOpParallelMultiLeftJoin;
+import se.liu.ida.hefquin.engine.queryplan.physical.impl.PhysicalOpRequest;
 import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.rewriting.rules.IdentifyLogicalOp;
+
+import java.util.*;
 
 public class LogicalToPhysicalPlanConverterImpl implements LogicalToPhysicalPlanConverter
 {
@@ -123,8 +113,17 @@ public class LogicalToPhysicalPlanConverterImpl implements LogicalToPhysicalPlan
 		}
 
 		public static boolean isNaryLogicalOpConvertibleIntoARandomRequestOperator(final PhysicalPlan root){
+			return _isNaryLogicalOpConvertibleIntoARandomRequestOperator(root, new HashSet<>());
+		}
 
-			if(root.getRootOperator() instanceof PhysicalOpRequest<?,?>) return true;
+		public static boolean _isNaryLogicalOpConvertibleIntoARandomRequestOperator(final PhysicalPlan root, Set<DataRetrievalRequest> foundQueries){
+
+			PhysicalOperator rootOp = root.getRootOperator();
+
+			if(rootOp instanceof PhysicalOpRequest<?,?>){
+				foundQueries.add(((PhysicalOpRequest) rootOp).getLogicalOperator().getRequest());
+				return foundQueries.size() == 1;
+			}
 
 			if(!IdentifyLogicalOp.isMultiwayUnion(root.getRootOperator()) &&
 					!IdentifyLogicalOp.isUnion(root.getRootOperator())) return false;
@@ -133,7 +132,7 @@ public class LogicalToPhysicalPlanConverterImpl implements LogicalToPhysicalPlan
 			for (int i = 0; i < root.numberOfSubPlans(); i++){
 				PhysicalPlan subPlan = root.getSubPlan(i);
 
-				if(!isNaryLogicalOpConvertibleIntoARandomRequestOperator(subPlan)) return false;
+				if(!_isNaryLogicalOpConvertibleIntoARandomRequestOperator(subPlan, foundQueries)) return false;
 			}
 
 			return true;
@@ -147,7 +146,7 @@ public class LogicalToPhysicalPlanConverterImpl implements LogicalToPhysicalPlan
 
 		public static Map<FederationMember, DataRetrievalRequest> _unionWithRequestsToRandomRequestOperator(PhysicalPlan unionOfRequests){
 			if(unionOfRequests.getRootOperator() instanceof PhysicalOpRequest<?,?>) {
-				LogicalOpRequest lop = ((PhysicalOpRequest) unionOfRequests).getLogicalOperator();
+				LogicalOpRequest lop = ((PhysicalOpRequest) unionOfRequests.getRootOperator()).getLogicalOperator();
 				return Map.of(lop.getFederationMember(), lop.getRequest());
 			}
 

@@ -1,30 +1,20 @@
 package se.liu.ida.hefquin.engine.queryplan.utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.jena.shared.AddDeniedException;
 import se.liu.ida.hefquin.base.data.VocabularyMapping;
 import se.liu.ida.hefquin.base.query.TriplePattern;
-import se.liu.ida.hefquin.base.utils.Pair;
 import se.liu.ida.hefquin.engine.federation.*;
-import se.liu.ida.hefquin.engine.federation.access.AgglomerationRequest;
 import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.engine.federation.access.impl.req.BGPRequestImpl;
 import se.liu.ida.hefquin.engine.federation.access.impl.req.SPARQLRequestImpl;
 import se.liu.ida.hefquin.engine.federation.access.impl.req.TPFRequestImpl;
 import se.liu.ida.hefquin.engine.federation.access.impl.req.TriplePatternRequestImpl;
-import se.liu.ida.hefquin.engine.queryplan.logical.BinaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.logical.NaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.NullaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.UnaryLogicalOp;
+import se.liu.ida.hefquin.engine.queryplan.logical.*;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.*;
-import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.rewriting.rules.IdentifyLogicalOp;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PhysicalPlanFactory
 {
@@ -69,9 +59,8 @@ public class PhysicalPlanFactory
 
 		final NullaryPhysicalOp pop;
 
-        if(lop.getRequest() instanceof AgglomerationRequest
-				&& lop.getFederationMember() instanceof FederationMemberAgglomeration){
-			pop = new PhysicalOpFrawRequest((LogicalOpRequest<AgglomerationRequest, FederationMemberAgglomeration>) lop);
+        if(lop.getFederationMember() instanceof FederationMemberAgglomeration){
+			pop = new PhysicalOpFrawRequest((LogicalOpRequest<DataRetrievalRequest, FederationMemberAgglomeration>) lop);
 		} else {
 			pop = new PhysicalOpRequest<>(lop);
 		}

@@ -1,25 +1,15 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
 
-import org.apache.jena.datatypes.xsd.XSDDatatype;
-import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.graph.Node;
-import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
-import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
-import se.liu.ida.hefquin.base.data.utils.SolutionMappingUtils;
-import se.liu.ida.hefquin.engine.queryplan.executable.ExecOpExecutionException;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultBlock;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.CollectingIntermediateResultElementSink;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.GenericIntermediateResultBlockImpl;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 
-import java.util.Iterator;
 import java.util.Random;
-
-import static se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants.MAPPING_PROBABILITY;
 
 public class ExecOpFrawMultiwayUnion extends ExecOpMultiwayUnion{
 
@@ -44,22 +34,9 @@ public class ExecOpFrawMultiwayUnion extends ExecOpMultiwayUnion{
 
         tempSink.getCollectedSolutionMappings().forEach(
                 solutionMapping -> {
-                    Binding binding = solutionMapping.asJenaBinding();
-
-                    BindingBuilder bb = BindingBuilder.create();
-
-                    for (Iterator<Var> it = binding.vars(); it.hasNext(); ) {
-                        Var var = it.next();
-                        if(!var.equals(MAPPING_PROBABILITY)){
-                            Node node = binding.get(var);
-                            bb.add(var, node);
-                        }else if(!bb.contains(MAPPING_PROBABILITY)) {
-                            Double newProbability = ((Double) binding.get(MAPPING_PROBABILITY).getLiteralValue()) / numberOfChildren;
-                            bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(newProbability), XSDDatatype.XSDdouble));
-                        }
-                    }
-
-                    sink.send(new SolutionMappingImpl(bb.build()));
+                    Binding updatedBinding = FrawUtils.updateProbaUnion(solutionMapping, numberOfChildren);
+                    SolutionMapping updatedSolutionMapping = new SolutionMappingImpl(updatedBinding);
+                    sink.send(updatedSolutionMapping);
                 }
         );
     }

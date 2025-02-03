@@ -3,9 +3,10 @@ package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
+import se.liu.ida.hefquin.engine.federation.FederationMemberAgglomeration;
 import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.engine.queryplan.executable.UnaryExecutableOp;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpBindJoinSPARQLwithVALUESorFILTER;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpFrawBindJoin;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpFrawBindJoinSPARQL;
 import se.liu.ida.hefquin.engine.queryplan.logical.UnaryLogicalOp;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
@@ -76,6 +77,8 @@ public class PhysicalOpFrawBindJoin extends BaseForPhysicalOpSingleInputJoin{
                                               final boolean collectExceptions ) {
         if ( fm instanceof SPARQLEndpoint )
             return new ExecOpFrawBindJoinSPARQL(pattern, (SPARQLEndpoint) fm, useOuterJoinSemantics, collectExceptions );
+        else if ( fm instanceof FederationMemberAgglomeration )
+            return new ExecOpFrawBindJoin(pattern, (FederationMemberAgglomeration) fm, useOuterJoinSemantics, collectExceptions );
         else
             throw new IllegalArgumentException("Unsupported type of federation member: " + fm.getClass().getName() );
     }

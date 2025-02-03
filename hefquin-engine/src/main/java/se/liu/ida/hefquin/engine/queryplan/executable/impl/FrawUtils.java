@@ -71,4 +71,23 @@ public class FrawUtils {
         return builder.build();
     }
 
+    public static Binding updateProbaUnion(SolutionMapping solutionMapping, int numberOfChildren){
+        Binding binding = solutionMapping.asJenaBinding();
+
+        BindingBuilder bb = BindingBuilder.create();
+
+        for (Iterator<Var> it = binding.vars(); it.hasNext(); ) {
+            Var var = it.next();
+            if(!var.equals(MAPPING_PROBABILITY)){
+                Node node = binding.get(var);
+                bb.add(var, node);
+            }else if(!bb.contains(MAPPING_PROBABILITY)) {
+                Double newProbability = ((Double) binding.get(MAPPING_PROBABILITY).getLiteralValue()) / numberOfChildren;
+                bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(newProbability), XSDDatatype.XSDdouble));
+            }
+        }
+
+        return bb.build();
+    }
+
 }

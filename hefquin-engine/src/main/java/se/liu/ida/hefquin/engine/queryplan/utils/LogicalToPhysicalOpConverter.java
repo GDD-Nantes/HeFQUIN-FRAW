@@ -1,18 +1,10 @@
 package se.liu.ida.hefquin.engine.queryplan.utils;
 
 import se.liu.ida.hefquin.engine.federation.*;
-import se.liu.ida.hefquin.engine.federation.access.AgglomerationRequest;
-import se.liu.ida.hefquin.engine.queryplan.logical.BinaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.logical.NaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.NullaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.UnaryLogicalOp;
+import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
+import se.liu.ida.hefquin.engine.queryplan.logical.*;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
-import se.liu.ida.hefquin.engine.queryplan.physical.BinaryPhysicalOp;
-import se.liu.ida.hefquin.engine.queryplan.physical.NaryPhysicalOp;
-import se.liu.ida.hefquin.engine.queryplan.physical.NullaryPhysicalOp;
-import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.physical.UnaryPhysicalOp;
+import se.liu.ida.hefquin.engine.queryplan.physical.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.*;
 
 /**
@@ -38,9 +30,8 @@ public class LogicalToPhysicalOpConverter
 	}
 
 	public static NullaryPhysicalOp convert( final LogicalOpRequest<?,?> lop ) {
-		if(lop.getRequest() instanceof AgglomerationRequest
-				&& lop.getFederationMember() instanceof FederationMemberAgglomeration){
-			return new PhysicalOpFrawRequest((LogicalOpRequest<AgglomerationRequest, FederationMemberAgglomeration>) lop);
+		if(lop.getFederationMember() instanceof FederationMemberAgglomeration){
+			return new PhysicalOpFrawRequest((LogicalOpRequest<DataRetrievalRequest, FederationMemberAgglomeration>) lop);
 		}
 
 		return new PhysicalOpRequest<>(lop);
@@ -106,6 +97,7 @@ public class LogicalToPhysicalOpConverter
 		final FederationMember fm = lop.getFederationMember();
 
 		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoin(lop);
+		if (      fm instanceof FederationMemberAgglomeration ) return new PhysicalOpFrawBindJoin(lop);
 
 		else throw new UnsupportedOperationException("Unsupported type of federation member: " + fm.getClass().getName() + ".");
 	}

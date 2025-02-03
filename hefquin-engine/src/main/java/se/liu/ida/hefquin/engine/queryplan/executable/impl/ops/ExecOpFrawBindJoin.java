@@ -1,0 +1,84 @@
+package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
+
+import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.Table;
+import org.apache.jena.sparql.algebra.op.OpSequence;
+import org.apache.jena.sparql.algebra.op.OpTable;
+import org.apache.jena.sparql.algebra.table.TableData;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
+import se.liu.ida.hefquin.base.data.SolutionMapping;
+import se.liu.ida.hefquin.base.data.utils.SolutionMappingUtils;
+import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
+import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
+import se.liu.ida.hefquin.base.query.impl.QueryPatternUtils;
+import se.liu.ida.hefquin.engine.federation.FederationMemberAgglomeration;
+import se.liu.ida.hefquin.engine.federation.access.SPARQLRequest;
+import se.liu.ida.hefquin.engine.federation.access.impl.req.SPARQLRequestImpl;
+import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
+
+import java.util.*;
+
+public class ExecOpFrawBindJoin extends BaseForExecOpBindJoinWithRequestOps<SPARQLGraphPattern, FederationMemberAgglomeration>{
+
+    protected final List<Var> varsInSubQuery;
+
+
+
+    public ExecOpFrawBindJoin(SPARQLGraphPattern query, FederationMemberAgglomeration fm, boolean useOuterJoinSemantics, boolean collectExceptions) {
+        super(query, fm, useOuterJoinSemantics, collectExceptions);
+        varsInSubQuery = new ArrayList<>(QueryPatternUtils.getVariablesInPattern(query));
+    }
+
+    public ExecOpFrawBindJoin(SPARQLGraphPattern query, FederationMemberAgglomeration fm, boolean useOuterJoinSemantics, Set<Var> varsInPatternForFM, boolean collectExceptions) {
+        super(query, fm, useOuterJoinSemantics, varsInPatternForFM, collectExceptions);
+        varsInSubQuery = new ArrayList<>(QueryPatternUtils.getVariablesInPattern(query));
+    }
+
+    protected NullaryExecutableOp createExecutableReqOp(Iterable<SolutionMapping> solMaps) {
+        return createExecutableRequestOperator(solMaps);
+    }
+
+    protected NullaryExecutableOp createExecutableRequestOperator(Iterable<SolutionMapping> solMaps) {
+
+        final Set<Binding> bindings = new HashSet<>();
+        final Set<Var> joinVars = new HashSet<>();
+
+        boolean noJoinVars = false;
+
+        for ( final SolutionMapping s : solMaps ) {
+
+            final Binding b = SolutionMappingUtils.restrict( s.asJenaBinding(), varsInSubQuery);
+
+            // If there exists a solution mapping that does not have any variables in common with the triple pattern of this operator
+            // retrieve all matching triples of the given query
+            if ( b.isEmpty() ) {
+                noJoinVars = true;
+                break;
+            }
+
+            if ( ! SolutionMappingUtils.containsBlankNodes(b) ) {
+                bindings.add(b);
+
+                final Iterator<Var> it = b.vars();
+                while ( it.hasNext() ) {
+                    joinVars.add( it.next() );
+                }
+            }
+        }
+
+        if (noJoinVars) {
+            return new ExecOpFrawRequest( new SPARQLRequestImpl(query), fm, false );
+        }
+
+        if ( bindings.isEmpty() ) {
+            return null;
+        }
+
+        final Table table = new TableData( new ArrayList<>(joinVars), new ArrayList<>(bindings) );
+        final Op op = OpSequence.create( OpTable.create(table), QueryPatternUtils.convertToJenaOp(query) );
+        final SPARQLGraphPattern pattern = new GenericSPARQLGraphPatternImpl2(op);
+        final SPARQLRequest request = new SPARQLRequestImpl(pattern);
+        return new ExecOpFrawRequest(request, fm, false);
+    }
+}

@@ -1,10 +1,18 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
 
+import org.apache.commons.lang3.NotImplementedException;
+import org.apache.jena.sparql.engine.binding.Binding;
+import se.liu.ida.hefquin.base.data.SolutionMapping;
+import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
+import se.liu.ida.hefquin.engine.federation.FederationMemberAgglomeration;
 import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.engine.federation.access.*;
+import se.liu.ida.hefquin.engine.federation.access.impl.response.SolMapsResponseImpl;
 import se.liu.ida.hefquin.engine.federation.access.utils.FederationAccessUtils;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -12,16 +20,35 @@ public class ExecOpFrawRequest extends BaseForExecOpSolMapsRequest<DataRetrieval
 
     List<FederationMember> endpoints;
 
-    public ExecOpFrawRequest(DataRetrievalRequest req, List<FederationMember> fms, boolean collectExceptions) {
-        super(req, fms.get(new Random().nextInt(fms.size())), collectExceptions);
-        this.endpoints = fms;
+    public ExecOpFrawRequest(DataRetrievalRequest req, FederationMemberAgglomeration fm, boolean collectExceptions) {
+        super(req, fm, collectExceptions);
+        this.endpoints = fm.getInterface().getFederationMembers();
     }
 
     @Override
     protected SolMapsResponse performRequest(FederationAccessManager fedAccessMgr) throws FederationAccessException {
         // TODO: add other cases
-        if(fm instanceof SPARQLEndpoint && req instanceof SPARQLRequest){
-            return FederationAccessUtils.performRequest(fedAccessMgr, (SPARQLRequest) req, (SPARQLEndpoint) fm);
+
+        Random random = new Random();
+        int chosen = random.nextInt(endpoints.size());
+
+        FederationMember chosenFM = ((FederationMemberAgglomeration) fm).getInterface().getFederationMembers().get(chosen);
+
+        if(chosenFM instanceof SPARQLEndpoint){
+
+            SolMapsResponse solMapsResponse = FederationAccessUtils.performRequest(fedAccessMgr, (SPARQLRequest) req, (SPARQLEndpoint) chosenFM);
+
+            List<SolutionMapping> updatedSolutionMappingList = new ArrayList<>();
+
+            solMapsResponse.getSolutionMappings().iterator().forEachRemaining(solutionMapping -> {
+                Binding updatedBinding = FrawUtils.updateProbaUnion(solutionMapping, endpoints.size());
+                SolutionMapping updatedSolutionMapping = new SolutionMappingImpl(updatedBinding);
+                updatedSolutionMappingList.add(updatedSolutionMapping);
+            });
+
+            SolMapsResponse updatedSolMapsResponse = new SolMapsResponseImpl(updatedSolutionMappingList, fm, req, solMapsResponse.getRequestStartTime(), solMapsResponse.getRetrievalEndTime());
+
+            return updatedSolMapsResponse;
         }
 
 //        else if ( fm instanceof TPFServer && req instanceof TriplePatternRequest) {
@@ -32,6 +59,6 @@ public class ExecOpFrawRequest extends BaseForExecOpSolMapsRequest<DataRetrieval
 //        }
 
         // TODO: handle this better
-        return null;
+        throw new NotImplementedException("This operation is not implemented yet in ExecOpFrawRequest");
     }
 }
