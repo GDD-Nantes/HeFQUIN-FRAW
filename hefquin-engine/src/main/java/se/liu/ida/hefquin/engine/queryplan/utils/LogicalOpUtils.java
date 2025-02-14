@@ -1,6 +1,7 @@
 package se.liu.ida.hefquin.engine.queryplan.utils;
 
 import org.apache.jena.sparql.core.BasicPattern;
+import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
@@ -154,6 +155,24 @@ public class LogicalOpUtils
             throw new IllegalArgumentException( "Unsupported type of request: " + req.getClass().getName() );
         }
 
+    }
+
+    public static Set<ExprList> getFilterExprsOfReq(final LogicalOpRequest<?, ?> lop ) {
+        final DataRetrievalRequest req = lop.getRequest();
+
+        if( req instanceof TriplePatternRequest ) {
+            return new HashSet<>();
+        }
+        if( req instanceof BGPRequest ) {
+            return new HashSet<>();
+        }
+        if( req instanceof SPARQLRequest ) {
+            final SPARQLGraphPattern graphPattern = ((SPARQLRequest) req).getQueryPattern();
+
+            return QueryPatternUtils.getFilterExprs(graphPattern);
+        }
+
+        throw new IllegalArgumentException( "Cannot get : " + req.getClass().getName() );
     }
 
     /**
