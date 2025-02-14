@@ -1,7 +1,5 @@
 package se.liu.ida.hefquin.base.query.impl;
 
-import java.util.*;
-
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.algebra.Op;
@@ -17,19 +15,15 @@ import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.syntax.*;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
-import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformer;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformSubst;
+import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformer;
 import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
-
 import se.liu.ida.hefquin.base.data.SolutionMapping;
-import se.liu.ida.hefquin.base.query.BGP;
-import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
-import se.liu.ida.hefquin.base.query.SPARQLGroupPattern;
-import se.liu.ida.hefquin.base.query.SPARQLQuery;
-import se.liu.ida.hefquin.base.query.SPARQLUnionPattern;
-import se.liu.ida.hefquin.base.query.TriplePattern;
+import se.liu.ida.hefquin.base.query.*;
 import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
 import se.liu.ida.hefquin.base.queryplan.utils.ExpectedVariablesUtilsCopy;
+
+import java.util.*;
 
 public class QueryPatternUtils
 {
@@ -122,6 +116,66 @@ public class QueryPatternUtils
 		}
 
 		throw new IllegalArgumentException( "Unsupported type of graph pattern: " + pattern.getClass().getName() );
+	}
+
+	public static Set<ExprList> getFilterExprs(SPARQLGraphPattern graphPattern ) {
+
+		if ( graphPattern instanceof TriplePattern) {
+			return new HashSet<>();
+		}
+		else if ( graphPattern instanceof BGP ) {
+			return new HashSet<>();
+		}
+		else if ( graphPattern instanceof GenericSPARQLGraphPatternImpl1 ) {
+			return getFilterExprs( ((GenericSPARQLGraphPatternImpl1) graphPattern).asJenaOp() );
+		}
+		else if ( graphPattern instanceof GenericSPARQLGraphPatternImpl2) {
+			return getFilterExprs( ((GenericSPARQLGraphPatternImpl2) graphPattern).asJenaOp() );
+		}
+
+		throw new IllegalArgumentException( "Unsupported type of graph pattern: " + graphPattern.getClass().getName() );
+	}
+
+	public static Set<ExprList> getFilterExprs( Op op ) {
+		if( op instanceof OpFilter ) {
+			final OpFilter opFilter = (OpFilter) op;
+			Set<ExprList> filterExprs = new HashSet<>();
+			filterExprs.add(opFilter.getExprs());
+			filterExprs.addAll(getFilterExprs(((OpFilter) op).getSubOp()));
+			return filterExprs;
+		}
+		if( op instanceof OpBGP ) {
+			final OpBGP opBGP = (OpBGP) op;
+			return new HashSet<>();
+		}
+		if( op instanceof OpTriple ) {
+			final OpTriple opTriple = (OpTriple) op;
+			return new HashSet<>();
+		}
+		if( op instanceof OpQuad ) {
+			final OpQuad opQuad = (OpQuad) op;
+			return new HashSet<>();
+		}
+		if( op instanceof OpUnion ) {
+			final OpUnion opUnion = (OpUnion) op;
+			Set<ExprList> filterExprs = new HashSet<>();
+			filterExprs.addAll(getFilterExprs(opUnion.getLeft()));
+			filterExprs.addAll(getFilterExprs(opUnion.getRight()));
+			return new HashSet<>();
+		}
+		if( op instanceof OpJoin ) {
+			final OpJoin opJoin = (OpJoin) op;
+			Set<ExprList> filterExprs = new HashSet<>();
+			filterExprs.addAll(getFilterExprs(opJoin.getLeft()));
+			filterExprs.addAll(getFilterExprs(opJoin.getRight()));
+			return new HashSet<>();
+		}
+		if(op instanceof OpSequence){
+			return new HashSet<>();
+		}
+
+		throw new IllegalArgumentException( "Unsupported type of Jena op : " + op.getClass().getName() );
+
 	}
 
 	public static Element convertToJenaElement( final SPARQLGraphPattern p ) {
