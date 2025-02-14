@@ -13,7 +13,7 @@ public class FrawExecutionEngineImpl implements ExecutionEngine {
     @Override
     public ExecutionStats execute(ExecutablePlan plan, QueryResultSink resultSink) throws ExecutionException {
         plan.run(resultSink);
-        return null;
-
+        
+        return new ExecutionStatsImpl( plan.getStats() );
     }
 }
