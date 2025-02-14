@@ -1,19 +1,18 @@
 package se.liu.ida.hefquin.engine.queryplan.utils;
 
 import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.engine.queryplan.executable.NaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.logical.*;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.BaseForPhysicalOpMultiwayJoin;
-import se.liu.ida.hefquin.engine.queryplan.physical.impl.PhysicalOpFrawRequest;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.PhysicalOpParallelMultiLeftJoin;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.PhysicalOpRequest;
-import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.rewriting.rules.IdentifyLogicalOp;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LogicalToPhysicalPlanConverterImpl implements LogicalToPhysicalPlanConverter
 {
@@ -97,67 +96,11 @@ public class LogicalToPhysicalPlanConverterImpl implements LogicalToPhysicalPlan
 				if ( children.size() < 1 )
 					throw new IllegalArgumentException( "unexpected number of sub-plans: " + children.size() );
 
-				PhysicalPlan physicalPlan = createPhysicalPlanWithNaryRoot( (NaryLogicalOp) lop, children, keepMultiwayJoins );
-
-				// Check if returned nary operator is a union of requests
-				// If it is, transform into a random federation member request operator
-				if(isNaryLogicalOpConvertibleIntoARandomRequestOperator(physicalPlan)){
-					physicalPlan = unionWithRequestsToRandomRequestOperator(physicalPlan);
-				}
-
-				return physicalPlan;
+				return createPhysicalPlanWithNaryRoot( (NaryLogicalOp) lop, children, keepMultiwayJoins );
 			}
 			else {
 				throw new IllegalArgumentException( "unknown logical operator: " + lop.getClass().getName() );
 			}
-		}
-
-		public static boolean isNaryLogicalOpConvertibleIntoARandomRequestOperator(final PhysicalPlan root){
-			return _isNaryLogicalOpConvertibleIntoARandomRequestOperator(root, new HashSet<>());
-		}
-
-		public static boolean _isNaryLogicalOpConvertibleIntoARandomRequestOperator(final PhysicalPlan root, Set<DataRetrievalRequest> foundQueries){
-
-			PhysicalOperator rootOp = root.getRootOperator();
-
-			if(rootOp instanceof PhysicalOpRequest<?,?>){
-				foundQueries.add(((PhysicalOpRequest) rootOp).getLogicalOperator().getRequest());
-				return foundQueries.size() == 1;
-			}
-
-			if(!IdentifyLogicalOp.isMultiwayUnion(root.getRootOperator()) &&
-					!IdentifyLogicalOp.isUnion(root.getRootOperator())) return false;
-
-
-			for (int i = 0; i < root.numberOfSubPlans(); i++){
-				PhysicalPlan subPlan = root.getSubPlan(i);
-
-				if(!_isNaryLogicalOpConvertibleIntoARandomRequestOperator(subPlan, foundQueries)) return false;
-			}
-
-			return true;
-		}
-
-		public static PhysicalPlan unionWithRequestsToRandomRequestOperator(PhysicalPlan unionOfRequests) {
-			Map<FederationMember, DataRetrievalRequest> memberToRequest = _unionWithRequestsToRandomRequestOperator(unionOfRequests);
-
-			return PhysicalPlanFactory.createPlan(PhysicalOpFrawRequest.instantiate(memberToRequest));
-		}
-
-		public static Map<FederationMember, DataRetrievalRequest> _unionWithRequestsToRandomRequestOperator(PhysicalPlan unionOfRequests){
-			if(unionOfRequests.getRootOperator() instanceof PhysicalOpRequest<?,?>) {
-				LogicalOpRequest lop = ((PhysicalOpRequest) unionOfRequests.getRootOperator()).getLogicalOperator();
-				return Map.of(lop.getFederationMember(), lop.getRequest());
-			}
-
-			Map<FederationMember, DataRetrievalRequest> reqMap = new HashMap<>();
-			for (int i = 0; i < unionOfRequests.numberOfSubPlans(); i++){
-				PhysicalPlan subPlan = unionOfRequests.getSubPlan(i);
-
-				reqMap.putAll(_unionWithRequestsToRandomRequestOperator(subPlan));
-			}
-
-			return reqMap;
 		}
 
 		protected PhysicalPlan createPhysicalPlanWithNullaryRoot( final NullaryLogicalOp lop ) {
