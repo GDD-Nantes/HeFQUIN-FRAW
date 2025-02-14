@@ -7,7 +7,10 @@ import se.liu.ida.hefquin.base.query.TriplePattern;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
+import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpFilter;
+import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpMultiwayJoin;
+import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpMultiwayUnion;
+import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRequest;
 import se.liu.ida.hefquin.engine.queryplan.utils.LogicalOpUtils;
 
 import java.util.ArrayList;
@@ -29,7 +32,10 @@ public class JOUQueryAnalyzer {
 
         if( lop instanceof LogicalOpRequest) {
             FederationMember fm = ((LogicalOpRequest<?, ?>) lop).getFederationMember();
-            Set<TriplePattern> ret = LogicalOpUtils.getTriplePatternsOfReq( (LogicalOpRequest<?, ?>) lop);
+            ((LogicalOpRequest<?,?>) lop).getRequest();
+            Set<TriplePattern> ret = LogicalOpUtils.getTriplePatternsOfReq( (LogicalOpRequest<?, ?>) lop );
+            Set<ExprList> exprLists = LogicalOpUtils.getFilterExprsOfReq( (LogicalOpRequest<?, ?>) lop );
+            exprLists.stream().forEach(el -> filters.add(new LogicalOpFilter(el)));
             ret.stream().forEach(
                     tp -> tpsl.put( tp, fm )
             );
