@@ -240,3 +240,8 @@ ex:rawRatingSite19
       a            fd:FederationMember ;
       fd:interface [ a                  fd:SPARQLEndpointInterface ;
                      fd:endpointAddress <http://localhost:9999/blazegraph/sparql?default-graph-uri=http://www.ratingsite19.fr/> ] .
+
+ex:empty
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:9999/blazegraph/sparql?default-graph-uri=http://www.empty.fr/> ] .

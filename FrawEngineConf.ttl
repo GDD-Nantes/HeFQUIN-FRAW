@@ -23,10 +23,10 @@ _:b1 ec:queryPlanner _:b2 ;
          #ec:constructorArguments ( ec:value:QueryProcContext )
          ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.compiler.PushBasedSamplingQueryPlanCompilerImpl" ;
          ec:constructorArguments ( ec:value:QueryProcContext
-                                  10000 )
+                                  1000 )
      ] ;
      ec:executionEngine [
-         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.execution.FrawExecutionEngineImpl" ;
+         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.execution.ExecutionEngineImpl" ;
          ec:constructorArguments ( )
      ] .
 
@@ -76,14 +76,15 @@ _:bFormulaForSelectivity
         "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.formula.FmAwareWeightedJoinAndUnboundVariableCount" .
 
 _:bServiceBasedSrcPlanner
-    ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ServiceClauseBasedSourcePlannerImpl" ;
+    #ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ServiceClauseBasedSourcePlannerImpl" ;
+    #ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ServiceClauseBasedJOUSourcePlannerImpl" ;
     #ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ExhaustiveSourcePlannerImpl" ;
-    ec:constructorArguments ( ec:value:QueryProcContext ) .
-    #ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedSourcePlannerImpl" ;
+    #ec:constructorArguments ( ec:value:QueryProcContext ) .
+    ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedSourcePlannerImpl" ;
     #ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedJOUSourcePlannerImpl" ;
-    #ec:constructorArguments ( ec:value:QueryProcContext
-    #                           "fedshop20-h0"
-    #                           "(e)->\"http://localhost:9999/blazegraph/sparql?default-graph-uri=\"+(e)") .
+    ec:constructorArguments ( ec:value:QueryProcContext
+                               "/Users/boisteau-desdevises-e/Documents/Projects/HeFQUIN/summaries/fedshop200-h0"
+                               "(e)->\"http://localhost:9999/blazegraph/sparql?default-graph-uri=\"+(e)") .
     #                           "(e)->\"http://localhost:3331/fedshop200.jnl/raw?default-graph-uri=\"+(e)") .
 
 _:bExhaustiveSrcPlanner
@@ -95,6 +96,7 @@ _:bExhaustiveSrcPlanner
 _:bArgL2PConverter
     ec:argumentTypeName "se.liu.ida.hefquin.engine.queryplan.utils.LogicalToPhysicalPlanConverter" ;
     ec:javaClassName    "se.liu.ida.hefquin.engine.queryplan.utils.LogicalToPhysicalPlanConverterImpl" ;
+    #ec:javaClassName    "se.liu.ida.hefquin.engine.queryplan.utils.LogicalToPhysicalSamplingPlanConverterImpl" ;
     ec:constructorArguments ( false      # ignorePhysicalOpsForLogicalAddOps
                               false ) .  # ignoreParallelMultiLeftJoin
 _:bNoPhysOptimizer
