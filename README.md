@@ -1,3 +1,24 @@
+# HeFQUIN WITH FEDUP
+
+1) git clone https://github.com/GDD-Nantes/HeFQUIN-FRAW.git
+2) git clone https://github.com/GDD-Nantes/fedup
+3) cd fedup
+4) sed -i '' -e 's/<jena.version>5.0.0<\/jena.version>/<jena.version>4.10.0<\/jena.version>/g' pom.xml
+5) mvn clean package install -Dmaven.test.skip -f pom.xml
+6) cd ..
+7) cd HeFQUIN
+8) git checkout hefquin_with_fedup
+9) mvn clean package install -Dmaven.test.skip -f pom.xml
+10) ./bin/hefquin --federationDescription fedshop200bg.ttl --confDescr DefaultEngineWithFedupConf.ttl --file query.sparql
+
+
+
+
+
+
+
+
+
 # HeFQUIN
 HeFQUIN is a query federation engine for heterogeneous federations of graph data sources (e.g, federated knowledge graphs) that is currently under development by [the Semantic Web research group at Linköping University](https://www.ida.liu.se/research/semanticweb/).
 

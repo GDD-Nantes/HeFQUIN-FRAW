@@ -1,0 +1,8 @@
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+
+SELECT * WHERE {
+    ?productType a bsbm:ProductType .
+    ?product a ?productType .
+    ?review bsbm:reviewFor ?product .
+}
+LIMIT 10
