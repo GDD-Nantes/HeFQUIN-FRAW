@@ -82,7 +82,7 @@ public class FrawUtils {
                 Node node = binding.get(var);
                 bb.add(var, node);
             }else if(!bb.contains(MAPPING_PROBABILITY)) {
-                Double newProbability = ((Double) binding.get(MAPPING_PROBABILITY).getLiteralValue()) / numberOfChildren;
+                Double newProbability = Double.valueOf(binding.get(MAPPING_PROBABILITY).getLiteralValue().toString()) / numberOfChildren;
                 bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(newProbability), XSDDatatype.XSDdouble));
             }
         }

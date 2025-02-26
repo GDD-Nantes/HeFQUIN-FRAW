@@ -15,6 +15,7 @@ import se.liu.ida.hefquin.engine.queryplan.physical.impl.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PhysicalPlanFactory
 {
@@ -407,7 +408,14 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlan( final NaryLogicalOp rootOp,
 	                                       final List<PhysicalPlan> subplans ) {
+
 		final NaryPhysicalOp pop = LogicalToPhysicalOpConverter.convert(rootOp);
+
+		if (rootOp instanceof LogicalOpMultiwayUnion) {
+			List<PhysicalPlan> subplansWithoutDuplicates = subplans.stream().distinct().collect(Collectors.toUnmodifiableList());
+			return createPlan(pop, subplansWithoutDuplicates);
+		}
+
 		return createPlan(pop, subplans);
 	}
 

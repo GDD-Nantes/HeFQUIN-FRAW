@@ -1,13 +1,17 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.engine.Rename;
 import org.apache.jena.sparql.engine.binding.Binding;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
+import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
 import se.liu.ida.hefquin.engine.federation.FederationMemberAgglomeration;
 import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.engine.federation.access.*;
+import se.liu.ida.hefquin.engine.federation.access.impl.req.SPARQLRequestImpl;
 import se.liu.ida.hefquin.engine.federation.access.impl.response.SolMapsResponseImpl;
 import se.liu.ida.hefquin.engine.federation.access.utils.FederationAccessUtils;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils;
@@ -36,7 +40,13 @@ public class ExecOpFrawRequest extends BaseForExecOpSolMapsRequest<DataRetrieval
 
         if(chosenFM instanceof SPARQLEndpoint){
 
-            SolMapsResponse solMapsResponse = FederationAccessUtils.performRequest(fedAccessMgr, (SPARQLRequest) req, (SPARQLEndpoint) chosenFM);
+            Op op = ((GenericSPARQLGraphPatternImpl2) ((SPARQLRequestImpl) req).getQueryPattern()).asJenaOp();
+
+            SPARQLRequest sr = new SPARQLRequestImpl(
+                    new GenericSPARQLGraphPatternImpl2(Rename.reverseVarRename(op, true))
+            );
+
+            SolMapsResponse solMapsResponse = FederationAccessUtils.performRequest(fedAccessMgr, sr, (SPARQLEndpoint) chosenFM);
 
             List<SolutionMapping> updatedSolutionMappingList = new ArrayList<>();
 
