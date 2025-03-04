@@ -22,13 +22,10 @@ import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
 import se.liu.ida.hefquin.engine.queryproc.impl.MaterializingQueryResultSinkImpl;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants.OP_TO_GROUP_BY_VARS;
-import static se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants.VAR_GROUP_CURRENT_STAGE;
+import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.OP_TO_GROUP_BY_VARS;
+import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.VAR_GROUP_CURRENT_STAGE;
 
 public class OpExecutorHeFQUIN extends OpExecutor
 {
@@ -139,7 +136,11 @@ public class OpExecutorHeFQUIN extends OpExecutor
 	@Override
 	protected QueryIterator execute(OpGroup opGroup, QueryIterator input) {
 		this.execCxt.getContext().setIfUndef(OP_TO_GROUP_BY_VARS, new HashMap<>());
-		((Map<Op, List<Var>>) this.execCxt.getContext().get(OP_TO_GROUP_BY_VARS)).put(opGroup.getSubOp(), opGroup.getGroupVars().getVars());
+
+		OpGroup renamed = (OpGroup) Rename.reverseVarRename(opGroup, true);
+		List<Var> renamedVars = renamed.getGroupVars().getVars();
+
+		((Map<Op, List<Var>>) this.execCxt.getContext().get(OP_TO_GROUP_BY_VARS)).put(opGroup.getSubOp(), renamedVars);
 		return super.execute(opGroup, input);
 	}
 
@@ -171,33 +172,14 @@ public class OpExecutorHeFQUIN extends OpExecutor
 		protected QueryIterator nextStage( final Binding binding ) {
 			final Op opForStage;
 
-//			int i = this.getIteratorNumber();
-//
-//			Iterator<QueryIterator> ite = getExecContext().listOpenIterators();
-//
-//			while(ite.hasNext()){
-//				QueryIterator qite = ite.next();
-//				if(qite instanceof QueryIterGroup){
-//					QueryIterGroup qg = (QueryIterGroup)qite;
-//					if(qg.getIteratorNumber() == i){
-//						qg.getExecContext();
-//						qg.embeddedIterator
-//					}
-//				}
-//			}
 
-			// This is a 'hacky' way to retrieve variables from the envelopping group by, if there is any. Ideally, these
-			// shouldn't be retrieved by looking at the variables and determining which have been renamed (≈ in the group by clause).
-			// Instead, we should find a way to access the potential group by clause's jena op and grab all variables from there
-//			List<Var> variables = new ArrayList<>();
-//			getExecContext().getContext().set(VAR_GROUP_CURRENT_STAGE, variables);
-//			QueryPatternUtils.getVariablesInPattern(op)
-//					.stream()
-//					.filter(var -> !var.getVarName().contains("/"))
-//					.forEach(var -> variables.add(var));
-
-			List<Var> vars_group_current_stage = ((Map<Op, List<Var>>)getExecContext().getContext().get(OP_TO_GROUP_BY_VARS)).get(op);
-			getExecContext().getContext().set(VAR_GROUP_CURRENT_STAGE, vars_group_current_stage);
+			// Handling of stages for group by operators' child op
+			Map<Op, List<Var>> opToVariablesToGroup = getExecContext().getContext().get(OP_TO_GROUP_BY_VARS);
+			if(Objects.nonNull(opToVariablesToGroup)) {
+				List<Var> vars_group_current_stage = opToVariablesToGroup.get(op);
+				getExecContext().getContext().set(VAR_GROUP_CURRENT_STAGE, vars_group_current_stage);
+			}
+			// end of Group By handling
 
 			if ( binding.isEmpty() ) {
 				opForStage = op;

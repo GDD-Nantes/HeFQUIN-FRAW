@@ -1,14 +1,10 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
 
-import org.apache.jena.sparql.algebra.Op;
-import org.apache.jena.sparql.engine.Rename;
-import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
 import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.engine.federation.access.FederationAccessException;
 import se.liu.ida.hefquin.engine.federation.access.FederationAccessManager;
 import se.liu.ida.hefquin.engine.federation.access.SPARQLRequest;
 import se.liu.ida.hefquin.engine.federation.access.SolMapsResponse;
-import se.liu.ida.hefquin.engine.federation.access.impl.req.SPARQLRequestImpl;
 import se.liu.ida.hefquin.engine.federation.access.utils.FederationAccessUtils;
 
 public class ExecOpRequestSPARQL extends BaseForExecOpSolMapsRequest<SPARQLRequest, SPARQLEndpoint>
@@ -20,13 +16,13 @@ public class ExecOpRequestSPARQL extends BaseForExecOpSolMapsRequest<SPARQLReque
 	@Override
 	protected SolMapsResponse performRequest( final FederationAccessManager fedAccessMgr ) throws FederationAccessException {
 
-		Op op = ((GenericSPARQLGraphPatternImpl2) ((SPARQLRequestImpl) req).getQueryPattern()).asJenaOp();
+//		Op op = ((GenericSPARQLGraphPatternImpl2) req.getQueryPattern()).asJenaOp();
+//
+//		SPARQLRequest sr = new SPARQLRequestImpl(
+//				new GenericSPARQLGraphPatternImpl2(Rename.reverseVarRename(op, true))
+//		);
 
-		SPARQLRequest sr = new SPARQLRequestImpl(
-				new GenericSPARQLGraphPatternImpl2(Rename.reverseVarRename(op, true))
-		);
-
-		return FederationAccessUtils.performRequest(fedAccessMgr, sr, fm);
+		return FederationAccessUtils.performRequest(fedAccessMgr, req, fm);
 	}
 
 }

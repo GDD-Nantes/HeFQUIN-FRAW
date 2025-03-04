@@ -26,8 +26,7 @@ import java.util.Iterator;
 import java.util.Objects;
 
 import static org.apache.jena.riot.rowset.rw.JSONResultsKW.*;
-import static se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants.MAPPING_PROBABILITY;
-import static se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants.VAR_PROBABILITY_PREFIX;
+import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.MAPPING_PROBABILITY;
 
 public class RawRowSetWriterJSON implements RowSetWriter {
     public static RowSetWriterFactory factory = lang -> {
@@ -197,14 +196,15 @@ public class RawRowSetWriterJSON implements RowSetWriter {
                 Var var = iter.next();
                 Node value = binding.get(var);
                 firstInRow = writeVarValueIfNotNull(out, var, value, firstInRow);
-
-                Var probaVar = Var.alloc(VAR_PROBABILITY_PREFIX + var.getVarName());
-                Node proba = binding.get(probaVar);
-                firstInRow = writeVarValueIfNotNull(out, probaVar, proba, firstInRow);
             }
 
             Node bindingProba = binding.get(MAPPING_PROBABILITY);
             firstInRow = writeVarValueIfNotNull(out, MAPPING_PROBABILITY, bindingProba, firstInRow);
+
+//            Node randomWalkHolder = binding.get(RANDOM_WALK_HOLDER);
+//            firstInRow = writeVarValueIfNotNull(out, RANDOM_WALK_HOLDER, randomWalkHolder, firstInRow);
+
+
 
             if ( false ) {
                 // Print "missing" variables.

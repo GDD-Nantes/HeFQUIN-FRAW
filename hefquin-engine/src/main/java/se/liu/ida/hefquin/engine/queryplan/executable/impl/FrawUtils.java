@@ -1,5 +1,9 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl;
 
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Node;
@@ -11,9 +15,11 @@ import org.apache.jena.sparql.engine.binding.BindingLib;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 
+import java.io.StringReader;
 import java.util.Iterator;
+import java.util.Objects;
 
-import static se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants.MAPPING_PROBABILITY;
+import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.*;
 
 public class FrawUtils {
 
@@ -47,7 +53,7 @@ public class FrawUtils {
         // Add any variables from the RHS
         for ( ; vIter.hasNext() ; ) {
             Var v = vIter.next();
-            if ( !builder.contains(v) )
+            if ( !builder.contains(v) && !isProbaVar(v))
                 builder.add(v, bind2.get(v));
             else {
                 // Checking!
@@ -71,23 +77,71 @@ public class FrawUtils {
         return builder.build();
     }
 
-    public static Binding updateProbaUnion(SolutionMapping solutionMapping, int numberOfChildren){
+    public static Binding updateProbaUnion(SolutionMapping solutionMapping, int numberOfChildren, int chosen){
         Binding binding = solutionMapping.asJenaBinding();
 
         BindingBuilder bb = BindingBuilder.create();
 
         for (Iterator<Var> it = binding.vars(); it.hasNext(); ) {
             Var var = it.next();
-            if(!var.equals(MAPPING_PROBABILITY)){
+            if(!var.equals(MAPPING_PROBABILITY) && !isRandomWalkHolder(var) && !isProbaVar(var)){
+                // Processing "normal" variables, aka not probabilities or whatever
                 Node node = binding.get(var);
                 bb.add(var, node);
             }else if(!bb.contains(MAPPING_PROBABILITY)) {
+                // Processing global mapping probability
                 Double newProbability = Double.valueOf(binding.get(MAPPING_PROBABILITY).getLiteralValue().toString()) / numberOfChildren;
                 bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(newProbability), XSDDatatype.XSDdouble));
             }
+            // We never copy union objects since we always create a new one right after this
         }
 
+        // Creating a new union object in the binding
+        Node subUnionObjectNode = binding.get(RANDOM_WALK_HOLDER);
+        JsonObject subUnionJson;
+        if(Objects.nonNull(subUnionObjectNode)){
+            JsonReader reader = Json.createReader(new StringReader(subUnionObjectNode.getLiteralValue().toString()));
+            subUnionJson = reader.readObject();
+            reader.close();
+        } else {
+            subUnionJson = Json.createObjectBuilder().build();
+        }
+
+        JsonArray vars = subUnionJson.getJsonArray("vars");
+
+        Double probability = subUnionJson.getJsonNumber("probability").doubleValue();
+
+        JsonObject currentUnionJson = Json.createObjectBuilder()
+                .add("type", "union")
+                .add("child", chosen)
+                .add("sub", subUnionJson)
+                .add("vars", vars)
+                // As we retrieve a random walk, this probability cannot be known
+                // in advance. It is computed based on the number of branches of this union that have been explored by
+                // a number of random walks. For now, we keep the probability of the child, as if this union had only one branch,
+                // and when computing the estimation later, we apply the observed probability.
+                .add("probability", probability)
+                .build();
+
+        bb.add(RANDOM_WALK_HOLDER, NodeFactory.createLiteral(currentUnionJson.toString()));
+
         return bb.build();
+    }
+
+    public static boolean isProbaVar(Var var){
+        return var.getVarName().contains(VAR_PROBABILITY_PREFIX);
+    }
+
+    public static String getProbaVarFromVar(Var var){
+        return VAR_PROBABILITY_PREFIX + var.getName();
+    }
+
+    public static boolean isRandomWalkHolder(Var var){
+        return RANDOM_WALK_HOLDER.getVarName().equals(var.getName());
+    }
+
+    public static String destringifyBindingJson(String jsonString){
+        return jsonString.substring(1, jsonString.length()-1).replace("\\\"", "\"");
     }
 
 }

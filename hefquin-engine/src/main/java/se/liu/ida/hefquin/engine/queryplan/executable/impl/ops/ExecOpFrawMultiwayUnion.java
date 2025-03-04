@@ -34,7 +34,7 @@ public class ExecOpFrawMultiwayUnion extends ExecOpMultiwayUnion{
 
         tempSink.getCollectedSolutionMappings().forEach(
                 solutionMapping -> {
-                    Binding updatedBinding = FrawUtils.updateProbaUnion(solutionMapping, numberOfChildren);
+                    Binding updatedBinding = FrawUtils.updateProbaUnion(solutionMapping, numberOfChildren, chosenChild);
                     SolutionMapping updatedSolutionMapping = new SolutionMappingImpl(updatedBinding);
                     sink.send(updatedSolutionMapping);
                 }
