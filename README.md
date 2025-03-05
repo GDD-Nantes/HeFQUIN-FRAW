@@ -10,14 +10,19 @@
 8) cd HeFQUIN-FRAW 
 9) git checkout hefquin_with_fedup 
 10) mvn clean package install -Dmaven.test.skip -f pom.xml 
+11) wget https://zenodo.org/records/11933972/files/fedshop20-h0.zip
 11) wget https://zenodo.org/records/11933972/files/fedshop200-h0.zip
-12) unzip fedshop200-h0.zip -d summaries 
-13) rm fedshop200-h0.zip 
-14) ./bin/hefquin --federationDescription fedshop200bg.ttl --confDescr DefaultEngineWithFedupConf.ttl --file query.sparql
+12) unzip fedshop20-h0.zip -d summaries
+13) unzip fedshop200-h0.zip -d summaries 
+14) rm fedshop20*-h0.zip
+15) sed -i '' -e 's/ENDPOINT_URL_PLACEHOLDER/[YOUR_ENDPOINT_URL]/g' fedshop200.ttl 
+16) ./bin/hefquin --federationDescription fedshop200.ttl --confDescr DefaultEngineWithFedupConfForFedshop20.ttl --file query.sparql
 
-
-
-
+Notes : 
+- IMPORTANT : N'oubliez pas de lancer Virtuoso ou votre endpoint de choix avant d'éxecuter une requêtes avec HeFQUIN. Sinon, ça marche moins bien.
+- Un exemple de fédération déjà entièrement déclarée est présente dans fedshop200bg.ttl (conçue pour une utilisation de fedup et d'endpoints virtuels blazegraph).
+- Pour utiliser fedshop200 au lieu de fedshop20, il faut changer la configuration de hefquin utilisée ("DefaultEngineWithFedupConfForFedshop20") dans la commande ci-dessus.
+- Pour utiliser d'autres configurations de fedshop (40, 60, 80, etc.) il faut générer / télécharger les summaries correspondant et les mettre dans le dossier "summaries", et créer le fichier de configuration de hefquin correspondant
 
 
 
