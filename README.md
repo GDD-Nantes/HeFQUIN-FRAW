@@ -3,13 +3,17 @@
 1) git clone https://github.com/GDD-Nantes/HeFQUIN-FRAW.git
 2) git clone https://github.com/GDD-Nantes/fedup
 3) cd fedup
-4) sed -i '' -e 's/<jena.version>5.0.0<\/jena.version>/<jena.version>4.10.0<\/jena.version>/g' pom.xml
-5) mvn clean package install -Dmaven.test.skip -f pom.xml
-6) cd ..
-7) cd HeFQUIN
-8) git checkout hefquin_with_fedup
-9) mvn clean package install -Dmaven.test.skip -f pom.xml
-10) ./bin/hefquin --federationDescription fedshop200bg.ttl --confDescr DefaultEngineWithFedupConf.ttl --file query.sparql
+4) sed -i '' -e 's/<jena.version>5.0.0<\\\/jena.version>/<jena.version>4.10.0<\\\/jena.version>/g' pom.xml
+5) sed -i '' -e 's/.enableCors(true, "")/.enableCors(true)/g' src/main/java/fr/gdd/fedup/cli/FedUPServer.java
+6) mvn clean package install -Dmaven.test.skip -f pom.xml 
+7) cd ..
+8) cd HeFQUIN-FRAW 
+9) git checkout hefquin_with_fedup 
+10) mvn clean package install -Dmaven.test.skip -f pom.xml 
+11) wget https://zenodo.org/records/11933972/files/fedshop200-h0.zip
+12) unzip fedshop200-h0.zip -d summaries 
+13) rm fedshop200-h0.zip 
+14) ./bin/hefquin --federationDescription fedshop200bg.ttl --confDescr DefaultEngineWithFedupConf.ttl --file query.sparql
 
 
 
