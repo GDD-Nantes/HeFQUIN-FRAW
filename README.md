@@ -1,6 +1,6 @@
 # HeFQUIN WITH FEDUP
 
-1) git clone https://github.com/GDD-Nantes/HeFQUIN-FRAW.git
+1) git clone git@github.com:GDD-Nantes/HeFQUIN-FRAW.git
 2) git clone https://github.com/GDD-Nantes/fedup
 3) cd fedup
 4) sed -i '' -e 's/<jena.version>5.0.0<\\\/jena.version>/<jena.version>4.10.0<\\\/jena.version>/g' pom.xml
