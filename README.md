@@ -16,7 +16,8 @@
 14) unzip fedshop200-h0.zip -d summaries
 15) rm fedshop20*-h0.zip
 16) sed -i '' -e 's/ENDPOINT_URL_PLACEHOLDER/[YOUR_ENDPOINT_URL]/g' fedshop200.ttl
-17) ./bin/hefquin --federationDescription fedshop200.ttl --confDescr DefaultEngineWithFedupConfForFedshop20.ttl --file query.sparql
+17) sed -i '' -e 's/ENDPOINT_URL_PLACEHOLDER/[YOUR_ENDPOINT_URL]/g' DefaultEngineWithFedupConfForFedshop*.ttl
+18) ./bin/hefquin --federationDescription fedshop200.ttl --confDescr DefaultEngineWithFedupConfForFedshop20.ttl --file query.sparql
 
 Notes : 
 - IMPORTANT : N'oubliez pas de lancer Virtuoso ou votre endpoint de choix avant d'éxecuter une requêtes avec HeFQUIN. Sinon, ça marche moins bien.
