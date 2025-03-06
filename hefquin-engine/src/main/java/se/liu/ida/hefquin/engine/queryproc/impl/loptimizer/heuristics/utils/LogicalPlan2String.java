@@ -1,23 +1,14 @@
 package se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.utils;
 
-import com.google.common.collect.Iterators;
-import fr.gdd.fedqpl.visitors.ReturningOpVisitorRouter;
-import org.apache.commons.logging.Log;
-import org.apache.jena.sparql.algebra.op.*;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.util.ExprUtils;
-import se.liu.ida.hefquin.engine.federation.access.DataRetrievalInterface;
 import se.liu.ida.hefquin.engine.federation.access.SPARQLEndpointInterface;
-import se.liu.ida.hefquin.engine.federation.access.impl.iface.SPARQLEndpointInterfaceImpl;
 import se.liu.ida.hefquin.engine.queryplan.logical.*;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
 
-public class LogicalPlan2String extends ReturningOpVisitorRouter {
+public class LogicalPlan2String {
 
     public String printLogicalPlan(LogicalPlan logicalPlan){
         StringBuilder builder = new StringBuilder();
