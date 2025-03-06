@@ -1,30 +1,26 @@
 package se.liu.ida.hefquin.engine;
 
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.jena.query.ARQ;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.*;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.main.OpExecutor;
 import org.apache.jena.sparql.engine.main.OpExecutorFactory;
 import org.apache.jena.sparql.engine.main.QC;
+import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.resultset.ResultsFormat;
 import org.apache.jena.sparql.util.QueryExecUtils;
-
 import se.liu.ida.hefquin.base.utils.Pair;
 import se.liu.ida.hefquin.engine.federation.access.FederationAccessManager;
 import se.liu.ida.hefquin.engine.federation.access.FederationAccessStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
-import se.liu.ida.hefquin.jenaintegration.sparql.engine.main.OpExecutorHeFQUIN;
+import se.liu.ida.hefquin.jenaintegration.sparql.engine.main.OpExecutorFraw;
+
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HeFQUINEngineImpl implements HeFQUINEngine
 {
@@ -38,6 +34,8 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 
 		this.fedAccessMgr = fedAccessMgr;
 		this.qProc = qProc;
+
+		AggregateRegistry.register("http://customAgg/rawcount", RawCountAggregator.factory());
 	}
 
 	@Override
@@ -45,7 +43,7 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 		final OpExecutorFactory factory = new OpExecutorFactory() {
 			@Override
 			public OpExecutor create( final ExecutionContext execCxt ) {
-				return new OpExecutorHeFQUIN(qProc, execCxt);
+				return new OpExecutorFraw(qProc, execCxt);
 			}
 		};
 
