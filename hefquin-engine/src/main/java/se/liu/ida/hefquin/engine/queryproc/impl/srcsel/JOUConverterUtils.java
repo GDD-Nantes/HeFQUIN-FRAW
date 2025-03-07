@@ -92,7 +92,7 @@ public class JOUConverterUtils {
         }
 
         if(lop instanceof LogicalOpFilter){
-            return new LogicalPlanWithUnaryRootImpl(new LogicalOpFilter(((LogicalOpFilter) lop).getFilterExpressions()), lp.getSubPlan(0));
+            return new LogicalPlanWithUnaryRootImpl(new LogicalOpFilter(((LogicalOpFilter) lop).getFilterExpressions()), unionOverJoin2JoinOverUnion(lp.getSubPlan(0)));
         }
 
         if(lop instanceof LogicalOpRequest<?,?>){
