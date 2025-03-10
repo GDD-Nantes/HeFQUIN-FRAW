@@ -11,10 +11,7 @@ import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingLib;
-import org.apache.jena.sparql.engine.iterator.QueryIter;
-import org.apache.jena.sparql.engine.iterator.QueryIterGroup;
-import org.apache.jena.sparql.engine.iterator.QueryIterRepeatApply;
-import org.apache.jena.sparql.engine.iterator.QueryIteratorBase;
+import org.apache.jena.sparql.engine.iterator.*;
 import org.apache.jena.sparql.engine.main.OpExecutor;
 import org.apache.jena.sparql.serializer.SerializationContext;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
@@ -32,6 +29,7 @@ import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 public class OpExecutorFraw extends OpExecutor {
     protected final QueryProcessor qProc;
@@ -74,7 +72,12 @@ public class OpExecutorFraw extends OpExecutor {
             return executeSupportedOp( opJoin, input );
         }
         else {
-            return super.execute(opJoin, input);
+            // Forcing use of bound join; it's random walk we're talking about after all
+            QueryIterator left = exec(opJoin.getLeft(), input);
+
+            // For each row, substitute and execute.
+            QueryIterator qIter = new FrawQueryIterLateral(left, opJoin.getRight(), execCxt);
+            return qIter;
         }
     }
 
@@ -145,6 +148,18 @@ public class OpExecutorFraw extends OpExecutor {
         }
         else {
             // Key exploration
+            // If the input already provides a full key binding, we don't need to explore
+            // What if input iterates over multiple input bindings?
+//            boolean shouldExplore = false;
+//            if(input.hasNext()){
+//                Binding inputBinding  = input.next();
+//                for(Var var : opGroup.getGroupVars().getVars()){
+//                    if(!inputBinding.contains(var)){
+//                        shouldExplore = true;
+//                    }
+//                }
+//            }
+//            QueryIterator inputKeyExplorationBindings = shouldExplore ? this.exec(opGroup.getSubOp(), input) : null;
             QueryIterator inputKeyExplorationBindings = this.exec(opGroup.getSubOp(), input);
 
             // Per-key exploitation
@@ -154,71 +169,6 @@ public class OpExecutorFraw extends OpExecutor {
             QueryIterator qIter = new QueryIterGroup(bindingsToGroup, opGroup.getGroupVars(), opGroup.getAggregators(), execCxt);
             return qIter;
 
-
-
-//            Op op = opGroup.getSubOp();
-//            VarExprList groupVars = opGroup.getGroupVars();
-//            SPARQLGraphPattern sparqlGraphPattern = new GenericSPARQLGraphPatternImpl2(op);
-//
-//            // Explore
-//            QueryIterator ite = this.exec(op, input);
-//
-//            IteratorChain<Binding> chain = new IteratorChain();
-//
-//            // For each found key during exploration
-//            while(ite.hasNext()){
-//                // Bind the found group key
-//                Binding exploreBinding = ite.next();
-//                Binding restrictedExploreBinding = SolutionMappingUtils.restrict(exploreBinding, groupVars.getVars());
-//                SolutionMapping restrictedExploreSolutionMapping = new SolutionMappingImpl(restrictedExploreBinding);
-//
-//                SPARQLGraphPattern boundSGP;
-//
-//                try {
-//                    boundSGP = QueryPatternUtils.applySolMapToGraphPattern(restrictedExploreSolutionMapping, sparqlGraphPattern);
-//                } catch (QueryPatternUtils.VariableByBlankNodeSubstitutionException e) {
-//                    throw new RuntimeException(e);
-//                }
-//
-//                Op boundOp = QueryPatternUtils.convertToJenaOp(boundSGP);
-//
-//                // running the newly bound op
-//                QueryIterator resultForKey = this.exec(boundOp, createRootQueryIterator(execCxt));
-//
-//                chain.addIterator(resultForKey);
-
-//                QueryIterator qite = new QueryIterAssign(
-//                        null,
-//
-//                );
-//
-//                this.exec(op, input)
-//            }
-
-//            new QueryProcessorImpl();
-//
-//            QueryProcContext qpc = new ExecutionContextImpl();
-//
-//            QueryPlanCompiler subQueryCompiler = new PushBasedSamplingQueryPlanCompilerImpl(execCxt, 10);
-//
-//            new OpExecutorFraw(new QueryProcessorImpl(
-//                    this.qProc.getPlanner(),
-//                    subQueryCompiler,
-//                    this.qProc.getExecutionEngine(),
-//
-//            ), execCxt);
-
-//            System.out.println(ite);
-//
-//            Iterators.concat();
-
-//            QueryIterator qIter = new QueryIterGroup(new QueryIter opGroup.getGroupVars(), opGroup.getAggregators(), execCxt);
-//            return qIter;
-
-            // this line is the equivalent of saying "i can't handle group bys with my query engine, so i let jena do it"
-//            return super.execute(opGroup, input);
-
-//            throw new UnsupportedOperationException();
         }
     }
 
@@ -353,6 +303,45 @@ public class OpExecutorFraw extends OpExecutor {
             @Override
             public boolean hasNextBinding() {
                 return wrapped.hasNext();
+            }
+
+            // Nothing-to-dos
+            @Override public void output(IndentedWriter out, SerializationContext sCxt) {}
+            @Override protected void closeIterator() {}
+            @Override protected void requestCancel() {}
+        }
+    }
+
+    protected class FrawQueryIterLateral extends QueryIterLateral {
+
+        public FrawQueryIterLateral(QueryIterator input, Op lateralOp, ExecutionContext execCxt) {
+            super(input, lateralOp, execCxt);
+        }
+
+        @Override
+        protected QueryIterator nextStage(Binding binding) {
+            return new FrawWrappingQueryIterLiteral(super.nextStage(binding), binding);
+        }
+
+        protected class FrawWrappingQueryIterLiteral extends QueryIteratorBase{
+            // Looks a suspicious lot like FrawWrappingGroupIterator
+
+            Binding binding;
+            QueryIterator wrapped;
+
+            public FrawWrappingQueryIterLiteral(QueryIterator queryIterator, Binding binding) {
+                this.binding = binding;
+                this.wrapped = queryIterator;
+            }
+
+            @Override
+            protected boolean hasNextBinding() {
+                return wrapped.hasNext();
+            }
+
+            @Override
+            protected Binding moveToNextBinding() {
+                return BindingLib.merge(wrapped.nextBinding(), binding);
             }
 
             // Nothing-to-dos

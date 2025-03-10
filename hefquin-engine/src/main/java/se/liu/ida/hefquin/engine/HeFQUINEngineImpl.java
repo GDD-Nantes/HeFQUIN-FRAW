@@ -1,6 +1,7 @@
 package se.liu.ida.hefquin.engine;
 
 import org.apache.jena.query.*;
+import org.apache.jena.sparql.algebra.optimize.Optimize;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.engine.ExecutionContext;
@@ -36,6 +37,7 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 		this.qProc = qProc;
 
 		AggregateRegistry.register("http://customAgg/rawcount", RawCountAggregator.factory());
+		Optimize.noOptimizer();
 	}
 
 	@Override
@@ -94,7 +96,7 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 	                                   final PrintStream output ) throws Exception {
 		final ResultSet rs;
 		try {
-			qe.getContext().setIfUndef(ARQ.optimization, false);
+//			qe.getContext().setIfUndef(ARQ.optimization, false);
 			rs = qe.execSelect();
 		}
 		catch ( final Exception e ) {
