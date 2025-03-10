@@ -1,9 +1,5 @@
 package se.liu.ida.hefquin.engine.queryproc.impl.compiler;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
 import se.liu.ida.hefquin.engine.queryplan.executable.*;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecPlanTask;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.TaskBasedExecutableSamplingPlanImpl;
@@ -11,6 +7,10 @@ import se.liu.ida.hefquin.engine.queryplan.executable.impl.pushbased.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class PushBasedSamplingQueryPlanCompilerImpl extends TaskBasedSamplingQueryPlanCompilerBase
 {
@@ -112,5 +112,9 @@ public class PushBasedSamplingQueryPlanCompilerImpl extends TaskBasedSamplingQue
             tasks.addFirst(newTask);
         }
     } // end of helper class Worker
+
+    public QueryProcContext getQueryProcContext() {
+        return ctxt;
+    }
 
 }

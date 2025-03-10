@@ -1,7 +1,6 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl;
 
 import se.liu.ida.hefquin.base.data.SolutionMapping;
-import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 import se.liu.ida.hefquin.base.utils.StatsPrinter;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlan;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlanStats;
@@ -38,6 +37,10 @@ public class TaskBasedExecutableSamplingPlanImpl implements ExecutablePlan {
 
     @Override
     public void run(QueryResultSink resultSink) throws ExecutionException {
+        runForNWalks(resultSink, this.numberOfWalksToAttempt);
+    }
+
+    public void runForNWalks(QueryResultSink resultSink, int numberOfWalksToAttempt) throws ExecutionException {
         if ( threadPool == null ) {
             throw new ExecutionException("thread pool missing");
         }
