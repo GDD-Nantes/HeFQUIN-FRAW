@@ -1,6 +1,7 @@
 package se.liu.ida.hefquin.jenaintegration.sparql.engine.main;
 
 import org.apache.jena.atlas.io.IndentedWriter;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.query.QueryExecException;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVisitorBase;
@@ -21,6 +22,7 @@ import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
 import se.liu.ida.hefquin.base.query.impl.QueryPatternUtils;
 import se.liu.ida.hefquin.base.utils.Pair;
+import se.liu.ida.hefquin.engine.queryproc.NoQueryToProcessException;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcException;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
@@ -34,9 +36,7 @@ import java.util.List;
 
 public class OpExecutorFraw extends OpExecutor {
     protected final QueryProcessor qProc;
-    private static int keyExploration = 50;
     private static int keyExploitation = 50;
-    private QueryProcessor keyExplorationQueryProcessor;
     private QueryProcessor keyExploitationQueryProcessor;
 
     public OpExecutorFraw(final QueryProcessor qProc, final ExecutionContext execCxt ) {
@@ -44,26 +44,6 @@ public class OpExecutorFraw extends OpExecutor {
 
         assert qProc != null;
         this.qProc = qProc;
-
-        keyExplorationQueryProcessor = new QueryProcessorImpl(
-                qProc.getPlanner(),
-                new PushBasedSamplingQueryPlanCompilerImpl(
-                        ((PushBasedSamplingQueryPlanCompilerImpl) qProc.getPlanCompiler()).getQueryProcContext(),
-                        keyExploration
-                ),
-                qProc.getExecutionEngine(),
-                ((PushBasedSamplingQueryPlanCompilerImpl) qProc.getPlanCompiler()).getQueryProcContext()
-        );
-
-        keyExploitationQueryProcessor = new QueryProcessorImpl(
-                qProc.getPlanner(),
-                new PushBasedSamplingQueryPlanCompilerImpl(
-                        ((PushBasedSamplingQueryPlanCompilerImpl) qProc.getPlanCompiler()).getQueryProcContext(),
-                        keyExploitation
-                ),
-                qProc.getExecutionEngine(),
-                ((PushBasedSamplingQueryPlanCompilerImpl) qProc.getPlanCompiler()).getQueryProcContext()
-        );
     }
 
     @Override
@@ -187,11 +167,10 @@ public class OpExecutorFraw extends OpExecutor {
 //            QueryIterator inputKeyExplorationBindings = shouldExplore ? this.exec(opGroup.getSubOp(), input) : null;
 
 
-            // Per-key exploitation
-            QueryIterator bindingsToGroup = executeSupportedOp( opGroup, input );
+            QueryIterator grouped = isSupportedOp(opGroup.getSubOp()) ? executeSupportedOp( opGroup, input ) : super.exec(opGroup.getSubOp(), input);
 
             // Grouping and accumulation
-            QueryIterator qIter = new QueryIterGroup(bindingsToGroup, opGroup.getGroupVars(), opGroup.getAggregators(), execCxt);
+            QueryIterator qIter = new QueryIterGroup(grouped, opGroup.getGroupVars(), opGroup.getAggregators(), execCxt);
             return qIter;
 
         }
@@ -210,7 +189,8 @@ public class OpExecutorFraw extends OpExecutor {
     }
 
     protected QueryIterator executeSupportedOp( final OpGroup opGroup, final QueryIterator input ) {
-        QueryIterator inputKeyExplorationBindings = new MainQueryIterator( opGroup, input );
+        QueryIterator inputKeyExplorationBindings = this.exec(opGroup.getSubOp(), input);
+        keyExploitationQueryProcessor = createQueryProc(keyExploitation, true);
 
         return new FrawGroupIterator( opGroup.getSubOp(), inputKeyExplorationBindings, opGroup.getGroupVars().getVars() );
     }
@@ -226,7 +206,7 @@ public class OpExecutorFraw extends OpExecutor {
             this.op = op;
         }
 
-        protected QueryIterator nextStageWithCustomQueryProcessor( final Binding binding, final QueryProcessor queryProcessor) {
+        protected QueryIterator nextStageWithCustomQueryProcessor( final Binding binding, final QueryProcessor queryProcessor ) {
             final Op opForStage;
             if ( binding.isEmpty() ) {
                 opForStage = op;
@@ -250,6 +230,9 @@ public class OpExecutorFraw extends OpExecutor {
 
             try {
                 statsAndExceptions = queryProcessor.processQuery( new GenericSPARQLGraphPatternImpl2(opForStage), sink );
+            }
+            catch ( final NoQueryToProcessException ex ){
+                return new WrappingQueryIterator(Iter.empty());
             }
             catch ( final QueryProcException ex ) {
                 throw new QueryExecException("Processing the query operator using HeFQUIN failed.", ex);
@@ -303,8 +286,11 @@ public class OpExecutorFraw extends OpExecutor {
         @Override
         protected QueryIterator nextStage( final Binding binding ) {
             Binding restricted = SolutionMappingUtils.restrict(binding, groupVars);
+            // Input binding is empty (one random walk for key exploration resulted in this fail), so there is nothing
+            // to exploit. We return an empty iterator.
+            if(restricted.isEmpty()) return new QueryIterNullIterator(execCxt);
 
-            // We want to use the binding retrieve during key exploration. However, its associated probability will be global, not related to the group
+            // We want to use the binding retrieved during key exploration. However, its associated probability will be global, not related to the group
             // We can handle this but it requires a much heavier machinery than just one probability per mapping
             // TODO : exploit the initial binding retrieved during key exploration
 //            QueryIterator inputBindingIterator = new WrappingQueryIterator(Iter.of(new SolutionMappingImpl(binding)));
@@ -445,6 +431,19 @@ public class OpExecutorFraw extends OpExecutor {
 //            return "Custom chainer iterator";
 //        }
 //    }
+
+    private QueryProcessor createQueryProc(int numberOfRandomWalks, boolean holdSourceSelection){
+        return new QueryProcessorImpl(
+                qProc.getPlanner(),
+                new PushBasedSamplingQueryPlanCompilerImpl(
+                        ((PushBasedSamplingQueryPlanCompilerImpl) qProc.getPlanCompiler()).getQueryProcContext(),
+                        numberOfRandomWalks
+                ),
+                qProc.getExecutionEngine(),
+                ((PushBasedSamplingQueryPlanCompilerImpl) qProc.getPlanCompiler()).getQueryProcContext(),
+                holdSourceSelection
+        );
+    }
 
     protected static class UnsupportedOpFinder extends OpVisitorBase
     {

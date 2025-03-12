@@ -6,14 +6,7 @@ import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.utils.LogicalPlanPrinter;
 import se.liu.ida.hefquin.engine.queryplan.utils.PhysicalPlanPrinter;
-import se.liu.ida.hefquin.engine.queryproc.LogicalOptimizer;
-import se.liu.ida.hefquin.engine.queryproc.PhysicalOptimizationStats;
-import se.liu.ida.hefquin.engine.queryproc.PhysicalOptimizer;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanner;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanningException;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanningStats;
-import se.liu.ida.hefquin.engine.queryproc.SourcePlanner;
-import se.liu.ida.hefquin.engine.queryproc.SourcePlanningStats;
+import se.liu.ida.hefquin.engine.queryproc.*;
 
 /**
  * Simple implementation of {@link QueryPlanner}.
@@ -42,6 +35,18 @@ public class QueryPlannerImpl implements QueryPlanner
 		this.srcasgPrinter = srcasgPrinter;
 		this.lplanPrinter = lplanPrinter;
 		this.pplanPrinter = pplanPrinter;
+	}
+
+	public QueryPlannerImpl( final PhysicalOptimizer poptimizer,
+							 final LogicalPlan sourceAssignment) {
+		assert poptimizer != null;
+
+		this.sourcePlanner = (q) -> new Pair<>(sourceAssignment, null);
+		this.loptimizer = null;
+		this.poptimizer = poptimizer;
+		this.srcasgPrinter = null;
+		this.lplanPrinter = null;
+		this.pplanPrinter = null;
 	}
 
 	@Override

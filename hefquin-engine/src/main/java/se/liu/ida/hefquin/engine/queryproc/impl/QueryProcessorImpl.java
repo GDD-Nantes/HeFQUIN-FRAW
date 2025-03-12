@@ -1,23 +1,17 @@
 package se.liu.ida.hefquin.engine.queryproc.impl;
 
-import java.util.Collections;
-import java.util.List;
-
 import se.liu.ida.hefquin.base.query.Query;
 import se.liu.ida.hefquin.base.utils.Pair;
 import se.liu.ida.hefquin.base.utils.StatsPrinter;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlan;
+import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
-import se.liu.ida.hefquin.engine.queryproc.ExecutionEngine;
-import se.liu.ida.hefquin.engine.queryproc.ExecutionStats;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanCompiler;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanner;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanningStats;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcException;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
-import se.liu.ida.hefquin.engine.queryproc.QueryResultSink;
+import se.liu.ida.hefquin.engine.queryproc.*;
+import se.liu.ida.hefquin.engine.queryproc.impl.planning.QueryPlannerImpl;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Simple implementation of {@link QueryProcessor}.
@@ -28,6 +22,8 @@ public class QueryProcessorImpl implements QueryProcessor
 	protected final QueryPlanCompiler planCompiler;
 	protected final ExecutionEngine execEngine;
 	protected final QueryProcContext ctxt;
+	protected final boolean holdSourceSelection;
+	protected LogicalPlan sourceSelection;
 
 	public QueryProcessorImpl( final QueryPlanner planner,
 	                           final QueryPlanCompiler planCompiler,
@@ -42,6 +38,25 @@ public class QueryProcessorImpl implements QueryProcessor
 		this.planCompiler = planCompiler;
 		this.execEngine = execEngine;
 		this.ctxt = ctxt;
+		this.holdSourceSelection = false;
+	}
+
+	public QueryProcessorImpl( final QueryPlanner planner,
+							   final QueryPlanCompiler planCompiler,
+							   final ExecutionEngine execEngine,
+							   final QueryProcContext ctxt,
+							   final boolean holdSourceSelection) {
+		assert planner != null;
+		assert planCompiler != null;
+		assert execEngine != null;
+		assert ctxt != null;
+
+		this.planner = planner;
+		this.planCompiler = planCompiler;
+		this.execEngine = execEngine;
+		this.ctxt = ctxt;
+
+		this.holdSourceSelection = holdSourceSelection;
 	}
 
 	@Override
@@ -57,9 +72,68 @@ public class QueryProcessorImpl implements QueryProcessor
 	public Pair<QueryProcStats, List<Exception>> processQuery( final Query query, final QueryResultSink resultSink )
 			throws QueryProcException
 	{
+		if(holdSourceSelection){
+			return _processQuery(query, resultSink, sourceSelection);
+		}
+		return _processQuery(query, resultSink);
+
+	}
+
+	private Pair<QueryProcStats, List<Exception>> _processQuery( final Query query, final QueryResultSink resultSink)
+			throws QueryProcException
+	{
 		final long t1 = System.currentTimeMillis();
 		final Pair<PhysicalPlan, QueryPlanningStats> qepAndStats = planner.createPlan(query);
+		if(holdSourceSelection) this.sourceSelection = qepAndStats.object2.getResultingSourceAssignment();
 
+		final long t2 = System.currentTimeMillis();
+
+		final long t3, t4;
+		final ExecutablePlan prg;
+		final ExecutionStats execStats;
+		final List<Exception> exceptionsCaughtDuringExecution;
+
+		if ( ctxt.skipExecution() ) {
+			t3 = System.currentTimeMillis();
+			t4 = System.currentTimeMillis();
+			prg = null;
+			execStats = null;
+			exceptionsCaughtDuringExecution = Collections.emptyList();
+		}
+		else {
+			prg = planCompiler.compile(qepAndStats.object1);
+
+			t3 = System.currentTimeMillis();
+			execStats = execEngine.execute(prg, resultSink);
+
+			t4 = System.currentTimeMillis();
+			exceptionsCaughtDuringExecution = prg.getExceptionsCaughtDuringExecution();
+		}
+
+		final QueryProcStatsImpl myStats = new QueryProcStatsImpl( t4-t1, t2-t1, t3-t2, t4-t3, qepAndStats.object2, execStats );
+
+		if ( ctxt.isExperimentRun() ) {
+			StatsPrinter.print( myStats, System.out, true );
+		}
+
+		return new Pair<>(myStats, exceptionsCaughtDuringExecution);
+	}
+
+	public Pair<QueryProcStats, List<Exception>> _processQuery(Query query, QueryResultSink resultSink, LogicalPlan sourceAssignment) throws QueryProcException {
+
+		final long t1 = System.currentTimeMillis();
+
+		QueryPlanner usedPlanner = planner;
+
+		if(!Objects.isNull(sourceSelection)){
+			usedPlanner = new QueryPlannerImpl(this.planner.getPhysicalOptimizer(), sourceAssignment);
+		}
+
+		final Pair<PhysicalPlan, QueryPlanningStats> qepAndStats = usedPlanner.createPlan(query);
+
+		if(holdSourceSelection){
+			this.sourceSelection = qepAndStats.object2.getResultingSourceAssignment();
+		}
 		final long t2 = System.currentTimeMillis();
 
 		final long t3, t4;
