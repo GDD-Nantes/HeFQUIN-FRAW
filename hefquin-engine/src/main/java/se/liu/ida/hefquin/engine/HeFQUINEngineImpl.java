@@ -37,6 +37,7 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 		this.qProc = qProc;
 
 		AggregateRegistry.register("http://customAgg/rawcount", RawCountAggregator.factory());
+		AggregateRegistry.register("http://customAgg/rawaverage", RawAverageAggregator.factory());
 		Optimize.noOptimizer();
 	}
 
