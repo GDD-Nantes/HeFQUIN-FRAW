@@ -36,12 +36,8 @@ public class FedupBasedSourcePlannerImpl extends ServiceClauseBasedSourcePlanner
 
     @Override
     protected Pair<LogicalPlan, SourcePlanningStats> createSourceAssignment(Op jenaOp) throws SourcePlanningException {
-        Op op = fedup.queryJenaToJena(jenaOp);
-
-
-
-        // TODO : add limits to every service clause : )
-
+        Op op = getFedupSourceSelection(jenaOp);
+        if(Objects.isNull(op)) return null;
         final LogicalPlan sa = createPlan(op);
         final SourcePlanningStats myStats = new SourcePlanningStatsImpl();
 
@@ -49,9 +45,18 @@ public class FedupBasedSourcePlannerImpl extends ServiceClauseBasedSourcePlanner
     }
 
     protected LogicalPlan createPlan(Op op) {
+        if(Objects.isNull(op)) {
+//            throw new UnsupportedOperationException("The op expression does not seem valid.");
+            // TODO : handle null op from source assignment where no source combination produces results
+        }
         if(op instanceof OpProject){
             return super.createPlan(((OpProject) op).getSubOp());
         }
         return super.createPlan(op);
+    }
+
+    protected Op getFedupSourceSelection(Op jenaOp){
+        Op ret = fedup.queryJenaToJena(jenaOp);
+        return ret;
     }
 }

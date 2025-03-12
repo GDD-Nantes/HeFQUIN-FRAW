@@ -58,6 +58,8 @@ public class QueryPlannerImpl implements QueryPlanner
 		final long t1 = System.currentTimeMillis();
 		final Pair<LogicalPlan, SourcePlanningStats> saAndStats = sourcePlanner.createSourceAssignment(query);
 
+		if(saAndStats == null) throw new NoQueryToProcessException();
+
 		if ( srcasgPrinter != null ) {
 			System.out.println("--------- Source Assignment ---------");
 			srcasgPrinter.print( saAndStats.object1, System.out );

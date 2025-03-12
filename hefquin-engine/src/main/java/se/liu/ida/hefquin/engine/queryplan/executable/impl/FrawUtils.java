@@ -55,7 +55,13 @@ public class FrawUtils {
                 Node n2 = bind2.get(v);
                 if(v.equals(MAPPING_PROBABILITY)){
                     if(!computedProba){
-                        builder.add(v, NodeFactory.createLiteral(String.valueOf((Double) n1.getLiteralValue() * (Double) n2.getLiteralValue()), XSDDatatype.XSDdouble));
+                        builder.add(
+                                v,
+                                NodeFactory.createLiteral(
+                                        String.valueOf(Double.valueOf(n1.getLiteralValue().toString()) * Double.valueOf(n2.getLiteralValue().toString())),
+                                        XSDDatatype.XSDdouble
+                                )
+                        );
                     } else {
                         System.out.println("Tried to compute probability of joined binding twice! This shouldn't happen");
                     }
