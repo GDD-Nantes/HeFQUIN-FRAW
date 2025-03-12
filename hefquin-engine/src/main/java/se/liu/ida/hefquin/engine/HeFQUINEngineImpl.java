@@ -8,6 +8,7 @@ import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.main.OpExecutor;
 import org.apache.jena.sparql.engine.main.OpExecutorFactory;
 import org.apache.jena.sparql.engine.main.QC;
+import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.resultset.ResultsFormat;
 import org.apache.jena.sparql.util.QueryExecUtils;
 import se.liu.ida.hefquin.base.utils.Pair;
@@ -35,6 +36,8 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 		this.fedAccessMgr = fedAccessMgr;
 		this.qProc = qProc;
 
+		AggregateRegistry.register("http://customAgg/rawcount", RawCountAggregator.factory());
+		AggregateRegistry.register("http://customAgg/rawaverage", RawAverageAggregator.factory());
 		Optimize.noOptimizer();
 	}
 
