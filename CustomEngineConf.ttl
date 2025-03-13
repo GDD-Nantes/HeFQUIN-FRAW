@@ -74,7 +74,8 @@ _:bFormulaForSelectivity
         "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.formula.FmAwareWeightedJoinAndUnboundVariableCount" .
 
 _:bServiceBasedSrcPlanner
-    ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ServiceClauseBasedSourcePlannerImpl" ;
+    # ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ServiceClauseBasedSourcePlannerImpl" ;
+    ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedSourcePlannerImpl" ;
     ec:constructorArguments ( ec:value:QueryProcContext ) .
 
 _:bExhaustiveSrcPlanner
