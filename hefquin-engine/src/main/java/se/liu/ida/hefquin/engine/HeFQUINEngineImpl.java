@@ -1,6 +1,8 @@
 package se.liu.ida.hefquin.engine;
 
 import org.apache.jena.query.*;
+import org.apache.jena.riot.resultset.ResultSetLang;
+import org.apache.jena.riot.rowset.RowSetWriterRegistry;
 import org.apache.jena.sparql.algebra.optimize.Optimize;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
@@ -38,6 +40,9 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 
 		AggregateRegistry.register("http://customAgg/rawcount", RawCountAggregator.factory());
 		AggregateRegistry.register("http://customAgg/rawaverage", RawAverageAggregator.factory());
+
+		RowSetWriterRegistry.register(ResultSetLang.RS_JSON, RawRowSetWriterJSON.factory);
+
 		Optimize.noOptimizer();
 	}
 
