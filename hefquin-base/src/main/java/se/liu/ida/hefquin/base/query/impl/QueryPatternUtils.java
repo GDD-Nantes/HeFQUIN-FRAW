@@ -1,20 +1,10 @@
 package se.liu.ida.hefquin.base.query.impl;
 
-import java.util.*;
-
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVars;
-import org.apache.jena.sparql.algebra.op.OpBGP;
-import org.apache.jena.sparql.algebra.op.OpFilter;
-import org.apache.jena.sparql.algebra.op.OpJoin;
-import org.apache.jena.sparql.algebra.op.OpLeftJoin;
-import org.apache.jena.sparql.algebra.op.OpService;
-import org.apache.jena.sparql.algebra.op.OpTriple;
-import org.apache.jena.sparql.algebra.op.Op1;
-import org.apache.jena.sparql.algebra.op.OpUnion;
-import org.apache.jena.sparql.algebra.op.Op2;
+import org.apache.jena.sparql.algebra.op.*;
 import org.apache.jena.sparql.core.*;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.Expr;
@@ -25,19 +15,15 @@ import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.syntax.*;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
-import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformer;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformSubst;
+import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformer;
 import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
-
 import se.liu.ida.hefquin.base.data.SolutionMapping;
-import se.liu.ida.hefquin.base.query.BGP;
-import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
-import se.liu.ida.hefquin.base.query.SPARQLGroupPattern;
-import se.liu.ida.hefquin.base.query.SPARQLQuery;
-import se.liu.ida.hefquin.base.query.SPARQLUnionPattern;
-import se.liu.ida.hefquin.base.query.TriplePattern;
+import se.liu.ida.hefquin.base.query.*;
 import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
 import se.liu.ida.hefquin.base.queryplan.utils.ExpectedVariablesUtilsCopy;
+
+import java.util.*;
 
 public class QueryPatternUtils
 {
@@ -49,6 +35,8 @@ public class QueryPatternUtils
 		}
 		return new BGPImpl(tps);
 	}
+
+
 
 	/**
 	 * Assumes that the given {@link ElementPathBlock} does not contain
@@ -130,6 +118,66 @@ public class QueryPatternUtils
 		throw new IllegalArgumentException( "Unsupported type of graph pattern: " + pattern.getClass().getName() );
 	}
 
+	public static Set<ExprList> getFilterExprs(SPARQLGraphPattern graphPattern ) {
+
+		if ( graphPattern instanceof TriplePattern) {
+			return new HashSet<>();
+		}
+		else if ( graphPattern instanceof BGP ) {
+			return new HashSet<>();
+		}
+		else if ( graphPattern instanceof GenericSPARQLGraphPatternImpl1 ) {
+			return getFilterExprs( ((GenericSPARQLGraphPatternImpl1) graphPattern).asJenaOp() );
+		}
+		else if ( graphPattern instanceof GenericSPARQLGraphPatternImpl2) {
+			return getFilterExprs( ((GenericSPARQLGraphPatternImpl2) graphPattern).asJenaOp() );
+		}
+
+		throw new IllegalArgumentException( "Unsupported type of graph pattern: " + graphPattern.getClass().getName() );
+	}
+
+	public static Set<ExprList> getFilterExprs( Op op ) {
+		if( op instanceof OpFilter ) {
+			final OpFilter opFilter = (OpFilter) op;
+			Set<ExprList> filterExprs = new HashSet<>();
+			filterExprs.add(opFilter.getExprs());
+			filterExprs.addAll(getFilterExprs(((OpFilter) op).getSubOp()));
+			return filterExprs;
+		}
+		if( op instanceof OpBGP ) {
+			final OpBGP opBGP = (OpBGP) op;
+			return new HashSet<>();
+		}
+		if( op instanceof OpTriple ) {
+			final OpTriple opTriple = (OpTriple) op;
+			return new HashSet<>();
+		}
+		if( op instanceof OpQuad ) {
+			final OpQuad opQuad = (OpQuad) op;
+			return new HashSet<>();
+		}
+		if( op instanceof OpUnion ) {
+			final OpUnion opUnion = (OpUnion) op;
+			Set<ExprList> filterExprs = new HashSet<>();
+			filterExprs.addAll(getFilterExprs(opUnion.getLeft()));
+			filterExprs.addAll(getFilterExprs(opUnion.getRight()));
+			return new HashSet<>();
+		}
+		if( op instanceof OpJoin ) {
+			final OpJoin opJoin = (OpJoin) op;
+			Set<ExprList> filterExprs = new HashSet<>();
+			filterExprs.addAll(getFilterExprs(opJoin.getLeft()));
+			filterExprs.addAll(getFilterExprs(opJoin.getRight()));
+			return new HashSet<>();
+		}
+		if(op instanceof OpSequence){
+			return new HashSet<>();
+		}
+
+		throw new IllegalArgumentException( "Unsupported type of Jena op : " + op.getClass().getName() );
+
+	}
+
 	public static Element convertToJenaElement( final SPARQLGraphPattern p ) {
 		if ( p instanceof TriplePattern ) {
 			final TriplePattern tp = (TriplePattern) p;
@@ -149,7 +197,7 @@ public class QueryPatternUtils
 		}
 		else if (p instanceof SPARQLUnionPattern) {
 			final SPARQLUnionPattern up = (SPARQLUnionPattern) p;
-			
+
 			final ElementUnion e = new ElementUnion();
 			for ( final SPARQLGraphPattern gp : up.getSubPatterns() ) {
 				e.addElement(convertToJenaElement(gp));
@@ -158,7 +206,7 @@ public class QueryPatternUtils
 		}
 		else if (p instanceof SPARQLGroupPattern) {
 			final SPARQLGroupPattern gp = (SPARQLGroupPattern) p;
-			
+
 			final ElementGroup e = new ElementGroup();
 			for ( final SPARQLGraphPattern g : gp.getSubPatterns() ) {
 				e.addElement(convertToJenaElement(g));
@@ -231,8 +279,20 @@ public class QueryPatternUtils
 				tps.add( new TriplePatternImpl(t) );
 			}
 			return tps;
-		}
-		else {
+		} else if ( op instanceof OpSequence) {
+			final List<Op> elements = ((OpSequence) op).getElements();
+			for(Op element : elements){
+				//Should always be the case ...?
+				if(element instanceof OpTriple)
+					tps.add(new TriplePatternImpl(((OpTriple) element).getTriple()));
+			}
+			return tps;
+		} else if (op instanceof OpTriple) {
+			tps.add(new TriplePatternImpl(((OpTriple) op).getTriple()));
+			return tps;
+		} else if (op instanceof OpFilter) {
+			return getTPsInPattern( ((OpFilter) op).getSubOp() );
+		} else {
 			throw new UnsupportedOperationException("Getting the triple patterns from arbitrary SPARQL patterns is an open TODO (type of Jena Op in the current case: " + op.getClass().getName() + ").");
 		}
 	}
@@ -349,6 +409,12 @@ public class QueryPatternUtils
 		return varLeft;
 	}
 
+	public static Set<Var> getVariablesInPattern( final OpSequence op) {
+		final Set<Var> result = new HashSet<>();
+		op.getElements().stream().forEach(e -> result.addAll(getVariablesInPattern(e)));
+		return result;
+	}
+
 	/**
 	 * Ignores variables in FILTER expressions.
 	 */
@@ -365,7 +431,12 @@ public class QueryPatternUtils
 		else if ( op instanceof OpFilter ){
 			return getVariablesInPattern( ((OpFilter) op).getSubOp());
 		}
-		else {
+		else if ( op instanceof OpSequence ){
+			return getVariablesInPattern( (OpSequence) op );
+		}
+		else if (op instanceof OpTriple) {
+			return getVariablesInPattern( ((OpTriple) op).getTriple() );
+		} else {
 			throw new UnsupportedOperationException("Getting the variables from arbitrary SPARQL patterns is an open TODO (type of Jena Op in the current case: " + op.getClass().getName() + ").");
 		}
 	}
@@ -677,7 +748,7 @@ public class QueryPatternUtils
 	public static SPARQLGraphPattern applySolMapToGraphPattern(
 			final SolutionMapping sm,
 			final SPARQLGraphPattern pattern )
-					throws VariableByBlankNodeSubstitutionException
+			throws VariableByBlankNodeSubstitutionException
 	{
 		if ( pattern instanceof TriplePattern )
 		{
@@ -772,7 +843,7 @@ public class QueryPatternUtils
 	 * of the variables of the triple pattern would be replaced by a blank node.
 	 */
 	public static TriplePattern applySolMapToTriplePattern( final SolutionMapping sm,
-	                                                        final TriplePattern tp )
+															final TriplePattern tp )
 			throws VariableByBlankNodeSubstitutionException
 	{
 		final Binding b = sm.asJenaBinding();
@@ -901,7 +972,7 @@ public class QueryPatternUtils
 	 * pattern).
 	 */
 	public static SPARQLGraphPattern merge( final SPARQLGraphPattern p1,
-	                                        final SPARQLGraphPattern p2 )
+											final SPARQLGraphPattern p2 )
 	{
 		if ( p1 instanceof TriplePattern ) return merge( (TriplePattern) p1, p2 );
 
