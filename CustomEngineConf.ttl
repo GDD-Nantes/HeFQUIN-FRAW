@@ -20,11 +20,12 @@ PREFIX ex:     <http://example.org/>
 _:b1 ec:queryPlanner _:b2 ;
      ec:planCompiler [
          # ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.compiler.PushBasedQueryPlanCompilerImpl" ;
-         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.compiler.IteratorBasedQueryPlanCompilerImpl" ;
+         # ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.compiler.IteratorBasedQueryPlanCompilerImpl" ;
+         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.compiler.IteratorBasedSamplingQueryPlanCompilerImpl" ;
          ec:constructorArguments ( ec:value:QueryProcContext )
      ] ;
      ec:executionEngine [
-         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.execution.ExecutionEngineImpl" ;
+         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.execution.FrawExecutionEngineImpl" ;
          ec:constructorArguments ( )
      ] .
 
@@ -77,8 +78,9 @@ _:bServiceBasedSrcPlanner
     # ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ServiceClauseBasedSourcePlannerImpl" ;
     ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedSourcePlannerImpl" ;
     ec:constructorArguments ( ec:value:QueryProcContext
-                              "summaries/fedshop200-h0"
+                              "summaries/fedshop20-h0"
                               "(e)->\"http://localhost:3332/fedshop200.jnl/raw?default-graph-uri=\"+(e)") .
+                              #"(e)->\"http://localhost:9999/blazegraph/sparql?default-graph-uri=\"+(e)") .
 
 _:bExhaustiveSrcPlanner
     ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ExhaustiveSourcePlannerImpl" ;
