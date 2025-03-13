@@ -76,7 +76,9 @@ _:bFormulaForSelectivity
 _:bServiceBasedSrcPlanner
     # ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ServiceClauseBasedSourcePlannerImpl" ;
     ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedSourcePlannerImpl" ;
-    ec:constructorArguments ( ec:value:QueryProcContext ) .
+    ec:constructorArguments ( ec:value:QueryProcContext
+                              "summaries/fedshop200-h0"
+                              "(e)->\"http://localhost:3332/fedshop200.jnl/raw?default-graph-uri=\"+(e)") .
 
 _:bExhaustiveSrcPlanner
     ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ExhaustiveSourcePlannerImpl" ;
