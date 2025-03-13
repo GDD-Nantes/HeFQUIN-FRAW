@@ -19,15 +19,16 @@ import java.util.function.Function;
 public class FedupBasedSourcePlannerImpl extends ServiceClauseBasedSourcePlannerImpl {
 
     FedUP fedup;
-    int nbResults;
-
-    public FedupBasedSourcePlannerImpl(QueryProcContext qpc){
+    public FedupBasedSourcePlannerImpl(QueryProcContext qpc, String summaries, String lambdaString){
         super(qpc);
-        Summary summary = new Summary(new ModuloOnSuffix(1), Location.create(Path.of("fedshop200-h0")));
+
+        Summary summary = new Summary(new ModuloOnSuffix(1), Location.create(Path.of(summaries)));
         fedup = new FedUP(summary);
 
-        // Hardcoded, TODO : make it config dependent
-        Function<String, String> lambda = (e)->"http://localhost:3331/blazegraph.jnl/raw?default-graph-uri="+(e);
+        Function<String, String> lambda = InMemoryLambdaJavaFileObject.getLambda("ModifyEndpoints", lambdaString, "String");
+        if (Objects.isNull(lambda)) {
+            throw new UnsupportedOperationException("The lambda expression does not seem valid.");
+        }
         fedup.modifyEndpoints(lambda);
     }
 
@@ -40,14 +41,12 @@ public class FedupBasedSourcePlannerImpl extends ServiceClauseBasedSourcePlanner
         // TODO : add limits to every service clause : )
 
         final LogicalPlan sa = createPlan(op);
-        if(Objects.isNull(op)) return null;
         final SourcePlanningStats myStats = new SourcePlanningStatsImpl();
 
         return new Pair<>(sa, myStats);
     }
 
     protected LogicalPlan createPlan(Op op) {
-        if(Objects.isNull(op)) return null;
         if(op instanceof OpProject){
             return super.createPlan(((OpProject) op).getSubOp());
         }
