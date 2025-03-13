@@ -1,8 +1,5 @@
 package se.liu.ida.hefquin.jenaintegration.sparql.engine.main;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.jena.query.QueryExecException;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVisitorBase;
@@ -12,9 +9,9 @@ import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIter;
+import org.apache.jena.sparql.engine.iterator.QueryIterNullIterator;
 import org.apache.jena.sparql.engine.iterator.QueryIterRepeatApply;
 import org.apache.jena.sparql.engine.main.OpExecutor;
-
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
 import se.liu.ida.hefquin.base.utils.Pair;
@@ -23,6 +20,10 @@ import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
 import se.liu.ida.hefquin.engine.queryproc.impl.MaterializingQueryResultSinkImpl;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 public class OpExecutorHeFQUIN extends OpExecutor
 {
@@ -170,6 +171,7 @@ public class OpExecutorHeFQUIN extends OpExecutor
 
 			try {
 				statsAndExceptions = qProc.processQuery( new GenericSPARQLGraphPatternImpl2(opForStage), sink );
+				if(Objects.isNull(statsAndExceptions)) return new QueryIterNullIterator(execCxt);
 			}
 			catch ( final QueryProcException ex ) {
 				throw new QueryExecException("Processing the query operator using HeFQUIN failed.", ex);

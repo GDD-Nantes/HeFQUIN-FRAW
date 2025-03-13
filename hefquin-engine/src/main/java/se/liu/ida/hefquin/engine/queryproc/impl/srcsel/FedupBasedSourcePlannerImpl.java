@@ -13,6 +13,7 @@ import se.liu.ida.hefquin.engine.queryproc.SourcePlanningException;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanningStats;
 
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class FedupBasedSourcePlannerImpl extends ServiceClauseBasedSourcePlannerImpl {
@@ -39,12 +40,14 @@ public class FedupBasedSourcePlannerImpl extends ServiceClauseBasedSourcePlanner
         // TODO : add limits to every service clause : )
 
         final LogicalPlan sa = createPlan(op);
+        if(Objects.isNull(op)) return null;
         final SourcePlanningStats myStats = new SourcePlanningStatsImpl();
 
         return new Pair<>(sa, myStats);
     }
 
     protected LogicalPlan createPlan(Op op) {
+        if(Objects.isNull(op)) return null;
         if(op instanceof OpProject){
             return super.createPlan(((OpProject) op).getSubOp());
         }

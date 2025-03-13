@@ -6,14 +6,9 @@ import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.utils.LogicalPlanPrinter;
 import se.liu.ida.hefquin.engine.queryplan.utils.PhysicalPlanPrinter;
-import se.liu.ida.hefquin.engine.queryproc.LogicalOptimizer;
-import se.liu.ida.hefquin.engine.queryproc.PhysicalOptimizationStats;
-import se.liu.ida.hefquin.engine.queryproc.PhysicalOptimizer;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanner;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanningException;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanningStats;
-import se.liu.ida.hefquin.engine.queryproc.SourcePlanner;
-import se.liu.ida.hefquin.engine.queryproc.SourcePlanningStats;
+import se.liu.ida.hefquin.engine.queryproc.*;
+
+import java.util.Objects;
 
 /**
  * Simple implementation of {@link QueryPlanner}.
@@ -57,7 +52,7 @@ public class QueryPlannerImpl implements QueryPlanner
 	public Pair<PhysicalPlan, QueryPlanningStats> createPlan( final Query query ) throws QueryPlanningException {
 		final long t1 = System.currentTimeMillis();
 		final Pair<LogicalPlan, SourcePlanningStats> saAndStats = sourcePlanner.createSourceAssignment(query);
-
+		if(Objects.isNull(saAndStats)) return null;
 		if ( srcasgPrinter != null ) {
 			System.out.println("--------- Source Assignment ---------");
 			srcasgPrinter.print( saAndStats.object1, System.out );
