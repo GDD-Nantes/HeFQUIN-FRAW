@@ -1,10 +1,8 @@
 package se.liu.ida.hefquin.cli;
 
-import java.io.PrintStream;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-
+import arq.cmdline.CmdARQ;
+import arq.cmdline.ModResultsOut;
+import arq.cmdline.ModTime;
 import org.apache.commons.io.output.NullPrintStream;
 import org.apache.jena.cmd.ArgDecl;
 import org.apache.jena.cmd.TerminationException;
@@ -12,10 +10,6 @@ import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.shared.NotFoundException;
 import org.apache.jena.sparql.resultset.ResultsFormat;
-
-import arq.cmdline.CmdARQ;
-import arq.cmdline.ModResultsOut;
-import arq.cmdline.ModTime;
 import se.liu.ida.hefquin.base.utils.Pair;
 import se.liu.ida.hefquin.base.utils.Stats;
 import se.liu.ida.hefquin.base.utils.StatsPrinter;
@@ -26,6 +20,11 @@ import se.liu.ida.hefquin.cli.modules.ModQuery;
 import se.liu.ida.hefquin.engine.HeFQUINEngine;
 import se.liu.ida.hefquin.engine.HeFQUINEngineDefaultComponents;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
+
+import java.io.PrintStream;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A command-line tool that executes SPARQL queries using the HeFQUIN federation
@@ -132,7 +131,7 @@ public class RunQueryWithoutSrcSel extends CmdARQ
 
 		final PrintStream out;
 		if ( contains( argSuppressResultPrintout ) ) {
-			out = NullPrintStream.INSTANCE;
+			out = NullPrintStream.NULL_PRINT_STREAM;
 		} else {
 			out = System.out;
 		}
