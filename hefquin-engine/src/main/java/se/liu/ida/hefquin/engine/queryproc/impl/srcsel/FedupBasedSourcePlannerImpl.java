@@ -37,9 +37,6 @@ public class FedupBasedSourcePlannerImpl extends ServiceClauseBasedSourcePlanner
         Op op = fedup.queryJenaToJena(jenaOp);
 
 
-
-        // TODO : add limits to every service clause : )
-
         final LogicalPlan sa = createPlan(op);
         final SourcePlanningStats myStats = new SourcePlanningStatsImpl();
 
