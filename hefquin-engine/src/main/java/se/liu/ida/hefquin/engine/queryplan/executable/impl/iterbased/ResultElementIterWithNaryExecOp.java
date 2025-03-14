@@ -2,10 +2,12 @@ package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlanStats;
 import se.liu.ida.hefquin.engine.queryplan.executable.NaryExecutableOp;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpFrawMultiwayUnion;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
 
 import java.util.List;
+import java.util.Random;
 
 public class ResultElementIterWithNaryExecOp extends ResultElementIterBase
 {
@@ -69,12 +71,28 @@ public class ResultElementIterWithNaryExecOp extends ResultElementIterBase
 			// intermediate result from input one first, before moving on to
 			// input two.
 
-			for(int i = 0; i < inputIters.size(); i++) {
-				ResultBlockIterator it = inputIters.get(i);
-				while ( it.hasNext() ) {
-					op.processBlockFromXthChild( i, it.next(), sink, execCxt );
+			if(op instanceof ExecOpFrawMultiwayUnion) {
+				runFrawMultiwayUnion();
+			} else {
+				for(int i = 0; i < inputIters.size(); i++) {
+					ResultBlockIterator it = inputIters.get(i);
+					while ( it.hasNext() ) {
+						op.processBlockFromXthChild( i, it.next(), sink, execCxt );
+					}
+					op.wrapUpForXthChild(i, sink, execCxt);
 				}
-				op.wrapUpForXthChild(i, sink, execCxt);
+			}
+		}
+
+		private void runFrawMultiwayUnion() throws ExecutionException{
+			Random random = new Random();
+			int chosen = random.nextInt(inputIters.size());
+			ResultBlockIterator it = inputIters.get(chosen);
+			while(it.hasNext()){
+				op.processBlockFromXthChild( chosen, it.next(), sink, execCxt );
+
+				chosen = random.nextInt(inputIters.size());
+				it = inputIters.get(chosen);
 			}
 		}
 
