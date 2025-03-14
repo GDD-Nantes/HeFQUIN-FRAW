@@ -1,8 +1,5 @@
 package se.liu.ida.hefquin.engine.queryplan.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import se.liu.ida.hefquin.base.data.VocabularyMapping;
 import se.liu.ida.hefquin.base.query.TriplePattern;
 import se.liu.ida.hefquin.engine.federation.BRTPFServer;
@@ -14,20 +11,13 @@ import se.liu.ida.hefquin.engine.federation.access.impl.req.BGPRequestImpl;
 import se.liu.ida.hefquin.engine.federation.access.impl.req.SPARQLRequestImpl;
 import se.liu.ida.hefquin.engine.federation.access.impl.req.TPFRequestImpl;
 import se.liu.ida.hefquin.engine.federation.access.impl.req.TriplePatternRequestImpl;
-import se.liu.ida.hefquin.engine.queryplan.logical.BinaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.logical.NaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.NullaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.UnaryLogicalOp;
+import se.liu.ida.hefquin.engine.queryplan.logical.*;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
-import se.liu.ida.hefquin.engine.queryplan.physical.BinaryPhysicalOp;
-import se.liu.ida.hefquin.engine.queryplan.physical.NaryPhysicalOp;
-import se.liu.ida.hefquin.engine.queryplan.physical.NullaryPhysicalOp;
-import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalOperatorForLogicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
-import se.liu.ida.hefquin.engine.queryplan.physical.UnaryPhysicalOp;
+import se.liu.ida.hefquin.engine.queryplan.physical.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PhysicalPlanFactory
 {
@@ -107,7 +97,7 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlanWithBindJoinFILTER( final LogicalOpTPAdd lop,
 	                                                         final PhysicalPlan subplan ) {
-		final UnaryPhysicalOp pop = new PhysicalOpBindJoinWithFILTER(lop);
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithFILTER(lop);
 		return createPlan(pop, subplan);
 	}
 
@@ -116,7 +106,7 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlanWithBindJoinUNION( final LogicalOpTPAdd lop,
 	                                                        final PhysicalPlan subplan ) {
-		final UnaryPhysicalOp pop = new PhysicalOpBindJoinWithUNION(lop);
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithUNION(lop);
 		return createPlan(pop, subplan);
 	}
 
@@ -125,7 +115,7 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlanWithBindJoinVALUES( final LogicalOpTPAdd lop,
 	                                                         final PhysicalPlan subplan ) {
-		final UnaryPhysicalOp pop = new PhysicalOpBindJoinWithVALUES(lop);
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithVALUES(lop);
 		return createPlan(pop, subplan);
 	}
 	
@@ -134,7 +124,7 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlanWithBindJoinVALUESorFILTER( final LogicalOpTPAdd lop,
 	                                                                 final PhysicalPlan subplan ) {
-		final UnaryPhysicalOp pop = new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
 		return createPlan(pop, subplan);
 	}
 
@@ -161,7 +151,7 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlanWithBindJoinFILTER( final LogicalOpBGPAdd lop,
 	                                                         final PhysicalPlan subplan ) {
-		final UnaryPhysicalOp pop = new PhysicalOpBindJoinWithFILTER(lop);
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithFILTER(lop);
 		return createPlan(pop, subplan);
 	}
 
@@ -170,7 +160,7 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlanWithBindJoinUNION( final LogicalOpBGPAdd lop,
 	                                                        final PhysicalPlan subplan ) {
-		final UnaryPhysicalOp pop = new PhysicalOpBindJoinWithUNION(lop);
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithUNION(lop);
 		return createPlan(pop, subplan);
 	}
 
@@ -179,7 +169,7 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlanWithBindJoinVALUES( final LogicalOpBGPAdd lop,
 	                                                         final PhysicalPlan subplan ) {
-		final UnaryPhysicalOp pop = new PhysicalOpBindJoinWithVALUES(lop);
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithVALUES(lop);
 		return createPlan(pop, subplan);
 	}
 
@@ -188,7 +178,7 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlanWithBindJoinVALUESorFILTER( final LogicalOpBGPAdd lop,
 	                                                                 final PhysicalPlan subplan ) {
-		final UnaryPhysicalOp pop = new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
 		return createPlan(pop, subplan);
 	}
 
@@ -206,7 +196,7 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlanWithBindJoinFILTER( final LogicalOpGPAdd lop,
 	                                                         final PhysicalPlan subplan ) {
-		final UnaryPhysicalOp pop = new PhysicalOpBindJoinWithFILTER(lop);
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithFILTER(lop);
 		return createPlan(pop, subplan);
 	}
 
@@ -215,7 +205,7 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlanWithBindJoinUNION( final LogicalOpGPAdd lop,
 	                                                        final PhysicalPlan subplan ) {
-		final UnaryPhysicalOp pop = new PhysicalOpBindJoinWithUNION(lop);
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithUNION(lop);
 		return createPlan(pop, subplan);
 	}
 
@@ -224,7 +214,7 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlanWithBindJoinVALUES( final LogicalOpGPAdd lop,
 	                                                         final PhysicalPlan subplan ) {
-		final UnaryPhysicalOp pop = new PhysicalOpBindJoinWithVALUES(lop);
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithVALUES(lop);
 		return createPlan(pop, subplan);
 	}
 
@@ -233,7 +223,7 @@ public class PhysicalPlanFactory
 	 */
 	public static PhysicalPlan createPlanWithBindJoinVALUESorFILTER( final LogicalOpGPAdd lop,
 	                                                                 final PhysicalPlan subplan ) {
-		final UnaryPhysicalOp pop = new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
 		return createPlan(pop, subplan);
 	}
 
@@ -267,16 +257,16 @@ public class PhysicalPlanFactory
 		if ( PhysicalOpIndexNestedLoopsJoin.class.isAssignableFrom(opClass) ) {
 			return createPlanWithIndexNLJ( lop, subplan );
 		}
-		else if ( PhysicalOpBindJoinWithFILTER.class.isAssignableFrom(opClass) ) {
+		else if ( PhysicalOpFrawBindJoinWithFILTER.class.isAssignableFrom(opClass) ) {
 			return createPlanWithBindJoinFILTER( lop, subplan );
 		}
-		else if ( PhysicalOpBindJoinWithUNION.class.isAssignableFrom(opClass) ) {
+		else if ( PhysicalOpFrawBindJoinWithUNION.class.isAssignableFrom(opClass) ) {
 			return createPlanWithBindJoinUNION( lop, subplan );
 		}
-		else if ( PhysicalOpBindJoinWithVALUES.class.isAssignableFrom(opClass) ) {
+		else if ( PhysicalOpFrawBindJoinWithVALUES.class.isAssignableFrom(opClass) ) {
 			return createPlanWithBindJoinVALUES( lop, subplan );
 		}
-		else if ( PhysicalOpBindJoinWithVALUESorFILTER.class.isAssignableFrom(opClass) ) {
+		else if ( PhysicalOpFrawBindJoinWithVALUESorFILTER.class.isAssignableFrom(opClass) ) {
 			return createPlanWithBindJoinVALUESorFILTER( lop, subplan );
 		}
 		else {
@@ -485,15 +475,15 @@ public class PhysicalPlanFactory
 		return extractRequestAsPlan( pop.getLogicalOperator() );
 	}
 
-	public static PhysicalPlan extractRequestAsPlan( final PhysicalOpBindJoinWithFILTER pop ) {
+	public static PhysicalPlan extractRequestAsPlan( final PhysicalOpFrawBindJoinWithFILTER pop ) {
 		return extractRequestAsPlan( pop.getLogicalOperator() );
 	}
 
-	public static PhysicalPlan extractRequestAsPlan( final PhysicalOpBindJoinWithUNION pop ) {
+	public static PhysicalPlan extractRequestAsPlan( final PhysicalOpFrawBindJoinWithUNION pop ) {
 		return extractRequestAsPlan( pop.getLogicalOperator() );
 	}
 
-	public static PhysicalPlan extractRequestAsPlan( final PhysicalOpBindJoinWithVALUES pop ) {
+	public static PhysicalPlan extractRequestAsPlan( final PhysicalOpFrawBindJoinWithVALUES pop ) {
 		return extractRequestAsPlan( pop.getLogicalOperator() );
 	}
 

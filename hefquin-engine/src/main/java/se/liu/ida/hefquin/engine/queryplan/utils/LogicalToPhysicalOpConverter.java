@@ -4,17 +4,9 @@ import se.liu.ida.hefquin.engine.federation.BRTPFServer;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
 import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.engine.federation.TPFServer;
-import se.liu.ida.hefquin.engine.queryplan.logical.BinaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.logical.NaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.NullaryLogicalOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.UnaryLogicalOp;
+import se.liu.ida.hefquin.engine.queryplan.logical.*;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
-import se.liu.ida.hefquin.engine.queryplan.physical.BinaryPhysicalOp;
-import se.liu.ida.hefquin.engine.queryplan.physical.NaryPhysicalOp;
-import se.liu.ida.hefquin.engine.queryplan.physical.NullaryPhysicalOp;
-import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.physical.UnaryPhysicalOp;
+import se.liu.ida.hefquin.engine.queryplan.physical.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.*;
 
 /**
@@ -62,7 +54,7 @@ public class LogicalToPhysicalOpConverter
 	public static UnaryPhysicalOp convert( final LogicalOpTPAdd lop ) {
 		final FederationMember fm = lop.getFederationMember();
 
-		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
 
 		else if ( fm instanceof TPFServer )      return new PhysicalOpIndexNestedLoopsJoin(lop);
 
@@ -74,7 +66,7 @@ public class LogicalToPhysicalOpConverter
 	public static UnaryPhysicalOp convert( final LogicalOpTPOptAdd lop ) {
 		final FederationMember fm = lop.getFederationMember();
 
-		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
 
 		else if ( fm instanceof TPFServer )      return new PhysicalOpIndexNestedLoopsJoin(lop);
 
@@ -86,7 +78,7 @@ public class LogicalToPhysicalOpConverter
 	public static UnaryPhysicalOp convert( final LogicalOpBGPAdd lop ) {
 		final FederationMember fm = lop.getFederationMember();
 
-		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
 
 		else throw new UnsupportedOperationException("Unsupported type of federation member: " + fm.getClass().getName() + ".");
 	}
@@ -94,7 +86,7 @@ public class LogicalToPhysicalOpConverter
 	public static UnaryPhysicalOp convert( final LogicalOpBGPOptAdd lop ) {
 		final FederationMember fm = lop.getFederationMember();
 
-		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
 
 		else throw new UnsupportedOperationException("Unsupported type of federation member: " + fm.getClass().getName() + ".");
 	}
@@ -102,7 +94,7 @@ public class LogicalToPhysicalOpConverter
 	public static UnaryPhysicalOp convert( final LogicalOpGPAdd lop ) {
 		final FederationMember fm = lop.getFederationMember();
 
-		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
 
 		else throw new UnsupportedOperationException("Unsupported type of federation member: " + fm.getClass().getName() + ".");
 	}
@@ -110,7 +102,7 @@ public class LogicalToPhysicalOpConverter
 	public static UnaryPhysicalOp convert( final LogicalOpGPOptAdd lop ) {
 		final FederationMember fm = lop.getFederationMember();
 
-		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpBindJoinWithVALUESorFILTER(lop);
+		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
 
 		else throw new UnsupportedOperationException("Unsupported type of federation member: " + fm.getClass().getName() + ".");
 	}
@@ -172,7 +164,7 @@ public class LogicalToPhysicalOpConverter
 	}
 
 	public static NaryPhysicalOp convert( final LogicalOpMultiwayUnion lop ) {
-		return new PhysicalOpMultiwayUnion();
+		return new PhysicalOpFrawMultiwayUnion();
 	}
 
 }
