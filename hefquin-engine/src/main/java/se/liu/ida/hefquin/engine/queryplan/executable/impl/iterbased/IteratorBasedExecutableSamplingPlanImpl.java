@@ -1,33 +1,18 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
-import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlan;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlanStats;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
 import se.liu.ida.hefquin.engine.queryproc.QueryResultSink;
 
 import java.util.List;
 
-public class IteratorBasedExecutableSamplingPlanImpl implements ExecutablePlan
+public class IteratorBasedExecutableSamplingPlanImpl extends IteratorBasedExecutablePlanImpl
 {
-	protected final ResultElementIterator it;
 	private final int DEFAULT_NUMBER_OF_WALKS = 100;
 	private final int DEFAULT_TIMEOUT_MS = Integer.MAX_VALUE;
 
 	public IteratorBasedExecutableSamplingPlanImpl(final ResultElementIterator it ) {
-		assert it != null;
-		this.it = it;
-	}
-
-	@Override
-	public void run( final QueryResultSink resultSink ) throws ExecutionException {
-		try {
-			while ( it.hasNext() ) {
-				resultSink.send( it.next() );
-			}
-		}
-		catch ( final ResultElementIterException ex ) {
-			throw new ExecutionException( "An exception occurred during result iteration.", ex.getWrappedExecutionException() );
-		}
+        super(it);
 	}
 
 	public void runWithBudget( final QueryResultSink resultSink ) throws ExecutionException {
