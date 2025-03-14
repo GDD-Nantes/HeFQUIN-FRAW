@@ -1,6 +1,7 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
 import se.liu.ida.hefquin.base.data.SolutionMapping;
+import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutableOperator;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.SynchronizedIntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
@@ -8,13 +9,15 @@ import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
 
 import java.util.NoSuchElementException;
 
-public abstract class ResultElementIterBase implements ResultElementIterator
+public abstract class ResultElementIterBase<OpType extends ExecutableOperator> implements ResultElementIterator
 {
 	protected final ExecutionContext execCxt;
 	protected final SynchronizedIntermediateResultElementSink sink;
 
 	protected boolean exhausted = false;
 	protected SolutionMapping nextElement = null;
+
+	protected OpRunnerThread opRunnerThread;
 
 	protected ResultElementIterBase( final ExecutionContext execCxt ) {
 		assert execCxt != null;
@@ -25,9 +28,6 @@ public abstract class ResultElementIterBase implements ResultElementIterator
 
 	@Override
 	public boolean hasNext() throws ResultElementIterException {
-		if ( exhausted ) {
-			return false;
-		}
 
 		if ( nextElement != null ) {
 			return true;
@@ -37,14 +37,47 @@ public abstract class ResultElementIterBase implements ResultElementIterator
 		ensureOpRunnerThreadHasNoException();
 
 		nextElement = sink.getNextElement();
-		if ( nextElement == null ) {
-			exhausted = true;
+		if(nextElement == null){
+			opRunnerThread = createNewOpRunnerThread();
+			sink.open();
+			ensureOpRunnerThreadIsStarted();
+			ensureOpRunnerThreadHasNoException();
+
+			nextElement = sink.getNextElement();
+
+			if(nextElement == null) {
+				System.out.println("Executed op once more; but didn't get any result. Producing an artificial empty mapping");
+				nextElement = new SolutionMappingImpl();
+			}
 		}
 
 		ensureOpRunnerThreadHasNoException();
 
-		return ! exhausted;
+		return true;
 	}
+
+//	@Override
+//	public boolean hasNext() throws ResultElementIterException {
+//		if ( exhausted ) {
+//			return false;
+//		}
+//
+//		if ( nextElement != null ) {
+//			return true;
+//		}
+//
+//		ensureOpRunnerThreadIsStarted();
+//		ensureOpRunnerThreadHasNoException();
+//
+//		nextElement = sink.getNextElement();
+//		if ( nextElement == null ) {
+//			exhausted = true;
+//		}
+//
+//		ensureOpRunnerThreadHasNoException();
+//
+//		return ! exhausted;
+//	}
 
 	@Override
 	public SolutionMapping next() throws ResultElementIterException {
@@ -71,11 +104,13 @@ public abstract class ResultElementIterBase implements ResultElementIterator
 		}
 	}
 
-	public ExecutableOperator getOp() {
-		return getOpRunnerThread().getOp();
+	public OpType getOp() {
+		return (OpType) getOpRunnerThread().getOp();
 	}
 
 	protected abstract OpRunnerThread getOpRunnerThread();
+
+	protected abstract OpRunnerThread createNewOpRunnerThread();
 
 	protected abstract class OpRunnerThread extends Thread
 	{
@@ -97,7 +132,7 @@ public abstract class ResultElementIterBase implements ResultElementIterator
 
 		protected abstract void _run() throws ExecutionException;
 
-		public abstract ExecutableOperator getOp();
+		public abstract OpType getOp();
 	}
 
 }

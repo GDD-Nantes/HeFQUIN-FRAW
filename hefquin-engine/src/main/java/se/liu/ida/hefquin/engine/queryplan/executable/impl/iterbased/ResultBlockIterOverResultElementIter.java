@@ -1,9 +1,9 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
-import java.util.NoSuchElementException;
-
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultBlock;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultBlockBuilder;
+
+import java.util.NoSuchElementException;
 
 public class ResultBlockIterOverResultElementIter implements ResultBlockIterator
 {

@@ -1,15 +1,16 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
-import java.util.List;
-
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlanStats;
 import se.liu.ida.hefquin.engine.queryplan.executable.UnaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
 
-public class ResultElementIterWithUnaryExecOp extends ResultElementIterBase
+import java.util.List;
+
+public class ResultElementIterWithUnaryExecOp extends ResultElementIterBase<UnaryExecutableOp>
 {
-	protected final MyOpRunnerThread opRunnerThread;
+	protected final UnaryExecutableOp op;
+	protected final ResultBlockIterator inputIter;
 
 	public ResultElementIterWithUnaryExecOp( final UnaryExecutableOp op,
 	                                         final ResultBlockIterator inputIter,
@@ -20,7 +21,9 @@ public class ResultElementIterWithUnaryExecOp extends ResultElementIterBase
 		assert op != null;
 		assert inputIter != null;
 
-		opRunnerThread = new MyOpRunnerThread(op, inputIter);
+		this.op = op;
+		this.inputIter = inputIter;
+		createNewOpRunnerThread();
 	}
 
 	@Override
@@ -29,15 +32,21 @@ public class ResultElementIterWithUnaryExecOp extends ResultElementIterBase
 	}
 
 	public ExecutablePlanStats tryGetStatsOfInput() {
-		return ResultIteratorUtils.tryGetStatsOfProducingSubPlan( opRunnerThread.getInput() );
+		return ResultIteratorUtils.tryGetStatsOfProducingSubPlan( ((MyOpRunnerThread) opRunnerThread).getInput() );
 	}
 
 	public List<Exception> tryGetExceptionsOfInput() {
-		return ResultIteratorUtils.tryGetExceptionsOfProducingSubPlan( opRunnerThread.getInput() );
+		return ResultIteratorUtils.tryGetExceptionsOfProducingSubPlan( ((MyOpRunnerThread) opRunnerThread).getInput() );
 	}
 
 	@Override
 	protected OpRunnerThread getOpRunnerThread() {
+		return opRunnerThread;
+	}
+
+	@Override
+	protected OpRunnerThread createNewOpRunnerThread() {
+		this.opRunnerThread = new MyOpRunnerThread( op, inputIter );
 		return opRunnerThread;
 	}
 
@@ -65,7 +74,7 @@ public class ResultElementIterWithUnaryExecOp extends ResultElementIterBase
 
 		@Override
 		protected void _run() throws ExecutionException {
-			while ( inputIter.hasNext() ) {
+			if ( inputIter.hasNext() ) {
 				op.process( inputIter.next(), sink, execCxt );
 			}
 			op.concludeExecution(sink, execCxt);

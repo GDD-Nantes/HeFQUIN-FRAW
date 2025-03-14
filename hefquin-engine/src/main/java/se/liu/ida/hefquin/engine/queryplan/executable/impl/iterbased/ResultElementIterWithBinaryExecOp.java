@@ -1,15 +1,17 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
-import java.util.List;
-
 import se.liu.ida.hefquin.engine.queryplan.executable.BinaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlanStats;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
 
-public class ResultElementIterWithBinaryExecOp extends ResultElementIterBase
+import java.util.List;
+
+public class ResultElementIterWithBinaryExecOp extends ResultElementIterBase<BinaryExecutableOp>
 {
-	protected final MyOpRunnerThread opRunnerThread;
+	protected final BinaryExecutableOp op;
+	protected final ResultBlockIterator inputIter1;
+	protected final ResultBlockIterator inputIter2;
 
 	public ResultElementIterWithBinaryExecOp( final BinaryExecutableOp op,
 	                                          final ResultBlockIterator inputIter1,
@@ -23,7 +25,11 @@ public class ResultElementIterWithBinaryExecOp extends ResultElementIterBase
 		assert inputIter2 != null;
 		assert execCxt != null;
 
-		opRunnerThread = new MyOpRunnerThread( op, inputIter1, inputIter2 );
+		System.out.println("WARNING : INSTANTIATING A " + this.getClass().getName());
+		this.op = op;
+		this.inputIter1 = inputIter1;
+		this.inputIter2 = inputIter2;
+		createNewOpRunnerThread();
 	}
 
 	@Override
@@ -32,24 +38,30 @@ public class ResultElementIterWithBinaryExecOp extends ResultElementIterBase
 	}
 
 	public ExecutablePlanStats tryGetStatsOfInput1() {
-		return ResultIteratorUtils.tryGetStatsOfProducingSubPlan( opRunnerThread.getInput1() );
+		return ResultIteratorUtils.tryGetStatsOfProducingSubPlan( ((MyOpRunnerThread) opRunnerThread).getInput1() );
 	}
 
 	public ExecutablePlanStats tryGetStatsOfInput2() {
-		return ResultIteratorUtils.tryGetStatsOfProducingSubPlan( opRunnerThread.getInput2() );
+		return ResultIteratorUtils.tryGetStatsOfProducingSubPlan( ((MyOpRunnerThread) opRunnerThread).getInput2() );
 	}
 
 	public List<Exception> tryGetExceptionsOfInput1() {
-		return ResultIteratorUtils.tryGetExceptionsOfProducingSubPlan( opRunnerThread.getInput1() );
+		return ResultIteratorUtils.tryGetExceptionsOfProducingSubPlan( ((MyOpRunnerThread) opRunnerThread).getInput1() );
 	}
 
 	public List<Exception> tryGetExceptionsOfInput2() {
-		return ResultIteratorUtils.tryGetExceptionsOfProducingSubPlan( opRunnerThread.getInput2() );
+		return ResultIteratorUtils.tryGetExceptionsOfProducingSubPlan( ((MyOpRunnerThread) opRunnerThread).getInput2() );
 	}
 
 	@Override
 	protected OpRunnerThread getOpRunnerThread() {
 		return opRunnerThread;
+	}
+
+	@Override
+	protected ResultElementIterBase<BinaryExecutableOp>.OpRunnerThread createNewOpRunnerThread() {
+		this.opRunnerThread = new MyOpRunnerThread(op, inputIter1, inputIter2);
+		return this.opRunnerThread;
 	}
 
 
@@ -82,12 +94,12 @@ public class ResultElementIterWithBinaryExecOp extends ResultElementIterBase
 			// intermediate result from input one first, before moving on to
 			// input two.
 
-			while ( inputIter1.hasNext() ) {
+			if ( inputIter1.hasNext() ) {
 				op.processBlockFromChild1( inputIter1.next(), sink, execCxt );
 			}
 			op.wrapUpForChild1(sink, execCxt);
 
-			while ( inputIter2.hasNext() ) {
+			if ( inputIter2.hasNext() ) {
 				op.processBlockFromChild2( inputIter2.next(), sink, execCxt );
 			}
 			op.wrapUpForChild2(sink, execCxt);

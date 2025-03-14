@@ -27,8 +27,9 @@ public class SynchronizedIntermediateResultElementSink
 	}
 
 	@Override
-	public void open() {
-		this.closed = false;
+	synchronized public void open() {
+		if(!closed) System.out.println("WARNING : SINK WAS ALREADY OPEN");
+		closed = false;
 	}
 
 	@Override

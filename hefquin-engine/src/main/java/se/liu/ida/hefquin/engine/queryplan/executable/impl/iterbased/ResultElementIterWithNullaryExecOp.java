@@ -4,9 +4,8 @@ import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
 
-public class ResultElementIterWithNullaryExecOp extends ResultElementIterBase
+public class ResultElementIterWithNullaryExecOp extends ResultElementIterBase<NullaryExecutableOp>
 {
-	protected MyOpRunnerThread opRunnerThread;
 	protected final NullaryExecutableOp op;
 
 	public ResultElementIterWithNullaryExecOp( final NullaryExecutableOp op,
@@ -17,8 +16,8 @@ public class ResultElementIterWithNullaryExecOp extends ResultElementIterBase
 		assert op != null;
 		assert execCxt != null;
 
-		opRunnerThread = new MyOpRunnerThread(op);
 		this.op = op;
+		createNewOpRunnerThread();
 	}
 
 	@Override
@@ -32,22 +31,9 @@ public class ResultElementIterWithNullaryExecOp extends ResultElementIterBase
 	}
 
 	@Override
-	public boolean hasNext() throws ResultElementIterException {
-		// From here to
-		ensureOpRunnerThreadIsStarted();
-		ensureOpRunnerThreadHasNoException();
-
-		if(sink.isClosed()){
-			sink.open();
-			this.opRunnerThread = new MyOpRunnerThread(op);
-			ensureOpRunnerThreadIsStarted();
-		}
-
-		nextElement = sink.getNextElement();
-
-		ensureOpRunnerThreadHasNoException();
-
-		return true;
+	protected OpRunnerThread createNewOpRunnerThread() {
+		this.opRunnerThread = new MyOpRunnerThread(op);
+		return this.opRunnerThread;
 	}
 
 	protected class MyOpRunnerThread extends OpRunnerThread
@@ -69,5 +55,5 @@ public class ResultElementIterWithNullaryExecOp extends ResultElementIterBase
 		}
 
 	} // end of class OpRunnerThread
-	
+
 }
