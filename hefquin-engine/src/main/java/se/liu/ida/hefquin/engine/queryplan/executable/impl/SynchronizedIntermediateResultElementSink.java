@@ -3,7 +3,7 @@ package se.liu.ida.hefquin.engine.queryplan.executable.impl;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 
 public class SynchronizedIntermediateResultElementSink
-                   implements ClosableIntermediateResultElementSink
+                   implements ClosableIntermediateResultElementSink, OpenableIntermediateResultSink
 {
 	protected SolutionMapping currentElement = null;
 	protected boolean closed = false;
@@ -24,6 +24,11 @@ public class SynchronizedIntermediateResultElementSink
 
 		currentElement = element;
 		this.notifyAll();
+	}
+
+	@Override
+	public void open() {
+		this.closed = false;
 	}
 
 	@Override
@@ -60,5 +65,4 @@ public class SynchronizedIntermediateResultElementSink
 			throw new IllegalStateException();
 		}
 	}
-
 }
