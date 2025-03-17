@@ -105,10 +105,8 @@ public class PhysicalOpParallelMultiLeftJoin extends BaseForPhysicalOps implemen
 	public ExpectedVariables getExpectedVariables( final ExpectedVariables... inputVars ) {
 		assert inputVars.length == 1;
 
-		final Set<Var> certainVars = new HashSet<>();
-		certainVars.addAll(inputVars[0].getCertainVariables());
-		final Set<Var> possibleVars = new HashSet<>();
-		possibleVars.addAll(inputVars[0].getPossibleVariables());
+		final Set<Var> certainVars = new HashSet<>(inputVars[0].getCertainVariables());
+		final Set<Var> possibleVars = new HashSet<>(inputVars[0].getPossibleVariables());
 
 		for ( final LogicalOpRequest<?,?> req : optionalParts ) {
 			final ExpectedVariables ev = req.getRequest().getExpectedVariables();
