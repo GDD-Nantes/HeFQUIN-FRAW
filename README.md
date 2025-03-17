@@ -1,23 +1,24 @@
 # HeFQUIN WITH FEDUP
 
-1) git clone git@github.com:GDD-Nantes/HeFQUIN-FRAW.git
-2) git clone https://github.com/GDD-Nantes/fedup
-3) cd fedup
-4) sed -i '' -e 's/<jena.version>5.0.0<\\\/jena.version>/<jena.version>4.10.0<\\\/jena.version>/g' pom.xml
-5) sed -i '' -e 's/.enableCors(true, "")/.enableCors(true)/g' src/main/java/fr/gdd/fedup/cli/FedUPServerCLI.java
-6) mvn clean package install -Dmaven.test.skip -f pom.xml
-7) cd ..
-8) cd HeFQUIN-FRAW
-9) git checkout hefquin_with_fedup
-10) mvn clean package install -Dmaven.test.skip -f pom.xml
-11) wget https://zenodo.org/records/11933972/files/fedshop20-h0.zip
-12) wget https://zenodo.org/records/11933972/files/fedshop200-h0.zip
-13) unzip fedshop20-h0.zip -d summaries
-14) unzip fedshop200-h0.zip -d summaries
-15) rm fedshop20*-h0.zip
-16) sed -i '' -e 's/ENDPOINT_URL_PLACEHOLDER/[YOUR_ENDPOINT_URL]/g' fedshop200.ttl
-17) sed -i '' -e 's/ENDPOINT_URL_PLACEHOLDER/[YOUR_ENDPOINT_URL]/g' DefaultEngineWithFedupConfForFedshop*.ttl
-18) ./bin/hefquin --federationDescription fedshop200.ttl --confDescr DefaultEngineWithFedupConfForFedshop20.ttl --file query.sparql
+1. git clone git@github.com:GDD-Nantes/HeFQUIN-FRAW.git
+1. git clone https://github.com/GDD-Nantes/fedup 
+1. git checkout d89f207122c9010ed803022dffe90efe5be6c4be
+1. cd fedup
+1. sed -i '' -e 's/<jena.version>5.0.0<\\\/jena.version>/<jena.version>4.10.0<\\\/jena.version>/g' pom.xml
+1. sed -i '' -e 's/.enableCors(true, "")/.enableCors(true)/g' src/main/java/fr/gdd/fedup/cli/FedUPServer.java
+1. mvn clean package install -Dmaven.test.skip -f pom.xml
+1. cd ..
+1. cd HeFQUIN-FRAW
+1. git checkout hefquin_with_fedup
+1. `mvn clean package install -Dmaven.test.skip -f pom.xml`
+1. `wget https://zenodo.org/records/11933972/files/fedshop20-h0.zip`
+1. `wget https://zenodo.org/records/11933972/files/fedshop200-h0.zip`
+1. `unzip fedshop20-h0.zip -d summaries`
+1. `unzip fedshop200-h0.zip -d summaries`
+1. `rm fedshop20*-h0.zip`
+1. `sed -i '' -e 's/ENDPOINT_URL_PLACEHOLDER/[YOUR_ENDPOINT_URL]/g' fedshop200.ttl`
+1. `sed -i '' -e 's/ENDPOINT_URL_PLACEHOLDER/[YOUR_ENDPOINT_URL]/g' DefaultEngineWithFedupConfForFedshop*.ttl`
+1. `./bin/hefquin --federationDescription fedshop200.ttl --confDescr DefaultEngineWithFedupConfForFedshop20.ttl --file query.sparql`
 
 Notes : 
 > [!IMPORTANT] 
