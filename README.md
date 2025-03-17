@@ -1,15 +1,15 @@
 # HeFQUIN WITH FEDUP
 
-1. git clone git@github.com:GDD-Nantes/HeFQUIN-FRAW.git
-1. git clone https://github.com/GDD-Nantes/fedup 
-1. git checkout d89f207122c9010ed803022dffe90efe5be6c4be
-1. cd fedup
-1. sed -i '' -e 's/<jena.version>5.0.0<\\\/jena.version>/<jena.version>4.10.0<\\\/jena.version>/g' pom.xml
-1. sed -i '' -e 's/.enableCors(true, "")/.enableCors(true)/g' src/main/java/fr/gdd/fedup/cli/FedUPServer.java
-1. mvn clean package install -Dmaven.test.skip -f pom.xml
-1. cd ..
-1. cd HeFQUIN-FRAW
-1. git checkout hefquin_with_fedup
+1. `git clone git@github.com:GDD-Nantes/HeFQUIN-FRAW.git`
+1. `git clone https://github.com/GDD-Nantes/fedup`
+1. `git checkout d89f207122c9010ed803022dffe90efe5be6c4be`
+1. `cd fedup`
+1. `sed -i '' -e 's/<jena.version>5.0.0<\\\/jena.version>/<jena.version>4.10.0<\\\/jena.version>/g' pom.xml`
+1. `sed -i '' -e 's/.enableCors(true, "")/.enableCors(true)/g' src/main/java/fr/gdd/fedup/cli/FedUPServer.java`
+1. `mvn clean package install -Dmaven.test.skip -f pom.xml`
+1. `cd ..`
+1. `cd HeFQUIN-FRAW`
+1. `git checkout hefquin_with_fedup`
 1. `mvn clean package install -Dmaven.test.skip -f pom.xml`
 1. `wget https://zenodo.org/records/11933972/files/fedshop20-h0.zip`
 1. `wget https://zenodo.org/records/11933972/files/fedshop200-h0.zip`
