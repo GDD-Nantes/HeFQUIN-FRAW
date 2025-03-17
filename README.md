@@ -4,7 +4,7 @@
 2) git clone https://github.com/GDD-Nantes/fedup
 3) cd fedup
 4) sed -i '' -e 's/<jena.version>5.0.0<\\\/jena.version>/<jena.version>4.10.0<\\\/jena.version>/g' pom.xml
-5) sed -i '' -e 's/.enableCors(true, "")/.enableCors(true)/g' src/main/java/fr/gdd/fedup/cli/FedUPServer.java
+5) sed -i '' -e 's/.enableCors(true, "")/.enableCors(true)/g' src/main/java/fr/gdd/fedup/cli/FedUPServerCLI.java
 6) mvn clean package install -Dmaven.test.skip -f pom.xml
 7) cd ..
 8) cd HeFQUIN-FRAW
