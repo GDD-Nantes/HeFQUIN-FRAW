@@ -21,6 +21,7 @@
 
 Notes : 
 - IMPORTANT : N'oubliez pas de lancer Virtuoso ou votre endpoint de choix avant d'éxecuter une requêtes avec HeFQUIN. Sinon, ça marche moins bien.
+- IMPORTANT : Pour éxecuter des requêtes RSA avec HeFQUIN, il faut utiliser la configuration DefaultEngineConfForRSA.ttl . N'oubliez pas de renommer les sources à l'intérieur des requêtes RSA. Notamment pour les requêtes 4 et 7 qui contiennent des "<http://localhost:8890/sparql?default-graph-uri=nan>", il faut les remplacer par "<http://localhost:8890/sparql?default-graph-uri=http://www.empty.fr/>" (avec l'url d'endpoint qui convient)
 - Un exemple de fédération déjà entièrement déclarée est présente dans fedshop200bg.ttl (conçue pour une utilisation de fedup et d'endpoints virtuels blazegraph).
 - Pour utiliser fedshop200 au lieu de fedshop20, il faut changer la configuration de hefquin utilisée ("DefaultEngineWithFedupConfForFedshop20") dans la commande ci-dessus.
 - Pour utiliser d'autres configurations de fedshop (40, 60, 80, etc.) il faut générer / télécharger les summaries correspondant et les mettre dans le dossier "summaries", et créer le fichier de configuration de hefquin correspondant.
