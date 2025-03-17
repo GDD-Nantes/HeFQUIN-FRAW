@@ -1,9 +1,6 @@
 package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.jena.sparql.core.Var;
 
@@ -108,8 +105,10 @@ public class PhysicalOpParallelMultiLeftJoin extends BaseForPhysicalOps implemen
 	public ExpectedVariables getExpectedVariables( final ExpectedVariables... inputVars ) {
 		assert inputVars.length == 1;
 
-		final Set<Var> certainVars = inputVars[0].getCertainVariables();
-		final Set<Var> possibleVars = inputVars[0].getPossibleVariables();
+		final Set<Var> certainVars = new HashSet<>();
+		certainVars.addAll(inputVars[0].getCertainVariables());
+		final Set<Var> possibleVars = new HashSet<>();
+		possibleVars.addAll(inputVars[0].getPossibleVariables());
 
 		for ( final LogicalOpRequest<?,?> req : optionalParts ) {
 			final ExpectedVariables ev = req.getRequest().getExpectedVariables();
