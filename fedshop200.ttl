@@ -1202,33 +1202,7 @@ ex:rawRatingSite99
       fd:interface [ a                  fd:SPARQLEndpointInterface ;
                      fd:endpointAddress <http://ENDPOINT_URL_PLACEHOLDER?default-graph-uri=http://www.ratingsite99.fr/> ] .
 
-
-#ex:neo4jTest
-#      a            fd:FederationMember ;
-#      fd:interface [ a                  fd:BoltInterface ;
-#                     fd:endpointAddress <http://localhost:7474/db/neo4j/tx> ;
-#                     fd:mappingConfiguration  [ a fd:LPGToRDFConfiguration ;
-#                                                # ...
-#                                              ]
-#                   ] .
-
-#ex:graphqlTest
-#      a            fd:FederationMember ;
-#      fd:interface [ a                  fd:GraphQLEndpointInterface ;
-#                     fd:endpointAddress <http://localhost:4000/graphql> ;
-#                     fd:mappingConfiguration  [ a fd:GraphQLToRDFConfiguration ;
-#                                                # ...
-#                                              ]
-#                   ] .
-
-#ex:dbpediaSPARQLWithVocabMappings
-#      a            fd:FederationMember ;
-#      fd:interface [ a                  fd:SPARQLEndpointInterface ;
-#                     fd:endpointAddress <http://dbpedia.org/sparql> ] ;
-#      fd:vocabularyMappingsFile "dbpedia/vocabularyMappings.nt" .
-
-#ex:wikidataSPARQLWithVocabMappings
-#      a            fd:FederationMember ;
-#      fd:interface [ a                  fd:SPARQLEndpointInterface ;
-#                     fd:endpointAddress <https://query.wikidata.org/sparql> ];
-#                     fd:vocabularyMappingsFile "wikidata/vocabularyMappings.nt" .
+ex:empty
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://ENDPOINT_URL_PLACEHOLDER?default-graph-uri=http://www.empty.fr/> ] .
