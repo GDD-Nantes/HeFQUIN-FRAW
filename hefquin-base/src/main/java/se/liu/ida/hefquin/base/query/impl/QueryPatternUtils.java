@@ -270,6 +270,12 @@ public class QueryPatternUtils
 			// Do nothing
 			return tps;
 		}
+		else if ( e instanceof ElementUnion ) {
+			for(Element el: ((ElementUnion) e).getElements() ){
+				tps.addAll(getTPsInPattern(el));
+			}
+			return tps;
+		}
 		else
 			throw new IllegalArgumentException( "Cannot get triple patterns of the operator (type: " + e.getClass().getName() + ")." );
 	}
