@@ -38,6 +38,10 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 
 		this.fedAccessMgr = fedAccessMgr;
 		this.qProc = qProc;
+
+		// This prevents Jena from applying optimizations to Ops.
+		// In particular, filter push down drastically increases source assignment plan build time.
+		Optimize.noOptimizer();
 	}
 
 	@Override
