@@ -19,7 +19,7 @@ import se.liu.ida.hefquin.engine.federation.access.FederationAccessStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
-import se.liu.ida.hefquin.jenaintegration.sparql.engine.main.OpExecutorHeFQUIN;
+import se.liu.ida.hefquin.jenaintegration.sparql.engine.main.OpExecutorFraw;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 		final OpExecutorFactory factory = new OpExecutorFactory() {
 			@Override
 			public OpExecutor create( final ExecutionContext execCxt ) {
-				return new OpExecutorHeFQUIN(qProc, execCxt);
+				return new OpExecutorFraw(qProc, execCxt);
 			}
 		};
 
