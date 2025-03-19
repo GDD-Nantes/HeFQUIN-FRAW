@@ -9,17 +9,10 @@ import se.liu.ida.hefquin.engine.queryplan.executable.impl.CollectingIntermediat
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 
-import java.util.Random;
-
 public class ExecOpFrawMultiwayUnion extends ExecOpMultiwayUnion{
-
-    private int chosenChild;
-    private Random random;
 
     public ExecOpFrawMultiwayUnion(int numberOfChildren, boolean collectExceptions) {
         super(numberOfChildren, collectExceptions);
-        this.random = new Random();
-        this.chosenChild = random.nextInt(numberOfChildren);
     }
 
     @Override
@@ -34,7 +27,7 @@ public class ExecOpFrawMultiwayUnion extends ExecOpMultiwayUnion{
 
         tempSink.getCollectedSolutionMappings().forEach(
                 solutionMapping -> {
-                    Binding updatedBinding = FrawUtils.updateProbaUnion(solutionMapping, numberOfChildren);
+                    Binding updatedBinding = FrawUtils.updateProbaUnion(solutionMapping, numberOfChildren, x);
                     SolutionMapping updatedSolutionMapping = new SolutionMappingImpl(updatedBinding);
                     sink.send(updatedSolutionMapping);
                 }
