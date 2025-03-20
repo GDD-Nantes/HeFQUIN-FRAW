@@ -38,6 +38,10 @@ public class FrawUtilsTest {
         return new SolutionMappingImpl(b1);
     }
 
+    private Node createProbaNode(Double proba){
+        return NodeFactory.createLiteral(String.valueOf(proba), XSDDatatype.XSDdouble);
+    }
+
     @Test
     public void testCompatibleWithDifferentProbabilities(){
         SolutionMapping s1 = buildSolutionMappingWithProbabilityAndValue(0.5, "value");
@@ -51,7 +55,17 @@ public class FrawUtilsTest {
         SolutionMapping s1 = buildSolutionMappingWithProbabilityAndValue(0.5, "value");
         SolutionMapping s2 = buildSolutionMappingWithProbabilityAndValue(0.8, "value");
 
-        Node expected = NodeFactory.createLiteral("0.4", XSDDatatype.XSDdouble);
+        Node expected = createProbaNode(0.4);
+
+        Assert.assertEquals(expected, FrawUtils.merge(s1, s2).asJenaBinding().get(MAPPING_PROBABILITY));
+    }
+
+    @Test
+    public void testMergeWithDifferentProbabilitiesWhenZero(){
+        SolutionMapping s1 = buildSolutionMappingWithProbabilityAndValue(0.5, "value");
+        SolutionMapping s2 = buildSolutionMappingWithProbabilityAndValue(0.0, "value");
+
+        Node expected = createProbaNode(0.0);
 
         Assert.assertEquals(expected, FrawUtils.merge(s1, s2).asJenaBinding().get(MAPPING_PROBABILITY));
     }
@@ -60,7 +74,18 @@ public class FrawUtilsTest {
     public void testUpdateProbaUnionCorrectlyUpdatesProbability(){
         SolutionMapping s1 = buildSolutionMappingWithProbabilityAndValue(0.5, "value");
 
-        Assert.assertEquals(0.05, FrawUtils.updateProbaUnion(s1, 10, 1).get(MAPPING_PROBABILITY).getLiteral());
+        Node expected = createProbaNode(0.05);
+
+        Assert.assertEquals(expected, FrawUtils.updateProbaUnion(s1, 10, 1).get(MAPPING_PROBABILITY));
+    }
+
+    @Test
+    public void testUpdateProbaUnionCorrectlyUpdatesProbabilityWhenZero(){
+        SolutionMapping s1 = buildSolutionMappingWithProbabilityAndValue(0.0, "value");
+
+        Node expected = createProbaNode(0.0);
+
+        Assert.assertEquals(expected, FrawUtils.updateProbaUnion(s1, 10, 1).get(MAPPING_PROBABILITY));
     }
 
     @Test
