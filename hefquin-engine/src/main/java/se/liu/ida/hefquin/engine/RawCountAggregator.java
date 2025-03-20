@@ -12,6 +12,7 @@ import org.apache.jena.sparql.expr.aggregate.Accumulator;
 import org.apache.jena.sparql.expr.aggregate.AccumulatorFactory;
 import org.apache.jena.sparql.expr.aggregate.AggCustom;
 import org.apache.jena.sparql.function.FunctionEnv;
+import org.apache.jena.sparql.util.Context;
 import se.liu.ida.hefquin.base.utils.Pair;
 import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
 
@@ -28,7 +29,12 @@ import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.MAPPING_PR
 public class RawCountAggregator {
 
     public static AccumulatorFactory factory() {
-        return (agg, distinct) -> new RawCountAccumulator(agg, distinct);
+        return (agg, distinct) -> new RawCountAccumulator(agg, distinct, ARQ.getContext());
+    }
+
+    // Mostly for testing purposes
+    public static AccumulatorFactory factory(Context cxt) {
+        return (agg, distinct) -> new RawCountAccumulator(agg, distinct, cxt);
     }
 
     private static class RawCountAccumulator implements Accumulator{
@@ -39,23 +45,16 @@ public class RawCountAggregator {
         private List<Pair<Double, List<ProbabilityModifier>>> probaAndModifiers = new ArrayList<>();
         private Boolean isGrouped;
         private List<Var> variablesToGroup;
-        private OpGroup opGroup;
 
-        public RawCountAccumulator(AggCustom agg, boolean distinct) {
+        public RawCountAccumulator(AggCustom agg, boolean distinct, Context context) {
             randomWalkHolder = new RandomWalkHolder();
-            opGroup = ARQ.getContext().get(CURRENT_OP_GROUP);
+            OpGroup opGroup = context.get(CURRENT_OP_GROUP);
+            isGrouped = Objects.nonNull(opGroup.getGroupVars()) && !opGroup.getGroupVars().isEmpty();
+            variablesToGroup = opGroup.getGroupVars().getVars();
         }
 
         @Override
         public void accumulate(Binding binding, FunctionEnv functionEnv) {
-            // We have to do the initialization step here, because it is the only method in which we have access to
-            // functionEnv, whose context holds the group by variables
-            if(Objects.isNull(variablesToGroup)) {
-                List<Var> vars = opGroup.getGroupVars().getVars();
-                isGrouped = Objects.nonNull(vars) && !vars.isEmpty();
-                this.variablesToGroup = vars;
-            }
-
             if(isGrouped) {
                 accumulateGroupBy(binding, functionEnv);
             }else {
@@ -66,12 +65,20 @@ public class RawCountAggregator {
         }
 
         private void accumulateGroupBy(Binding binding, FunctionEnv functionEnv) {
+
+            // The random walk failed, thus we must not process it
+            Node probabilityNode = binding.get(MAPPING_PROBABILITY);
+            if (probabilityNode == null
+                    || probabilityNode.isLiteral()
+                    || Double.valueOf(probabilityNode.getLiteralValue().toString()) == 0.0) return;
+
+
             Node rwhNode = binding.get(FrawConstants.RANDOM_WALK_HOLDER);
             String rwhString =  String.valueOf(rwhNode);
             String parsableRwhString = destringifyBindingJson(rwhString);
             JsonObject rwhJson = Json.createReader(new StringReader(parsableRwhString)).readObject();
 
-            randomWalkHolder.initialize(rwhJson, opGroup.getGroupVars().getVars());
+            randomWalkHolder.initialize(rwhJson, variablesToGroup);
 
             List<ProbabilityModifier> probabilityModifiers = randomWalkHolder.addWalk(rwhJson);
 
@@ -81,19 +88,18 @@ public class RawCountAggregator {
         }
 
         private void accumulateNoGroupBy(Binding binding, FunctionEnv functionEnv) {
-            Node n = binding.get(MAPPING_PROBABILITY);
-            if (n != null && n.isLiteral()) {
-                Double value = Double.valueOf(n.getLiteralValue().toString());
-                Double estimate = 1.0 / value;
+            Node probabilityNode = binding.get(MAPPING_PROBABILITY);
+            if (probabilityNode != null && probabilityNode.isLiteral()) {
+                Double probability = Double.valueOf(probabilityNode.getLiteralValue().toString());
+                if(probability == 0.0) return;
+                Double estimate = 1.0 / probability;
                 estimation += estimate;
             }
         }
 
         @Override
         public NodeValue getValue() {
-
-
-            if(numberOfWalks == 0.0) return NodeValue.makeInteger(0);
+            if(numberOfWalks == 0.0) return NodeValue.makeDouble(0.0);
 
             if(isGrouped) {
                 // We are in a group by scenario, so
