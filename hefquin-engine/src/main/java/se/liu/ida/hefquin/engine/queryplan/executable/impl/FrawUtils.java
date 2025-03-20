@@ -1,9 +1,6 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl;
 
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
+import jakarta.json.*;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Node;
@@ -17,7 +14,6 @@ import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 
 import java.io.StringReader;
 import java.util.Iterator;
-import java.util.Objects;
 
 import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.*;
 
@@ -91,40 +87,20 @@ public class FrawUtils {
                 bb.add(var, node);
             }else if(!bb.contains(MAPPING_PROBABILITY)) {
                 // Processing global mapping probability
-                Double newProbability = Double.valueOf(binding.get(MAPPING_PROBABILITY).getLiteralValue().toString()) / numberOfChildren;
+                Double newProbability = Double.valueOf(String.valueOf(binding.get(MAPPING_PROBABILITY).getLiteralValue())) / Double.valueOf(numberOfChildren);
                 bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(newProbability), XSDDatatype.XSDdouble));
             }
             // We never copy union objects since we always create a new one right after this
         }
 
-        // Creating a new union object in the binding
         Node subUnionObjectNode = binding.get(RANDOM_WALK_HOLDER);
-        JsonObject subUnionJson;
-        if(Objects.nonNull(subUnionObjectNode)){
-            JsonReader reader = Json.createReader(new StringReader(subUnionObjectNode.getLiteralValue().toString()));
-            subUnionJson = reader.readObject();
-            reader.close();
-        } else {
-            subUnionJson = Json.createObjectBuilder().build();
-        }
+        if(subUnionObjectNode == null) return bb.build();
 
-        JsonArray vars = subUnionJson.getJsonArray("vars");
+        JsonObject subUnionJson = Json.createReader(new StringReader(subUnionObjectNode.getLiteralValue().toString())).readObject();
 
-        Double probability = subUnionJson.getJsonNumber("probability").doubleValue();
+        JsonObject unionJson = buildUnion(subUnionJson, chosen);
 
-        JsonObject currentUnionJson = Json.createObjectBuilder()
-                .add("type", "union")
-                .add("child", chosen)
-                .add("sub", subUnionJson)
-                .add("vars", vars)
-                // As we retrieve a random walk, this probability cannot be known
-                // in advance. It is computed based on the number of branches of this union that have been explored by
-                // a number of random walks. For now, we keep the probability of the child, as if this union had only one branch,
-                // and when computing the estimation later, we apply the observed probability.
-                .add("probability", probability)
-                .build();
-
-        bb.add(RANDOM_WALK_HOLDER, NodeFactory.createLiteral(currentUnionJson.toString()));
+        bb.add(RANDOM_WALK_HOLDER, NodeFactory.createLiteral(unionJson.toString()));
 
         return bb.build();
     }
@@ -143,6 +119,76 @@ public class FrawUtils {
 
     public static String destringifyBindingJson(String jsonString){
         return jsonString.substring(1, jsonString.length()-1).replace("\\\"", "\"");
+    }
+
+    public static JsonObject buildUnion(JsonObject subUnionJson, int chosen){
+        // Creating a new union object in the binding
+
+        JsonArray vars = subUnionJson.getJsonArray("vars");
+
+        Double probability = subUnionJson.getJsonNumber("probability").doubleValue();
+
+        JsonObject currentUnionJson = Json.createObjectBuilder()
+                .add("type", "union")
+                .add("child", chosen)
+                .add("sub", subUnionJson)
+                .add("vars", vars)
+                // As we retrieve a random walk, this probability cannot be known
+                // in advance. It is computed based on the number of branches of this union that have been explored by
+                // a number of random walks. For now, we keep the probability of the child, as if this union had only one branch,
+                // and when computing the estimation later, we apply the observed probability.
+                .add("probability", probability)
+                .build();
+
+        return currentUnionJson;
+    }
+
+    public static JsonObject buildScan(Binding binding, Double probability){
+        JsonArrayBuilder jab = Json.createArrayBuilder();
+        binding.vars().forEachRemaining(var -> jab.add(Json.createValue(var.toString())));
+
+        JsonArray jsonArray = jab.build();
+
+        JsonObject scanJson = Json.createObjectBuilder()
+                .add("type", "scan")
+                .add("vars", jsonArray)
+                .add("probability", probability)
+                .build();
+
+        return scanJson;
+    }
+
+    public static JsonObject buildJoin(JsonObject left, JsonObject right){
+        // Computing probabilities for current join
+        JsonValue probabilityLeftJson = left.get("probability");
+        Double probabilityLeft = Double.valueOf(probabilityLeftJson.toString());
+        JsonValue probabilityRightJson = right.get("probability");
+        Double probabilityRight = Double.valueOf(probabilityRightJson.toString());
+
+        Double probability = probabilityLeft.doubleValue() * probabilityRight.doubleValue();
+
+        JsonArray varsLeft = left.getJsonArray("vars");
+        JsonArray varsRight = right.getJsonArray("vars");
+
+        JsonArrayBuilder varsBuilder = Json.createArrayBuilder();
+        for(JsonValue var : varsLeft){
+            varsBuilder.add(var);
+        }
+        for(JsonValue var : varsRight){
+            varsBuilder.add(var);
+        }
+
+        JsonArray vars = varsBuilder.build();
+
+        JsonObject joinJson = Json.createObjectBuilder()
+                .add("type", "join")
+                .add("left", left)
+                .add("right", right)
+                .add("probability", probability)
+                .add("vars", vars)
+                .build();
+
+        return joinJson;
     }
 
 }
