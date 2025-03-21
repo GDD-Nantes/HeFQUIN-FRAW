@@ -37,6 +37,10 @@ public class RawCountAggregator {
         return (agg, distinct) -> new RawCountAccumulator(agg, distinct, cxt);
     }
 
+    public static boolean isRawCountAccumulator(Accumulator accumulator) {
+        return accumulator instanceof RawCountAccumulator;
+    }
+
     private static class RawCountAccumulator implements Accumulator{
 
         private Double numberOfWalks = 0.0;

@@ -4,6 +4,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.expr.aggregate.Accumulator;
 import org.apache.jena.sparql.expr.aggregate.AccumulatorExpr;
 import org.apache.jena.sparql.expr.aggregate.AccumulatorFactory;
 import org.apache.jena.sparql.function.FunctionEnv;
@@ -14,6 +15,10 @@ public class RawAverageAggregator {
 
     public static AccumulatorFactory factory() {
         return (agg, distinct) -> new RawAverageAccumulator(agg.getExpr(), distinct);
+    }
+
+    public static boolean isRawAverageAccumulator(Accumulator accumulator) {
+        return accumulator instanceof RawAverageAccumulator;
     }
 
     @Override
