@@ -19,6 +19,7 @@ import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
 import se.liu.ida.hefquin.base.query.impl.QueryPatternUtils;
 import se.liu.ida.hefquin.base.utils.Pair;
+import se.liu.ida.hefquin.engine.QueryIterGroupFraw;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcException;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
@@ -152,8 +153,8 @@ public class OpExecutorFraw extends OpExecutor
 			// raw aggregates, which are only relevant when they are at the very bottom of a group by nest, in which case
 			// setting it here isn't a problem either! It's lucky, it's wanky, but hey, it works :)
 			ARQ.getContext().set(CURRENT_OP_GROUP, opGroup);
-			QueryIterator queryIterator = super.execute(opGroup, input);
-			return queryIterator;
+			QueryIterator qIter = exec(opGroup.getSubOp(), input);
+			return new QueryIterGroupFraw(qIter, opGroup.getGroupVars(), opGroup.getAggregators(), execCxt);
 		}
 	}
 
