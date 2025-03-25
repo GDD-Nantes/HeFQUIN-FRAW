@@ -99,9 +99,6 @@ public class ResultElementIterWithNaryExecOp extends ResultElementIterBase<NaryE
 			ResultBlockIterator it = inputIters.get(chosen);
 			if(it.hasNext()){
 				op.processBlockFromXthChild( chosen, it.next(), sink, execCxt );
-
-				chosen = random.nextInt(inputIters.size());
-				it = inputIters.get(chosen);
 			}
 		}
 

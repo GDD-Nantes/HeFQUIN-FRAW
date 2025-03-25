@@ -6,8 +6,6 @@ import org.apache.jena.riot.rowset.RowSetWriterRegistry;
 import org.apache.jena.sparql.algebra.optimize.Optimize;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
-import org.apache.jena.sparql.engine.ExecutionContext;
-import org.apache.jena.sparql.engine.main.OpExecutor;
 import org.apache.jena.sparql.engine.main.OpExecutorFactory;
 import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
@@ -48,12 +46,7 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 
 	@Override
 	public void integrateIntoJena() {
-		final OpExecutorFactory factory = new OpExecutorFactory() {
-			@Override
-			public OpExecutor create( final ExecutionContext execCxt ) {
-				return new OpExecutorFraw(qProc, execCxt);
-			}
-		};
+		final OpExecutorFactory factory = execCxt -> new OpExecutorFraw(qProc, execCxt);
 
 		QC.setFactory( ARQ.getContext(), factory );
 	}
