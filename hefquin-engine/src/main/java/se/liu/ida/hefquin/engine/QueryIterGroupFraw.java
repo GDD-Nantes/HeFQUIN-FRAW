@@ -128,14 +128,15 @@ public class QueryIterGroupFraw extends QueryIterPlainWrapper {
                     Collection<Pair<Var, Accumulator>> accs = accumulators.get(k);
 
                     for ( Pair<Var, Accumulator> pair : accs ) {
-                        NodeValue value = pair.getRight().getValue();
+                        NodeValue value;
+                        Double groupScalingFactor = keyToGroupCardinality.get(k) / total;
 
-                        if(RawCountAggregator.isRawCountAccumulator(pair.getRight())) {
-                            value = NodeValue.makeDouble(value.getDouble() * (keyToGroupCardinality.get(k) / total));
-                        }
-
-                        if(RawAverageAggregator.isRawAverageAccumulator(pair.getRight())) {
-                            value = NodeValue.makeDouble(value.getDouble() * (keyToGroupCardinality.get(k) / total));
+                        if(pair.getRight() instanceof RawCountAggregator.RawCountAccumulator) {
+                            value = ((RawCountAggregator.RawCountAccumulator) pair.getRight()).getValueWithFactor(groupScalingFactor);
+                        }else if(false){
+                            // Add other raw accumulators here
+                        }else {
+                            value = pair.getRight().getValue();
                         }
 
                         if ( value == null )

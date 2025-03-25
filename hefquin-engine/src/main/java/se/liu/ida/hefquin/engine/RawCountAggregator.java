@@ -4,7 +4,6 @@ import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.ARQ;
-import org.apache.jena.sparql.algebra.op.OpGroup;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.NodeValue;
@@ -19,10 +18,8 @@ import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils.destringifyBindingJson;
-import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.CURRENT_OP_GROUP;
 import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.MAPPING_PROBABILITY;
 
 
@@ -41,7 +38,7 @@ public class RawCountAggregator {
         return accumulator instanceof RawCountAccumulator;
     }
 
-    private static class RawCountAccumulator implements Accumulator{
+    public static class RawCountAccumulator implements ContextDependentAccumulator{
 
         private Double numberOfWalks = 0.0;
         private Double estimation = 0.0;
@@ -51,20 +48,21 @@ public class RawCountAggregator {
         private List<Var> variablesToGroup;
 
         public RawCountAccumulator(AggCustom agg, boolean distinct, Context context) {
-            randomWalkHolder = new RandomWalkHolder();
-            OpGroup opGroup = context.get(CURRENT_OP_GROUP);
-            isGrouped = Objects.nonNull(opGroup.getGroupVars()) && !opGroup.getGroupVars().isEmpty();
-            variablesToGroup = opGroup.getGroupVars().getVars();
+//            randomWalkHolder = new RandomWalkHolder();
+//            OpGroup opGroup = context.get(CURRENT_OP_GROUP);
+//            isGrouped = Objects.nonNull(opGroup.getGroupVars()) && !opGroup.getGroupVars().isEmpty();
+//            variablesToGroup = opGroup.getGroupVars().getVars();
         }
 
         @Override
         public void accumulate(Binding binding, FunctionEnv functionEnv) {
-            if(isGrouped) {
-                accumulateGroupBy(binding, functionEnv);
-            }else {
-                accumulateNoGroupBy(binding, functionEnv);
-            }
+//            if(isGrouped) {
+//                accumulateGroupBy(binding, functionEnv);
+//            }else {
+//                accumulateNoGroupBy(binding, functionEnv);
+//            }
 
+            accumulateNoGroupBy(binding, functionEnv);
             numberOfWalks += 1.0;
         }
 
@@ -73,7 +71,7 @@ public class RawCountAggregator {
             // The random walk failed, thus we must not process it
             Node probabilityNode = binding.get(MAPPING_PROBABILITY);
             if (probabilityNode == null
-                    || probabilityNode.isLiteral()
+                    || !probabilityNode.isLiteral()
                     || Double.valueOf(probabilityNode.getLiteralValue().toString()) == 0.0) return;
 
 
@@ -101,29 +99,42 @@ public class RawCountAggregator {
             }
         }
 
+        public Double getFinalEstimation() {
+            if(numberOfWalks == 0.0) return 0.0;
+
+//            if(isGrouped) {
+//                // We are in a group by scenario, so
+//                // we compute the estimations' sum once all the walks are done
+//
+//                for(Pair<Double, List<ProbabilityModifier>> pair : probaAndModifiers) {
+//                    Double proba = pair.object1;
+//                    List<ProbabilityModifier> modifiers = pair.object2;
+//
+//                    Double modifiedProbability = modifiers
+//                            .stream()
+//                            .map(modifier -> modifier.getModifier())
+//                            .reduce(proba, (soFar, nextModifider) -> soFar / nextModifider);
+//
+//                    estimation += 1.0 / modifiedProbability;
+//                }
+//
+//            }
+
+            return estimation/numberOfWalks;
+        }
+
+        public Double getFinalEstimationWithfactor(Double factor) {
+            return getFinalEstimation() * factor;
+        }
+
         @Override
         public NodeValue getValue() {
-            if(numberOfWalks == 0.0) return NodeValue.makeDouble(0.0);
+            return NodeValue.makeDouble(getFinalEstimation());
+        }
 
-            if(isGrouped) {
-                // We are in a group by scenario, so
-                // we compute the estimations' sum once all the walks are done
-
-                for(Pair<Double, List<ProbabilityModifier>> pair : probaAndModifiers) {
-                    Double proba = pair.object1;
-                    List<ProbabilityModifier> modifiers = pair.object2;
-
-                    Double modifiedProbability = modifiers
-                            .stream()
-                            .map(modifier -> modifier.getModifier())
-                            .reduce(proba, (soFar, nextModifider) -> soFar / nextModifider);
-
-                    estimation += 1.0 / modifiedProbability;
-                }
-
-            }
-
-            return NodeValue.makeDouble(estimation/numberOfWalks);
+        @Override
+        public NodeValue getValueWithFactor(Double factor) {
+            return NodeValue.makeDouble(getFinalEstimationWithfactor(factor));
         }
     }
 }

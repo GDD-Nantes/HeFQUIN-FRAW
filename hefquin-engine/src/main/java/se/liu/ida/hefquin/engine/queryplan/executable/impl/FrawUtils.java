@@ -12,7 +12,6 @@ import org.apache.jena.sparql.engine.binding.BindingLib;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 
-import java.io.StringReader;
 import java.util.Iterator;
 
 import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.*;
@@ -93,14 +92,14 @@ public class FrawUtils {
             // We never copy union objects since we always create a new one right after this
         }
 
-        Node subUnionObjectNode = binding.get(RANDOM_WALK_HOLDER);
-        if(subUnionObjectNode == null) return bb.build();
-
-        JsonObject subUnionJson = Json.createReader(new StringReader(subUnionObjectNode.getLiteralValue().toString())).readObject();
-
-        JsonObject unionJson = buildUnion(subUnionJson, chosen);
-
-        bb.add(RANDOM_WALK_HOLDER, NodeFactory.createLiteral(unionJson.toString()));
+//        Node subUnionObjectNode = binding.get(RANDOM_WALK_HOLDER);
+//        if(subUnionObjectNode == null) return bb.build();
+//
+//        JsonObject subUnionJson = Json.createReader(new StringReader(subUnionObjectNode.getLiteralValue().toString())).readObject();
+//
+//        JsonObject unionJson = buildUnion(subUnionJson, chosen);
+//
+//        bb.add(RANDOM_WALK_HOLDER, NodeFactory.createLiteral(unionJson.toString()));
 
         return bb.build();
     }
