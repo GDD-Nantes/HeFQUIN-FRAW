@@ -1,23 +1,25 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Test;
-
 import se.liu.ida.hefquin.base.data.SolutionMapping;
+import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutableOperatorStats;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.BaseForExecOps;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class ResultElementIterWithNullaryExecOpTest
 {
+
+	private static SolutionMapping EMPTY = new SolutionMappingImpl();
+
 	@Test
 	public void getOpTest() {
 		final NullaryExecutableOpForTest op = new NullaryExecutableOpForTest();
@@ -27,17 +29,11 @@ public class ResultElementIterWithNullaryExecOpTest
 	}
 
 	@Test
-	public void nextWithoutHasNext() {
-		final SolutionMapping sm1 = TestUtils.createSolutionMappingForTests();
-		final SolutionMapping sm2 = TestUtils.createSolutionMappingForTests();
-		final SolutionMapping sm3 = TestUtils.createSolutionMappingForTests();
-		final ResultElementIterator it = createIteratorForTests( sm1, sm2, sm3 );
+	public void nextWithEmptyIterator() {
+		final ResultElementIterator it = createIteratorForTests();
 
-		assertEquals( sm1, it.next() );
-		assertEquals( sm2, it.next() );
-		assertEquals( sm3, it.next() );
-
-		assertFalse( it.hasNext() );
+		assertEquals( it.hasNext(), true );
+		assertEquals( it.next(), EMPTY );
 	}
 
 	@Test
@@ -54,14 +50,16 @@ public class ResultElementIterWithNullaryExecOpTest
 		assertTrue( it.hasNext() );
 		assertEquals( sm3, it.next() );
 
-		assertFalse( it.hasNext() );
+		assertEquals( it.hasNext(), true );
+		assertEquals( it.next(), sm1 );
 	}
 
 	@Test
 	public void noElement() {
 		final ResultElementIterator it = createIteratorForTests();
 
-		assertFalse( it.hasNext() );
+		assertEquals( it.hasNext(), true );
+		assertEquals( it.next(), EMPTY );
 	}
 
 

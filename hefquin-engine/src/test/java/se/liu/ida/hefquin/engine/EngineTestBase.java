@@ -1,21 +1,18 @@
 package se.liu.ida.hefquin.engine;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.op.OpBGP;
+import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
-
+import org.apache.jena.sparql.engine.main.OpExecutor;
+import org.apache.jena.sparql.engine.main.QC;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.Triple;
 import se.liu.ida.hefquin.base.data.VocabularyMapping;
@@ -23,6 +20,7 @@ import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 import se.liu.ida.hefquin.base.data.impl.TripleImpl;
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.base.query.TriplePattern;
+import se.liu.ida.hefquin.base.query.impl.BGPImpl;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl1;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
 import se.liu.ida.hefquin.engine.federation.*;
@@ -35,6 +33,9 @@ import se.liu.ida.hefquin.engine.federation.access.impl.reqproc.Neo4jRequestProc
 import se.liu.ida.hefquin.engine.federation.access.impl.reqproc.Neo4jRequestProcessorImpl;
 import se.liu.ida.hefquin.engine.federation.access.impl.response.SolMapsResponseImpl;
 import se.liu.ida.hefquin.engine.federation.access.impl.response.TPFResponseImpl;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class EngineTestBase
 {
@@ -123,11 +124,19 @@ public abstract class EngineTestBase
 			}
 			else if ( pattern instanceof GenericSPARQLGraphPatternImpl2 ) {
 				jenaOp = ( (GenericSPARQLGraphPatternImpl2) pattern ).asJenaOp();
-			}
-			else {
+			} else if( pattern instanceof BGPImpl ){
+				BasicPattern bp = new BasicPattern();
+				( (BGPImpl) pattern ).getTriplePatterns().forEach(tp -> bp.add(tp.asJenaTriple()));
+
+				jenaOp = new OpBGP(bp);
+			} else {
 				throw new UnsupportedOperationException( pattern.getClass().getName() );
 			}
 
+
+			// Uses hefquin, even though Algebra.exec simulates remote endpoints processing queries locally.
+
+			QC.setFactory( ARQ.getContext(), (execCxt -> OpExecutor.stdFactory.create(execCxt)) );
 			final QueryIterator qIter = Algebra.exec(jenaOp, data);
 			final List<SolutionMapping> results = new ArrayList<>();
 			while ( qIter.hasNext() ){

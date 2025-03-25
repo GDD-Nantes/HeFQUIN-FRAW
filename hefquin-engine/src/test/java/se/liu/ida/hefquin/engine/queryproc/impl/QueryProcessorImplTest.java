@@ -1,13 +1,5 @@
 package se.liu.ida.hefquin.engine.queryproc.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Iterator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -17,12 +9,13 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.junit.Test;
-
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.query.Query;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl1;
 import se.liu.ida.hefquin.engine.EngineTestBase;
+import se.liu.ida.hefquin.engine.HeFQUINEngine;
 import se.liu.ida.hefquin.engine.HeFQUINEngineDefaultComponents;
+import se.liu.ida.hefquin.engine.HeFQUINEngineImpl;
 import se.liu.ida.hefquin.engine.federation.BRTPFServer;
 import se.liu.ida.hefquin.engine.federation.TPFServer;
 import se.liu.ida.hefquin.engine.federation.access.BRTPFRequest;
@@ -35,20 +28,21 @@ import se.liu.ida.hefquin.engine.federation.catalog.FederationCatalog;
 import se.liu.ida.hefquin.engine.federation.catalog.impl.FederationCatalogImpl;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.utils.LogicalToPhysicalPlanConverter;
-import se.liu.ida.hefquin.engine.queryproc.ExecutionEngine;
-import se.liu.ida.hefquin.engine.queryproc.LogicalOptimizer;
-import se.liu.ida.hefquin.engine.queryproc.PhysicalOptimizer;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanCompiler;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanner;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcException;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
-import se.liu.ida.hefquin.engine.queryproc.SourcePlanner;
-import se.liu.ida.hefquin.engine.queryproc.impl.compiler.*;
+import se.liu.ida.hefquin.engine.queryproc.*;
+import se.liu.ida.hefquin.engine.queryproc.impl.compiler.IteratorBasedSamplingQueryPlanCompilerImpl;
+import se.liu.ida.hefquin.engine.queryproc.impl.compiler.PushBasedQueryPlanCompilerImpl;
 import se.liu.ida.hefquin.engine.queryproc.impl.execution.ExecutionEngineImpl;
+import se.liu.ida.hefquin.engine.queryproc.impl.execution.FrawExecutionEngineImpl;
 import se.liu.ida.hefquin.engine.queryproc.impl.planning.QueryPlannerImpl;
 import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.PhysicalOptimizerWithoutOptimization;
 import se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ServiceClauseBasedSourcePlannerImpl;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.*;
 
 public class QueryProcessorImplTest extends EngineTestBase
 {
@@ -381,6 +375,7 @@ public class QueryProcessorImplTest extends EngineTestBase
 		final ExecutionEngine execEngine = new ExecutionEngineImpl();
 		final QueryProcessor qProc = new QueryProcessorImpl(planner, planCompiler, execEngine, ctxt);
 		final MaterializingQueryResultSinkImpl resultSink = new MaterializingQueryResultSinkImpl();
+		// Doesn't work with group bys, because of the getQueryPattern call
 		final Query query = new GenericSPARQLGraphPatternImpl1( QueryFactory.create(queryString).getQueryPattern() );
 
 		qProc.processQuery(query, resultSink);
@@ -397,4 +392,171 @@ System.err.println("Terminating the thread pool was interrupted." );
 		return resultSink.getSolMapsIter();
 	}
 
+
+	// -------------------------------------- HEFQUIN FRAW TESTS -------------------------------------------------------
+
+	String spo = "SELECT * WHERE { SERVICE <http://example.org> { ?s ?p ?o } }";
+
+	String noresult = "SELECT * WHERE { ?s ?p \"doesntExist\" }";
+
+	String groupBy = "SELECT ?s (COUNT(?p) as ?nbPredicate) WHERE { SERVICE <http://example.org> { ?s ?p ?o } } GROUP BY ?s";
+
+	String nestedGroupBy =
+					"SELECT ?person (count(?species) as ?numberOfSpecies) WHERE {\n" +
+					"    {\n" +
+					"        SELECT ?person ?species WHERE {\n" +
+					"            SERVICE <http://example.org> {\n" +
+					"				?person <http://own> ?animal.\n" +
+					"           	?animal <http://species> ?species.\n" +
+					"			}\n" +
+					"        }\n" +
+					"        group by ?person ?species\n" +
+					"    }\n" +
+					"}\n" +
+					"group by ?person";
+
+	String joinGroupByAsInput =
+			"SELECT ?person (count(?species) as ?numberOfSpecies) WHERE {\n" +
+					"    {\n" +
+					"        SELECT ?person ?species WHERE {\n" +
+					"            SERVICE <http://example.org> {\n" +
+					"				?person <http://own> ?animal.\n" +
+					"           	?animal <http://species> ?species.\n" +
+					"			}\n" +
+					"        }\n" +
+					"        group by ?person ?species\n" +
+					"    }.\n" +
+					"    ?person <http://own> ?animal. " +
+					"}\n" +
+					"group by ?person";
+
+	String joinGroupByWithInput =
+			"SELECT ?person (count(?species) as ?numberOfSpecies) WHERE {\n" +
+					"    ?person <http://own> ?animal." +
+					"    {\n" +
+					"        SELECT ?person ?species WHERE {\n" +
+					"            SERVICE <http://example.org> {\n" +
+					"				?person <http://own> ?animal.\n" +
+					"           	?animal <http://species> ?species.\n" +
+					"			}\n" +
+					"        }\n" +
+					"        group by ?person ?species\n" +
+					"    }.\n" +
+					"}\n" +
+					"group by ?person";
+
+
+	private static Graph getGraph(){
+		Graph dataForMember = GraphFactory.createGraphMem();
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://Alice"),
+				NodeFactory.createURI("http://address"),
+				NodeFactory.createURI("http://nantes")) );
+
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://Bob"),
+				NodeFactory.createURI("http://address"),
+				NodeFactory.createURI("http://paris")) );
+
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://Carole"),
+				NodeFactory.createURI("http://address"),
+				NodeFactory.createURI("http://nantes")) );
+
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://Alice"),
+				NodeFactory.createURI("http://own"),
+				NodeFactory.createURI("http://cat")) );
+
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://Alice"),
+				NodeFactory.createURI("http://own"),
+				NodeFactory.createURI("http://bird")) );
+
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://Bob"),
+				NodeFactory.createURI("http://own"),
+				NodeFactory.createURI("http://dog")) );
+
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://Carole"),
+				NodeFactory.createURI("http://own"),
+				NodeFactory.createURI("http://snake")) );
+
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://cat"),
+				NodeFactory.createURI("http://species"),
+				NodeFactory.createURI("http://feline")) );
+
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://bird"),
+				NodeFactory.createURI("http://species"),
+				NodeFactory.createURI("http://birb")) );
+
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://dog"),
+				NodeFactory.createURI("http://species"),
+				NodeFactory.createURI("http://canine")) );
+
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://snake"),
+				NodeFactory.createURI("http://species"),
+				NodeFactory.createURI("http://reptile")) );
+
+		return dataForMember;
+	}
+
+
+	@Test
+	public void testGroupBy() throws QueryProcException, UnsupportedEncodingException {
+
+//		final DatasetGraph dsg = DatasetGraphFactory.createGeneral();
+//		dsg.addGraph(NodeFactory.createURI("http://example.com"), getGraph());
+//		final QueryExecution qe = QueryExecutionFactory.create(QueryFactory.create(spo), dsg);
+
+
+		final Graph dataForMember = getGraph();
+
+		final FederationCatalogImpl fedCat = new FederationCatalogImpl();
+		fedCat.addMember("http://example.org" , new SPARQLEndpointForTest(dataForMember) );
+
+		final FederationAccessManager fedAccessMgr = new FederationAccessManagerForTest();
+
+
+		final ExecutorService execServiceForPlanTasks = HeFQUINEngineDefaultComponents.createExecutorServiceForPlanTasks();
+		final LogicalToPhysicalPlanConverter l2pConverter = HeFQUINEngineDefaultComponents.createDefaultLogicalToPhysicalPlanConverter();
+
+		final QueryProcContext ctxt = new QueryProcContext() {
+			@Override public FederationCatalog getFederationCatalog() { return fedCat; }
+			@Override public FederationAccessManager getFederationAccessMgr() { return fedAccessMgr; }
+			@Override public ExecutorService getExecutorServiceForPlanTasks() { return execServiceForPlanTasks; }
+			@Override public boolean isExperimentRun() { return false; }
+			@Override public boolean skipExecution() { return false; }
+		};
+
+		final SourcePlanner sourcePlanner = new ServiceClauseBasedSourcePlannerImpl(ctxt);
+
+		final LogicalOptimizer loptimizer = (p, keepNaryOperators) -> p;
+		final PhysicalOptimizer poptimizer = new PhysicalOptimizerWithoutOptimization(l2pConverter);
+
+		final QueryPlanner planner = new QueryPlannerImpl(sourcePlanner, loptimizer, poptimizer, null, null, null);
+		final QueryPlanCompiler planCompiler = new IteratorBasedSamplingQueryPlanCompilerImpl(ctxt);
+		final ExecutionEngine execEngine = new FrawExecutionEngineImpl();
+
+		final QueryProcessor qProc = new QueryProcessorImpl(planner, planCompiler, execEngine, ctxt);
+
+		HeFQUINEngine engine = new HeFQUINEngineImpl(fedAccessMgr, qProc);
+
+		engine.integrateIntoJena();
+
+		engine.executeQuery(QueryFactory.create(nestedGroupBy));
+
+
+//		final Iterator<SolutionMapping> it = processQuery(groupBy, fedCat, fedAccessMgr);
+//
+//		while ( it.hasNext() ){
+//			final SolutionMapping sol = it.next();
+//			System.out.println(sol.toString());
+//		}
+	}
 }
