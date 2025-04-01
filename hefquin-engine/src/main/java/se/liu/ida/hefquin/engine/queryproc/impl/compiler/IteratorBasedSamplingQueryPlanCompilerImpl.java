@@ -8,13 +8,16 @@ import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.QueryCompilationException;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
+import se.liu.ida.hefquin.engine.queryproc.SamplingQueryPlanCompiler;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompilerBase
+import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.DEFAULT_RANDOM_WALK;
+
+public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompilerBase implements SamplingQueryPlanCompiler
 {
-	public IteratorBasedSamplingQueryPlanCompilerImpl(final QueryProcContext ctxt ) {
+	public IteratorBasedSamplingQueryPlanCompilerImpl(final QueryProcContext ctxt) {
 		super(ctxt);
 	}
 
@@ -22,9 +25,16 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 	public ExecutablePlan compile( final PhysicalPlan qep )
 			throws QueryCompilationException
 	{
+		return compile( qep, DEFAULT_RANDOM_WALK );
+	}
+
+	@Override
+	public ExecutablePlan compile( final PhysicalPlan qep, final int numberOfWalks )
+			throws QueryCompilationException
+	{
 		final ExecutionContext execCxt = createExecContext();
 		final ResultElementIterator it = compile( qep, execCxt );
-		return new IteratorBasedExecutableSamplingPlanImpl(it);
+		return new IteratorBasedExecutableSamplingPlanImpl( it, numberOfWalks );
 	}
 
 	protected ResultElementIterator compile( final PhysicalPlan qep,

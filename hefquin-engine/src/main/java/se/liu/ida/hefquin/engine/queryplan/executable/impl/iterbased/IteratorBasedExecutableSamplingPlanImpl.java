@@ -6,13 +6,21 @@ import se.liu.ida.hefquin.engine.queryproc.QueryResultSink;
 
 import java.util.List;
 
+import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.DEFAULT_RANDOM_WALK;
+
 public class IteratorBasedExecutableSamplingPlanImpl extends IteratorBasedExecutablePlanImpl
 {
-	private final int DEFAULT_NUMBER_OF_WALKS = 100;
+	private final int numberOfWalks;
 	private final int DEFAULT_TIMEOUT_MS = Integer.MAX_VALUE;
 
-	public IteratorBasedExecutableSamplingPlanImpl(final ResultElementIterator it ) {
+	public IteratorBasedExecutableSamplingPlanImpl(final ResultElementIterator it) {
         super(it);
+		this.numberOfWalks = DEFAULT_RANDOM_WALK;
+	}
+
+	public IteratorBasedExecutableSamplingPlanImpl( final ResultElementIterator it, final int numberOfWalks ) {
+		super(it);
+		this.numberOfWalks = numberOfWalks;
 	}
 
 	public void runWithBudget( final QueryResultSink resultSink ) throws ExecutionException {
@@ -30,7 +38,7 @@ public class IteratorBasedExecutableSamplingPlanImpl extends IteratorBasedExecut
 	}
 
 	private boolean shouldStop(final int attempted, final long start) {
-		return attempted >= DEFAULT_NUMBER_OF_WALKS || System.currentTimeMillis() - start >= DEFAULT_TIMEOUT_MS;
+		return attempted >= numberOfWalks || System.currentTimeMillis() - start >= DEFAULT_TIMEOUT_MS;
 	}
 
 	@Override

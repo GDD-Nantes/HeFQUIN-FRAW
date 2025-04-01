@@ -16,6 +16,7 @@ import se.liu.ida.hefquin.engine.federation.access.FederationAccessManager;
 import se.liu.ida.hefquin.engine.federation.access.FederationAccessStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
+import se.liu.ida.hefquin.engine.queryproc.SamplingQueryProcessor;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
 import se.liu.ida.hefquin.jenaintegration.sparql.engine.main.OpExecutorFraw;
 
@@ -46,7 +47,7 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 
 	@Override
 	public void integrateIntoJena() {
-		final OpExecutorFactory factory = execCxt -> new OpExecutorFraw(qProc, execCxt);
+		final OpExecutorFactory factory = execCxt -> new OpExecutorFraw((SamplingQueryProcessor) qProc, execCxt);
 
 		QC.setFactory( ARQ.getContext(), factory );
 	}

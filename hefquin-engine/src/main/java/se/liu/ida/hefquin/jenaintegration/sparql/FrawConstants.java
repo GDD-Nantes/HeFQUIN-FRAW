@@ -10,5 +10,7 @@ public class FrawConstants {
     public static final Symbol CURRENT_OP_GROUP = Symbol.create("currentOp");
     public static final Var RANDOM_WALK_HOLDER = Var.alloc("randomWalkHolder");
 
+    public static final Integer DEFAULT_RANDOM_WALK = 1000;
+
 }
 
