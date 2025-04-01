@@ -1,6 +1,5 @@
 package se.liu.ida.hefquin.jenaintegration.sparql.engine.main;
 
-import org.apache.jena.query.ARQ;
 import org.apache.jena.query.QueryExecException;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVisitorBase;
@@ -22,21 +21,22 @@ import se.liu.ida.hefquin.base.utils.Pair;
 import se.liu.ida.hefquin.engine.QueryIterGroupFraw;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcException;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
-import se.liu.ida.hefquin.engine.queryproc.impl.MaterializingQueryResultSinkImpl;
+import se.liu.ida.hefquin.engine.queryproc.SamplingQueryProcessor;
+import se.liu.ida.hefquin.engine.queryproc.impl.MaterializingQueryResultSinkWithInputBindingImpl;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.CURRENT_OP_GROUP;
+import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.DEFAULT_RANDOM_WALK;
 
 public class OpExecutorFraw extends OpExecutor
 {
-	protected final QueryProcessor qProc;
+	protected final SamplingQueryProcessor qProc;
+	protected boolean nextQueryProcSingleWalk = false;
 
-	public OpExecutorFraw(final QueryProcessor qProc, final ExecutionContext execCxt ) {
+	public OpExecutorFraw(final SamplingQueryProcessor qProc, final ExecutionContext execCxt ) {
 		super(execCxt);
 
 		assert qProc != null;
@@ -76,6 +76,7 @@ public class OpExecutorFraw extends OpExecutor
 		else {
 			// Forcing use of bound join; it's random walk we're talking about after all
 			QueryIterator left = exec(opJoin.getLeft(), input);
+			this.nextQueryProcSingleWalk = true;
 			return super.executeOp(opJoin.getRight(), left);
 		}
 	}
@@ -147,12 +148,13 @@ public class OpExecutorFraw extends OpExecutor
 			return executeSupportedOp( opGroup, input );
 		}
 		else {
-			// This works for sequential group bys (like in a join for example). That is, the current op group will
-			// always be the right one.
-			// However, it shouldn't work for nested group bys, but thankfully the current op group is only used for
-			// raw aggregates, which are only relevant when they are at the very bottom of a group by nest, in which case
-			// setting it here isn't a problem either! It's lucky, it's wanky, but hey, it works :)
-			ARQ.getContext().set(CURRENT_OP_GROUP, opGroup);
+//			// This works for sequential group bys (like in a join for example). That is, the current op group will
+//			// always be the right one.
+//			// However, it shouldn't work for nested group bys, but thankfully the current op group is only used for
+//			// raw aggregates, which are only relevant when they are at the very bottom of a group by nest, in which case
+//			// setting it here isn't a problem either! It's lucky, it's wanky, but hey, it works :)
+//			ARQ.getContext().set(CURRENT_OP_GROUP, opGroup);
+
 			QueryIterator qIter = exec(opGroup.getSubOp(), input);
 			return new QueryIterGroupFraw(qIter, opGroup.getGroupVars(), opGroup.getAggregators(), execCxt);
 		}
@@ -167,19 +169,32 @@ public class OpExecutorFraw extends OpExecutor
 	}
 
 	protected QueryIterator executeSupportedOp( final Op op, final QueryIterator input ) {
-		return new MainQueryIterator( op, input );
+
+		return new MainQueryIterator( op, input, nextQueryProcSingleWalk ? 1 : DEFAULT_RANDOM_WALK );
 	}
 
 
 	protected class MainQueryIterator extends QueryIterRepeatApply
 	{
 		protected final Op op;
+		protected final int numberOfWalks;
 
 		public MainQueryIterator( final Op op, final QueryIterator input ) {
 			super(input, execCxt);
 
 			assert op != null;
 			this.op = op;
+
+			this.numberOfWalks = DEFAULT_RANDOM_WALK;
+		}
+
+		public MainQueryIterator( final Op op, final QueryIterator input, final int numberOfWalks ) {
+			super(input, execCxt);
+
+			assert op != null;
+			this.op = op;
+
+			this.numberOfWalks = numberOfWalks;
 		}
 
 		@Override
@@ -203,11 +218,11 @@ public class OpExecutorFraw extends OpExecutor
 				opForStage = QueryPatternUtils.convertToJenaOp(boundSGP);
 			}
 
-			final MaterializingQueryResultSinkImpl sink = new MaterializingQueryResultSinkImpl();
+			final MaterializingQueryResultSinkWithInputBindingImpl sink = new MaterializingQueryResultSinkWithInputBindingImpl(binding);
 			final Pair<QueryProcStats, List<Exception>> statsAndExceptions;
 
 			try {
-				statsAndExceptions = qProc.processQuery( new GenericSPARQLGraphPatternImpl2(opForStage), sink );
+				statsAndExceptions = qProc.processQuery( new GenericSPARQLGraphPatternImpl2(opForStage), sink, numberOfWalks );
 				if(Objects.isNull(statsAndExceptions)) return new QueryIterNullIterator(execCxt);
 			}
 			catch ( final QueryProcException ex ) {
