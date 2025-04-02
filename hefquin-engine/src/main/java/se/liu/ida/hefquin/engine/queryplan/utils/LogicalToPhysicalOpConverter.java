@@ -137,7 +137,7 @@ public class LogicalToPhysicalOpConverter
 	}
 
 	public static BinaryPhysicalOp convert( final LogicalOpUnion lop ) {
-		return new PhysicalOpBinaryUnion(lop);
+		return new PhysicalOpFrawBinaryUnion(lop);
 	}
 
 	public static BinaryPhysicalOp convert( final LogicalOpRightJoin lop ) {
