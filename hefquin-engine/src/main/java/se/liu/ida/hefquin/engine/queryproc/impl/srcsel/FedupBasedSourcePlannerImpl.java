@@ -35,20 +35,26 @@ public class FedupBasedSourcePlannerImpl extends ServiceClauseBasedSourcePlanner
     @Override
     protected Pair<LogicalPlan, SourcePlanningStats> createSourceAssignment(Op jenaOp) throws SourcePlanningException {
         Op op = getSourceSelection(jenaOp);
+        if(Objects.isNull(op)) return null;
 
         final LogicalPlan sa = createPlan(op);
-        if(Objects.isNull(op)) return null;
         final SourcePlanningStats myStats = new SourcePlanningStatsImpl();
 
         return new Pair<>(sa, myStats);
     }
 
     protected Op getSourceSelection(Op jenaOp) throws SourcePlanningException {
-        return fedup.queryJenaToJena(jenaOp);
+        try{
+            return fedup.queryJenaToJena(jenaOp);
+        }catch(Exception e){
+            return null;
+        }
     }
 
     protected LogicalPlan createPlan(Op op) {
         if(Objects.isNull(op)) return null;
+
+        // TODO : check if i can remove this if and its content. I'm pretty sure it's useless
         if(op instanceof OpProject){
             return super.createPlan(((OpProject) op).getSubOp());
         }

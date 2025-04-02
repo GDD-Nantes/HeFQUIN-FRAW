@@ -10,16 +10,14 @@ import org.apache.jena.sparql.algebra.op.*;
 import org.apache.jena.sparql.expr.ExprList;
 import se.liu.ida.hefquin.engine.OpVisitorRouter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class JOUConverter extends ReturningOpBaseVisitor {
 
-    public Op convert(Op op){
+    public Op convert(Op op) {
+        if(Objects.isNull(op)) return null;
         return ReturningOpVisitorRouter.visit(this, op);
     }
 
