@@ -34,10 +34,5 @@
       <artifactId>chronicle-map</artifactId>
       <version>3.27ea0</version>
     </dependency>
-    <dependency>
-      <groupId>fr.gdd</groupId>
-      <artifactId>fedup</artifactId>
-      <version>0.0.1</version>
-    </dependency>
   </dependencies>
 </project>
