@@ -11,6 +11,7 @@ import se.liu.ida.hefquin.engine.queryplan.utils.LogicalPlanPrinter;
 import se.liu.ida.hefquin.engine.queryplan.utils.PhysicalPlanPrinter;
 import se.liu.ida.hefquin.engine.queryproc.*;
 import se.liu.ida.hefquin.engine.queryproc.impl.ExecutionContextImpl;
+import se.liu.ida.hefquin.engine.queryproc.impl.QueryProcessorImpl;
 import se.liu.ida.hefquin.engine.queryproc.impl.SamplingQueryProcessorImpl;
 import se.liu.ida.hefquin.engine.queryproc.impl.planning.QueryPlannerImpl;
 import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.CostModel;
@@ -142,7 +143,10 @@ public class HeFQUINEngineConfigReader
 		final QueryPlanCompiler compiler = readQueryPlanCompiler(rsrc, ctx);
 		final ExecutionEngine exec = readExecutionEngine(rsrc, ctx);
 
-		return new SamplingQueryProcessorImpl( planner, (SamplingQueryPlanCompiler) compiler, exec, ctx.getQueryProcContext() );
+
+		if(compiler instanceof SamplingQueryPlanCompiler)
+			return new SamplingQueryProcessorImpl( planner, (SamplingQueryPlanCompiler) compiler, exec, ctx.getQueryProcContext() );
+		return new QueryProcessorImpl( planner, compiler, exec, ctx.getQueryProcContext() );
 	}
 
 	public CostModel readCostModel( final Resource qprocRsrc, final ExtendedContext ctx ) {

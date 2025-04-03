@@ -19,6 +19,7 @@ import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
 import se.liu.ida.hefquin.engine.queryproc.SamplingQueryProcessor;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
 import se.liu.ida.hefquin.jenaintegration.sparql.engine.main.OpExecutorFraw;
+import se.liu.ida.hefquin.jenaintegration.sparql.engine.main.OpExecutorHeFQUIN;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -47,7 +48,10 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 
 	@Override
 	public void integrateIntoJena() {
-		final OpExecutorFactory factory = execCxt -> new OpExecutorFraw((SamplingQueryProcessor) qProc, execCxt);
+		final OpExecutorFactory factory = execCxt ->
+				qProc instanceof SamplingQueryProcessor ?
+						new OpExecutorFraw((SamplingQueryProcessor) qProc, execCxt) :
+						new OpExecutorHeFQUIN(qProc, execCxt);
 
 		QC.setFactory( ARQ.getContext(), factory );
 	}
