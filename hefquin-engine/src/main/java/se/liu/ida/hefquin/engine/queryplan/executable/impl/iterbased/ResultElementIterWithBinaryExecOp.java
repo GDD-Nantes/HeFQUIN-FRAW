@@ -2,10 +2,12 @@ package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
 import se.liu.ida.hefquin.engine.queryplan.executable.BinaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlanStats;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpFrawMultiwayUnion;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
 
 import java.util.List;
+import java.util.Random;
 
 public class ResultElementIterWithBinaryExecOp extends ResultElementIterBase<BinaryExecutableOp>
 {
@@ -25,7 +27,6 @@ public class ResultElementIterWithBinaryExecOp extends ResultElementIterBase<Bin
 		assert inputIter2 != null;
 		assert execCxt != null;
 
-		System.out.println("WARNING : INSTANTIATING A " + this.getClass().getName());
 		this.op = op;
 		this.inputIter1 = inputIter1;
 		this.inputIter2 = inputIter2;
@@ -94,17 +95,31 @@ public class ResultElementIterWithBinaryExecOp extends ResultElementIterBase<Bin
 			// intermediate result from input one first, before moving on to
 			// input two.
 
-			if ( inputIter1.hasNext() ) {
-				op.processBlockFromChild1( inputIter1.next(), sink, execCxt );
-			}
-			op.wrapUpForChild1(sink, execCxt);
+			if(op instanceof ExecOpFrawMultiwayUnion) {
+				runFrawBinaryUnion();
+			} else {
+				if ( inputIter1.hasNext() ) {
+					op.processBlockFromChild1( inputIter1.next(), sink, execCxt );
+				}
+				op.wrapUpForChild1(sink, execCxt);
 
-			if ( inputIter2.hasNext() ) {
-				op.processBlockFromChild2( inputIter2.next(), sink, execCxt );
+				if ( inputIter2.hasNext() ) {
+					op.processBlockFromChild2( inputIter2.next(), sink, execCxt );
+				}
+				op.wrapUpForChild2(sink, execCxt);
 			}
-			op.wrapUpForChild2(sink, execCxt);
+
+
+		}
+
+		private void runFrawBinaryUnion() throws ExecutionException{
+			Random random = new Random();
+			int chosen = random.nextInt(2);
+			if (chosen == 0)
+				op.processBlockFromChild1(inputIter1.next(), sink, execCxt);
+            else
+				op.processBlockFromChild2(inputIter2.next(), sink, execCxt);
 		}
 
 	} // end of class OpRunnerThread
-
 }

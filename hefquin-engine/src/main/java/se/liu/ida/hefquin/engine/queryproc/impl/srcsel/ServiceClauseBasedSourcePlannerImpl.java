@@ -1,13 +1,8 @@
 package se.liu.ida.hefquin.engine.queryproc.impl.srcsel;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.*;
 import org.apache.jena.sparql.core.BasicPattern;
-
 import se.liu.ida.hefquin.base.query.BGP;
 import se.liu.ida.hefquin.base.query.TriplePattern;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
@@ -28,6 +23,10 @@ import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanner;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanningException;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanningStats;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This implementation of {@link SourcePlanner} does not actually perform
@@ -323,7 +322,7 @@ public class ServiceClauseBasedSourcePlannerImpl extends SourcePlannerBase
 		final List<LogicalPlan> subPlansFlattened = new ArrayList<>();
 
 		for ( int i = 0; i < subPlans.length; ++i ) {
-			if ( subPlans[i].getRootOperator() instanceof LogicalOpMultiwayUnion ) {
+			if ( subPlans[i].getRootOperator() instanceof LogicalOpUnion || subPlans[i].getRootOperator() instanceof LogicalOpMultiwayUnion ) {
 				for ( int j = 0; j < subPlans[i].numberOfSubPlans(); ++j ) {
 					subPlansFlattened.add( subPlans[i].getSubPlan(j) );
 				}
@@ -332,6 +331,11 @@ public class ServiceClauseBasedSourcePlannerImpl extends SourcePlannerBase
 				subPlansFlattened.add( subPlans[i] );
 			}
 		}
+
+		if( subPlansFlattened.size() == 2 )
+			return new LogicalPlanWithBinaryRootImpl( LogicalOpUnion.getInstance(),
+					subPlansFlattened.get(0),
+					subPlansFlattened.get(1) );
 
 		return new LogicalPlanWithNaryRootImpl( LogicalOpMultiwayUnion.getInstance(),
 		                                        subPlansFlattened );
