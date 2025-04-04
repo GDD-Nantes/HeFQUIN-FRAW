@@ -43,7 +43,7 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 		if ( qep.numberOfSubPlans() == 0 )
 		{
 			final NullaryExecutableOp execOp = (NullaryExecutableOp) qep.getRootOperator().createExecOp(true);
-			return new ResultElementIterWithNullaryExecOp(execOp, execCxt);
+			return new SamplingResultElementIterWithNullaryExecOp(execOp, execCxt);
 		}
 		else if ( qep.numberOfSubPlans() == 1 )
 		{
@@ -53,7 +53,7 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 
 			final ResultElementIterator elmtIterSubPlan = compile(subPlan, execCxt);
 			final ResultBlockIterator blockIterSubPlan = createBlockIterator( elmtIterSubPlan, execOp.preferredInputBlockSize() );
-			return new ResultElementIterWithUnaryExecOp(execOp, blockIterSubPlan, execCxt);
+			return new SamplingResultElementIterWithUnaryExecOp(execOp, blockIterSubPlan, execCxt);
 		}
 		else if ( qep.numberOfSubPlans() == 2 )
 		{
@@ -71,7 +71,7 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 			final ResultElementIterator elmtIterSubPlan2 = compile(subPlan2, execCxt);
 			final ResultBlockIterator blockIterSubPlan2 = createBlockIterator( elmtIterSubPlan2, execOp.preferredInputBlockSizeFromChild2() );
 
-			return new ResultElementIterWithBinaryExecOp(execOp, blockIterSubPlan1, blockIterSubPlan2, execCxt);
+			return new SamplingResultElementIterWithBinaryExecOp(execOp, blockIterSubPlan1, blockIterSubPlan2, execCxt);
 		}
 		else {
 			List<ResultBlockIterator> blockIterators = new ArrayList<>();
@@ -96,13 +96,13 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 				blockIterators.add(blockIterSubPlan);
 			}
 
-			return new ResultElementIterWithNaryExecOp( execOp, blockIterators, execCxt );
+			return new SamplingResultElementIterWithNaryExecOp( execOp, blockIterators, execCxt );
 		}
 	}
 
 	protected ResultBlockIterator createBlockIterator( final ResultElementIterator elmtIter, final int preferredBlockSize ) {
 		final IntermediateResultBlockBuilder blockBuilder = new GenericIntermediateResultBlockBuilderImpl();
-		return new ResultBlockIterOverResultElementIter( elmtIter, blockBuilder, preferredBlockSize );
+		return new ResultBlockIterOverResultElementIter( elmtIter, blockBuilder, 1 );
 	}
 
 }

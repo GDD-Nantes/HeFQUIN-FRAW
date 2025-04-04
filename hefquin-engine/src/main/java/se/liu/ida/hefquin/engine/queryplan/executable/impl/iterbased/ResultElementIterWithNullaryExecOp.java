@@ -4,20 +4,19 @@ import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
 
-public class ResultElementIterWithNullaryExecOp extends ResultElementIterBase<NullaryExecutableOp>
+public class ResultElementIterWithNullaryExecOp extends ResultElementIterBase
 {
-	protected final NullaryExecutableOp op;
+	protected final MyOpRunnerThread opRunnerThread;
 
 	public ResultElementIterWithNullaryExecOp( final NullaryExecutableOp op,
-	                                           final ExecutionContext execCxt )
+											   final ExecutionContext execCxt )
 	{
 		super(execCxt);
 
 		assert op != null;
 		assert execCxt != null;
 
-		this.op = op;
-		createNewOpRunnerThread();
+		opRunnerThread = new MyOpRunnerThread(op);
 	}
 
 	@Override
@@ -30,11 +29,6 @@ public class ResultElementIterWithNullaryExecOp extends ResultElementIterBase<Nu
 		return opRunnerThread;
 	}
 
-	@Override
-	protected OpRunnerThread createNewOpRunnerThread() {
-		this.opRunnerThread = new MyOpRunnerThread(op);
-		return this.opRunnerThread;
-	}
 
 	protected class MyOpRunnerThread extends OpRunnerThread
 	{
