@@ -4,7 +4,6 @@ import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.*;
-import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
@@ -13,7 +12,6 @@ import org.apache.jena.sparql.engine.main.OpExecutor;
 import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import se.liu.ida.hefquin.engine.EngineTestBase;
 import se.liu.ida.hefquin.engine.HeFQUINEngine;
@@ -39,6 +37,8 @@ public class SamplingQueryProcessorImplTest extends EngineTestBase
 {
 
 	String spo = "SELECT * WHERE { SERVICE <http://example.org> { ?s ?p ?o } }";
+
+	String spop1o1 = "SELECT * WHERE { SERVICE <http://example.org> { ?s ?p ?o. } . SERVICE <http://example2.org> { ?o ?p1 ?o1. } }";
 
 	String noresult = "SELECT * WHERE { ?s ?p \"doesntExist\" }";
 
@@ -90,6 +90,26 @@ public class SamplingQueryProcessorImplTest extends EngineTestBase
 					"    }.\n" +
 					"}\n";
 
+
+	private static Graph getGraph2(){
+		Graph dataForMember = GraphFactory.createGraphMem();
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://cat"),
+				NodeFactory.createURI("http://loves"),
+				NodeFactory.createURI("http://food")) );
+
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://dog"),
+				NodeFactory.createURI("http://loves"),
+				NodeFactory.createURI("http://bone")) );
+
+		dataForMember.add( Triple.create(
+				NodeFactory.createURI("http://bird"),
+				NodeFactory.createURI("http://loves"),
+				NodeFactory.createURI("http://dance")) );
+
+		return dataForMember;
+	}
 
 	private static Graph getGraph(){
 		Graph dataForMember = GraphFactory.createGraphMem();
@@ -157,9 +177,11 @@ public class SamplingQueryProcessorImplTest extends EngineTestBase
 		final QueryExecution qe = QueryExecutionFactory.create(QueryFactory.create(queryString), dsg);
 
 		final Graph dataForMember = getGraph();
+		final Graph dataForMember2 = getGraph2();
 
 		final FederationCatalogImpl fedCat = new FederationCatalogImpl();
 		fedCat.addMember("http://example.org" , new SPARQLEndpointForTest(dataForMember) );
+		fedCat.addMember("http://example2.org" , new SPARQLEndpointForTest(dataForMember2) );
 
 		final FederationAccessManager fedAccessMgr = new FederationAccessManagerForTest();
 
@@ -205,6 +227,38 @@ public class SamplingQueryProcessorImplTest extends EngineTestBase
 		final QueryIterator qIter = Algebra.exec(Algebra.compile(QueryFactory.create(queryString)), getGraph());
 
 		return qIter;
+	}
+
+	@Test
+	public void testSPO() throws QueryProcException, UnsupportedEncodingException {
+
+		ResultSet rs = runQuery(spo);
+		List<QuerySolution> results = new ArrayList<>();
+
+		while(rs.hasNext()) {
+			results.add(rs.next());
+		}
+
+		Assert.assertTrue(results.get(0).contains("s"));
+		Assert.assertTrue(results.get(0).contains("p"));
+		Assert.assertTrue(results.get(0).contains("o"));
+	}
+
+	@Test
+	public void testSPOP1O1() throws QueryProcException, UnsupportedEncodingException {
+
+		ResultSet rs = runQuery(spop1o1);
+		List<QuerySolution> results = new ArrayList<>();
+
+		while(rs.hasNext()) {
+			results.add(rs.next());
+		}
+
+		Assert.assertTrue(results.get(0).contains("s"));
+		Assert.assertTrue(results.get(0).contains("p"));
+		Assert.assertTrue(results.get(0).contains("o"));
+		Assert.assertTrue(results.get(0).contains("p1"));
+		Assert.assertTrue(results.get(0).contains("o1"));
 	}
 
 	@Test
@@ -267,17 +321,5 @@ public class SamplingQueryProcessorImplTest extends EngineTestBase
 		Assert.assertTrue( results.stream().allMatch(res -> res.contains("person")) );
 		Assert.assertTrue( results.stream().allMatch(res -> res.contains("species")) );
 		Assert.assertTrue( results.stream().allMatch(res -> res.contains("animal")) );
-	}
-
-	@Ignore
-	@Test
-	public void test(){
-		String get = ARQConstants.systemVarNS;
-
-		QueryIterator qIter = runQueryWithJena(joinGroupByAsInput);
-
-		while(qIter.hasNext()){
-			System.out.println(qIter.next());
-		}
 	}
 }

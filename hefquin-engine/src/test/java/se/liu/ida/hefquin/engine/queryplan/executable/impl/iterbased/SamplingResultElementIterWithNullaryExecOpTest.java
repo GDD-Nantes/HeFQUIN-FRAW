@@ -2,6 +2,7 @@ package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
 import org.junit.Test;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
+import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutableOperatorStats;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
@@ -11,10 +12,14 @@ import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-public class ResultElementIterWithNullaryExecOpTest
+public class SamplingResultElementIterWithNullaryExecOpTest
 {
+
+	private static SolutionMapping EMPTY = new SolutionMappingImpl();
+
 	@Test
 	public void getOpTest() {
 		final NullaryExecutableOpForTest op = new NullaryExecutableOpForTest();
@@ -24,17 +29,11 @@ public class ResultElementIterWithNullaryExecOpTest
 	}
 
 	@Test
-	public void nextWithoutHasNext() {
-		final SolutionMapping sm1 = TestUtils.createSolutionMappingForTests();
-		final SolutionMapping sm2 = TestUtils.createSolutionMappingForTests();
-		final SolutionMapping sm3 = TestUtils.createSolutionMappingForTests();
-		final ResultElementIterator it = createIteratorForTests( sm1, sm2, sm3 );
+	public void nextWithEmptyIterator() {
+		final ResultElementIterator it = createIteratorForTests();
 
-		assertEquals( sm1, it.next() );
-		assertEquals( sm2, it.next() );
-		assertEquals( sm3, it.next() );
-
-		assertFalse( it.hasNext() );
+		assertEquals( it.hasNext(), true );
+		assertEquals( it.next(), EMPTY );
 	}
 
 	@Test
@@ -51,21 +50,38 @@ public class ResultElementIterWithNullaryExecOpTest
 		assertTrue( it.hasNext() );
 		assertEquals( sm3, it.next() );
 
-		assertFalse( it.hasNext() );
+		assertEquals( it.hasNext(), true );
+		assertEquals( it.next(), sm1 );
 	}
 
 	@Test
-	public void noElement() {
-		final ResultElementIterator it = createIteratorForTests();
+	public void testCache(){
+		final SolutionMapping sm1 = TestUtils.createSolutionMappingForTests("1");
+		final SolutionMapping sm2 = TestUtils.createSolutionMappingForTests("2");
+		final SolutionMapping sm3 = TestUtils.createSolutionMappingForTests("3");
 
-		assertFalse( it.hasNext() );
+		StatsProvidingResultElementIterator it = createIteratorForTests( sm1, sm2, sm3 );
+
+		for ( int i = 0; i < 10; i++ ) {
+			it.next();
+		}
+
+		assertEquals( it.getNumberOfNexts(), 10 );
+
+		// 1 for startup -> results 1, 2, 3
+		// 2 -> results 4, 5, 6
+		// 3 -> results 7, 8, 9
+		// 4 -> results 10
+		assertEquals( it.getNumberOfThreadWakeUps(), 4 );
+
+
 	}
 
 
-	protected static ResultElementIterator createIteratorForTests( SolutionMapping... elements ) {
-		return new ResultElementIterWithNullaryExecOp(
-				new NullaryExecutableOpForTest(elements),
-				TestUtils.createExecContextForTests() );
+	protected static StatsProvidingResultElementIterator createIteratorForTests( SolutionMapping... elements ) {
+		return new SamplingResultElementIterWithNullaryExecOp(
+						new NullaryExecutableOpForTest(elements),
+						TestUtils.createExecContextForTests() );
 	}
 
 	protected static class NullaryExecutableOpForTest extends BaseForExecOps implements NullaryExecutableOp
@@ -84,7 +100,7 @@ public class ResultElementIterWithNullaryExecOpTest
 
 		@Override
 		public void execute( final IntermediateResultElementSink sink,
-							 final ExecutionContext execCxt )
+		                     final ExecutionContext execCxt )
 		{
 			if ( list != null ) {
 				for ( final SolutionMapping sm : list ) {
@@ -102,5 +118,7 @@ public class ResultElementIterWithNullaryExecOpTest
 			return null;
 		}
 	}
+
+
 
 }
