@@ -2,7 +2,7 @@ package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
 import se.liu.ida.hefquin.engine.queryplan.executable.BinaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlanStats;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpFrawMultiwayUnion;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpFrawBinaryUnion;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
 
@@ -60,7 +60,7 @@ public class SamplingResultElementIterWithBinaryExecOp extends SamplingResultEle
 		// intermediate result from input one first, before moving on to
 		// input two.
 
-		if(op instanceof ExecOpFrawMultiwayUnion) {
+		if(op instanceof ExecOpFrawBinaryUnion) {
 			runFrawBinaryUnion();
 		} else {
 			throw new ExecutionException( "Unsupported binary executable op : " + op );
