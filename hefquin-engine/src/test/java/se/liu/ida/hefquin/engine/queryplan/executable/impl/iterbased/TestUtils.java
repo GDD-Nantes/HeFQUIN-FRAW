@@ -27,6 +27,17 @@ public class TestUtils extends EngineTestBase
 		};
 	}
 
+	public static ExecutionContext createExecContextForTests(FederationCatalog federationCatalog) {
+		final FederationAccessManager fedAccessMgr = new FederationAccessManagerForTest ();
+		return new ExecutionContext() {
+			@Override public FederationCatalog getFederationCatalog() { return federationCatalog; }
+			@Override public FederationAccessManager getFederationAccessMgr() { return fedAccessMgr; }
+			@Override public ExecutorService getExecutorServiceForPlanTasks() { return null; }
+			@Override public boolean isExperimentRun() { return false; }
+			@Override public boolean skipExecution() { return false; }
+		};
+	}
+
 	public static SolutionMapping createSolutionMappingForTests() {
 		return new SolutionMappingForTests(null);
 	}

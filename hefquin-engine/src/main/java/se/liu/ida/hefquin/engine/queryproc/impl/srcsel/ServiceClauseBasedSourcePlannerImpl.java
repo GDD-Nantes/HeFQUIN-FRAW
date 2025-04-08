@@ -8,6 +8,7 @@ import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.*;
 import org.apache.jena.sparql.core.BasicPattern;
 
+import org.apache.jena.sparql.expr.ExprList;
 import se.liu.ida.hefquin.base.query.BGP;
 import se.liu.ida.hefquin.base.query.TriplePattern;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
@@ -104,7 +105,7 @@ public class ServiceClauseBasedSourcePlannerImpl extends SourcePlannerBase
 
 	protected LogicalPlan createPlanForLeftJoin( final OpLeftJoin jenaOp ) {
 		if ( jenaOp.getExprs() != null && ! jenaOp.getExprs().isEmpty() ) {
-			throw new IllegalArgumentException( "OpLeftJoin with filter condition is not supported" );
+			return createPlanForLeftJoinWithFilter( jenaOp );
 		}
 
 		final LogicalPlan leftSubPlan = createPlan( jenaOp.getLeft() );
@@ -196,7 +197,7 @@ public class ServiceClauseBasedSourcePlannerImpl extends SourcePlannerBase
 
 	protected LogicalPlan createPlanForLeftJoin( final OpLeftJoin jenaOp, final FederationMember fm ) {
 		if ( jenaOp.getExprs() != null && ! jenaOp.getExprs().isEmpty() ) {
-			throw new IllegalArgumentException( "OpLeftJoin with filter condition is not supported" );
+			return createPlanForLeftJoinWithFilter( jenaOp, fm );
 		}
 
 		final LogicalPlan leftSubPlan = createPlan( jenaOp.getLeft(), fm );
@@ -337,4 +338,24 @@ public class ServiceClauseBasedSourcePlannerImpl extends SourcePlannerBase
 		                                        subPlansFlattened );
 	}
 
+	protected LogicalPlan createPlanForLeftJoinWithFilter(OpLeftJoin opLeftJoin) {
+		Op op = exposeFilterFromConditionalLeftJoin(opLeftJoin);
+
+		return createPlan( op );
+	}
+
+	protected LogicalPlan createPlanForLeftJoinWithFilter(OpLeftJoin opLeftJoin, FederationMember fm) {
+		Op op = exposeFilterFromConditionalLeftJoin(opLeftJoin);
+
+		return createPlan( op, fm );
+	}
+
+	protected Op exposeFilterFromConditionalLeftJoin(OpLeftJoin opLeftJoin) {
+		if(opLeftJoin.getExprs() == null || opLeftJoin.getExprs().isEmpty()) return opLeftJoin;
+
+		Op filter = OpFilter.filterBy(opLeftJoin.getExprs(), opLeftJoin.getRight());
+		Op leftJoin = OpLeftJoin.create(opLeftJoin.getLeft(), filter, (ExprList) null);
+
+		return leftJoin;
+	}
 }

@@ -1,26 +1,36 @@
 package se.liu.ida.hefquin.engine.queryproc.impl.srcsel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased.TestUtils.createExecContextForTests;
 
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.OpLeftJoin;
 import org.junit.Test;
 
+import se.liu.ida.hefquin.base.query.Query;
 import se.liu.ida.hefquin.base.query.TriplePattern;
+import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl1;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
+import se.liu.ida.hefquin.engine.HeFQUINEngineConfigReader;
 import se.liu.ida.hefquin.engine.federation.BRTPFServer;
 import se.liu.ida.hefquin.engine.federation.TPFServer;
 import se.liu.ida.hefquin.engine.federation.access.SPARQLRequest;
 import se.liu.ida.hefquin.engine.federation.access.TriplePatternRequest;
 import se.liu.ida.hefquin.engine.federation.catalog.impl.FederationCatalogImpl;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased.TestUtils;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
+import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpFilter;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpMultiwayJoin;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpMultiwayLeftJoin;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRequest;
+import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanner;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanningException;
+
+import javax.xml.transform.Source;
 
 public class ServiceClauseBasedSourcePlannerImplTest extends SourcePlannerImplTestBase
 {
@@ -344,6 +354,34 @@ public class ServiceClauseBasedSourcePlannerImplTest extends SourcePlannerImplTe
 
 		final TriplePatternRequest req3 = (TriplePatternRequest) rootOp3.getRequest();
 		assertEqualTriplePatternsVUV( "v", "http://example.org/r", "y", req3 );
+	}
+
+	@Test
+	public void optionalWithFilterInsideClause() throws SourcePlanningException {
+		// setup
+		final String queryString = "SELECT * WHERE {"
+				+ "  SERVICE <http://example.org> { ?x <http://example.org/p> ?y }"
+				+ "  OPTIONAL {"
+				+ "    SERVICE <http://example.org> { ?z <http://example.org/q> ?y }"
+				+ "    FILTER (?z != <http://example.org/r> )"
+				+ "  }"
+				+ "}";
+
+		final FederationCatalogImpl fedCat = new FederationCatalogImpl();
+		fedCat.addMember( "http://example.org", new SPARQLEndpointForTest() );
+
+		ExecutionContext ctxt = TestUtils.createExecContextForTests(fedCat);
+
+		Op op = Algebra.compile(QueryFactory.create(queryString).getQueryPattern());
+		Query q = new GenericSPARQLGraphPatternImpl2(op);
+
+		final LogicalPlan plan = createSourcePlanner(ctxt).createSourceAssignment(q).object1;
+
+		assertTrue( plan.getRootOperator() instanceof LogicalOpFilter);
+		assertTrue( plan.getSubPlan(0).getRootOperator() instanceof LogicalOpMultiwayLeftJoin );
+		assertTrue( plan.getSubPlan(0).getSubPlan(0).getRootOperator() instanceof LogicalOpRequest<?,?>);
+		assertTrue( plan.getSubPlan(0).getSubPlan(1).getRootOperator() instanceof LogicalOpRequest<?,?>);
+		assertNotEquals( plan.getSubPlan(0).getSubPlan(0), plan.getSubPlan(0).getSubPlan(1) );
 	}
 
 
