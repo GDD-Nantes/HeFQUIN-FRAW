@@ -13,8 +13,6 @@ import se.liu.ida.hefquin.engine.queryproc.SamplingQueryPlanCompiler;
 import java.util.ArrayList;
 import java.util.List;
 
-import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.DEFAULT_RANDOM_WALK;
-
 public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompilerBase implements SamplingQueryPlanCompiler
 {
 	public IteratorBasedSamplingQueryPlanCompilerImpl(final QueryProcContext ctxt) {
@@ -25,7 +23,7 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 	public ExecutablePlan compile( final PhysicalPlan qep )
 			throws QueryCompilationException
 	{
-		return compile( qep, DEFAULT_RANDOM_WALK );
+		throw new QueryCompilationException("Can't compile query plan without a budget");
 	}
 
 	@Override

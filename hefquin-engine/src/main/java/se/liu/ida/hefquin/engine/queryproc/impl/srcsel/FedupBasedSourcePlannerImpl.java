@@ -36,7 +36,6 @@ public class FedupBasedSourcePlannerImpl extends ServiceClauseBasedSourcePlanner
     protected Pair<LogicalPlan, SourcePlanningStats> createSourceAssignment(Op jenaOp) throws SourcePlanningException {
         Op op = getSourceSelection(jenaOp);
         if(Objects.isNull(op)) return null;
-
         final LogicalPlan sa = createPlan(op);
         final SourcePlanningStats myStats = new SourcePlanningStatsImpl();
 

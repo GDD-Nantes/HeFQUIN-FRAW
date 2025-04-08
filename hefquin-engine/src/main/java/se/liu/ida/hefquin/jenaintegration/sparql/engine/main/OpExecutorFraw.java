@@ -29,18 +29,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.DEFAULT_RANDOM_WALK;
-
 public class OpExecutorFraw extends OpExecutor
 {
 	protected final SamplingQueryProcessor qProc;
 	protected boolean nextQueryProcSingleWalk = false;
+	protected final int budget;
+	protected final int subBudget;
 
-	public OpExecutorFraw(final SamplingQueryProcessor qProc, final ExecutionContext execCxt ) {
+	public OpExecutorFraw(final SamplingQueryProcessor qProc, final ExecutionContext execCxt, final int budget, final int subBudget ) {
 		super(execCxt);
 
 		assert qProc != null;
-		this.qProc= qProc;
+		this.qProc = qProc;
+
+		assert budget >= 0;
+		assert subBudget >= 0;
+		this.budget = budget;
+		this.subBudget = subBudget;
 	}
 
 	@Override
@@ -169,8 +174,7 @@ public class OpExecutorFraw extends OpExecutor
 	}
 
 	protected QueryIterator executeSupportedOp( final Op op, final QueryIterator input ) {
-
-		return new MainQueryIterator( op, input, nextQueryProcSingleWalk ? 1 : DEFAULT_RANDOM_WALK );
+		return new MainQueryIterator( op, input, nextQueryProcSingleWalk ? subBudget : budget );
 	}
 
 
@@ -182,10 +186,7 @@ public class OpExecutorFraw extends OpExecutor
 		public MainQueryIterator( final Op op, final QueryIterator input ) {
 			super(input, execCxt);
 
-			assert op != null;
-			this.op = op;
-
-			this.numberOfWalks = DEFAULT_RANDOM_WALK;
+			throw new QueryExecException("Can't instantiate MainQueryIterator without a budget");
 		}
 
 		public MainQueryIterator( final Op op, final QueryIterator input, final int numberOfWalks ) {

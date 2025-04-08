@@ -1,14 +1,11 @@
 package se.liu.ida.hefquin.engine;
 
 import org.apache.jena.query.*;
-import org.apache.jena.riot.resultset.ResultSetLang;
-import org.apache.jena.riot.rowset.RowSetWriterRegistry;
 import org.apache.jena.sparql.algebra.optimize.Optimize;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.engine.main.OpExecutorFactory;
 import org.apache.jena.sparql.engine.main.QC;
-import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.resultset.ResultsFormat;
 import org.apache.jena.sparql.util.QueryExecUtils;
 import se.liu.ida.hefquin.base.utils.Pair;
@@ -16,9 +13,7 @@ import se.liu.ida.hefquin.engine.federation.access.FederationAccessManager;
 import se.liu.ida.hefquin.engine.federation.access.FederationAccessStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
-import se.liu.ida.hefquin.engine.queryproc.SamplingQueryProcessor;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
-import se.liu.ida.hefquin.jenaintegration.sparql.engine.main.OpExecutorFraw;
 import se.liu.ida.hefquin.jenaintegration.sparql.engine.main.OpExecutorHeFQUIN;
 
 import java.io.PrintStream;
@@ -38,20 +33,12 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 		this.fedAccessMgr = fedAccessMgr;
 		this.qProc = qProc;
 
-		AggregateRegistry.register("http://customAgg/rawcount", RawCountAggregator.factory());
-		AggregateRegistry.register("http://customAgg/rawaverage", RawAverageAggregator.factory());
-
-		RowSetWriterRegistry.register(ResultSetLang.RS_JSON, RawRowSetWriterJSON.factory);
-
 		Optimize.noOptimizer();
 	}
 
 	@Override
 	public void integrateIntoJena() {
-		final OpExecutorFactory factory = execCxt ->
-				qProc instanceof SamplingQueryProcessor ?
-						new OpExecutorFraw((SamplingQueryProcessor) qProc, execCxt) :
-						new OpExecutorHeFQUIN(qProc, execCxt);
+		final OpExecutorFactory factory = execCxt -> new OpExecutorHeFQUIN(qProc, execCxt);
 
 		QC.setFactory( ARQ.getContext(), factory );
 	}

@@ -17,6 +17,7 @@ import se.liu.ida.hefquin.engine.queryproc.impl.planning.QueryPlannerImpl;
 import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.CostModel;
 import se.liu.ida.hefquin.engine.vocabulary.ECVocab;
 import se.liu.ida.hefquin.jenaext.ModelUtils;
+import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -77,10 +78,18 @@ public class HeFQUINEngineConfigReader
 	}
 
 	public HeFQUINEngine read( final Resource confRsrc, final Context ctx ) {
+
 		final FederationAccessManager fedAccessMgr = readFederationAccessManager(confRsrc, ctx);
 
 		final ExtendedContext ctxx = new ExtendedContextImpl2(ctx, fedAccessMgr);
 		final QueryProcessor qproc = readQueryProcessor(confRsrc, ctxx);
+
+		final int budget = readBudget(confRsrc, ctx);
+		final int subBudget = readSubBudget(confRsrc, ctx);
+
+		if( budget > 0 && subBudget > 0 ) {
+			return new FrawEngineImpl(fedAccessMgr, qproc, budget, subBudget);
+		}
 
 		return new HeFQUINEngineImpl(fedAccessMgr, qproc);
 	}
@@ -102,6 +111,19 @@ public class HeFQUINEngineConfigReader
 		PhysicalPlanPrinter getPhysicalPlanPrinter();
 	}
 
+	public int readBudget( final Resource confRsrc, final Context ctx ) {
+		final Literal ltrl = ModelUtils.getSingleOptionalLiteralProperty( confRsrc, FrawConstants.budget );
+		// not pretty
+		if ( ltrl == null ) return -1;
+		return ltrl.getInt();
+	}
+
+	public int readSubBudget( final Resource confRsrc, final Context ctx ) {
+		final Literal ltrl = ModelUtils.getSingleOptionalLiteralProperty( confRsrc, FrawConstants.subBudget );
+		// not pretty
+		if ( ltrl == null ) return -1;
+		return ltrl.getInt();
+	}
 
 	// ------------ federation access manager ------------
 

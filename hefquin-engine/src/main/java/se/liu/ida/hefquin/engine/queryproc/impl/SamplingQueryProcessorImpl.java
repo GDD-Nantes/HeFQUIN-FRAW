@@ -11,8 +11,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.DEFAULT_RANDOM_WALK;
-
 /**
  * Simple implementation of {@link QueryProcessor}.
  */
@@ -41,7 +39,7 @@ public class SamplingQueryProcessorImpl implements SamplingQueryProcessor
 
 	@Override
 	public Pair<QueryProcStats, List<Exception>> processQuery(Query query, QueryResultSink resultSink) throws QueryProcException {
-		return processQuery(query, resultSink, DEFAULT_RANDOM_WALK);
+		throw new UnsupportedOperationException("Can't process query without a budget");
 	}
 
 	@Override

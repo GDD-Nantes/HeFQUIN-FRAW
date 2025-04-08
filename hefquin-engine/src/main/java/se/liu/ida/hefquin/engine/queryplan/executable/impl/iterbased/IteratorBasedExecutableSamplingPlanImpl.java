@@ -6,8 +6,6 @@ import se.liu.ida.hefquin.engine.queryproc.QueryResultSink;
 
 import java.util.List;
 
-import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.DEFAULT_RANDOM_WALK;
-
 public class IteratorBasedExecutableSamplingPlanImpl extends IteratorBasedExecutablePlanImpl
 {
 	private final int numberOfWalks;
@@ -15,7 +13,7 @@ public class IteratorBasedExecutableSamplingPlanImpl extends IteratorBasedExecut
 
 	public IteratorBasedExecutableSamplingPlanImpl(final ResultElementIterator it) {
         super(it);
-		this.numberOfWalks = DEFAULT_RANDOM_WALK;
+        throw new UnsupportedOperationException("Can't instantiate IteratorBasedExecutableSamplingPlanImpl without a budget");
 	}
 
 	public IteratorBasedExecutableSamplingPlanImpl( final ResultElementIterator it, final int numberOfWalks ) {
