@@ -48,7 +48,7 @@ public class ExecOpFrawBindJoinSPARQLwithUNION extends BaseForExecOpFrawBindJoin
 
 		final SPARQLGraphPattern pattern = new GenericSPARQLGraphPatternImpl2(op);
 		final SPARQLRequest request = new SPARQLRequestImpl(pattern);
-		return new ExecOpRequestSPARQL(request, fm, false);
+		return new ExecOpFrawRequest(request, fm, false);
 	}
 
 	protected Op createUnion( final Iterable<SolutionMapping> solMaps ) {

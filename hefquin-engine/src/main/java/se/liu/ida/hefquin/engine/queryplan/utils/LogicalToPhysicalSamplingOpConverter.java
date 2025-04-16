@@ -1,9 +1,7 @@
 package se.liu.ida.hefquin.engine.queryplan.utils;
 
-import se.liu.ida.hefquin.engine.federation.BRTPFServer;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
-import se.liu.ida.hefquin.engine.federation.TPFServer;
+import se.liu.ida.hefquin.engine.federation.*;
+import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.engine.queryplan.logical.*;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.*;
@@ -27,11 +25,15 @@ public class LogicalToPhysicalSamplingOpConverter
 	// --------- nullary operators -----------
 
 	public static NullaryPhysicalOp convert( final NullaryLogicalOp lop ) {
+
 		if ( lop instanceof LogicalOpRequest ) return convert( (LogicalOpRequest<?,?>) lop );
 		else throw new UnsupportedOperationException("Unsupported type of logical operator: " + lop.getClass().getName() + ".");
 	}
 
 	public static NullaryPhysicalOp convert( final LogicalOpRequest<?,?> lop ) {
+		if(lop.getFederationMember() instanceof FederationMemberAgglomeration){
+			return new PhysicalOpFrawRequest((LogicalOpRequest<DataRetrievalRequest, FederationMemberAgglomeration>) lop);
+		}
 		return new PhysicalOpRequest<>(lop);
 	}
 

@@ -1,6 +1,7 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
 
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
+import se.liu.ida.hefquin.engine.federation.FederationMemberAgglomeration;
 import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecOpExecutionException;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultBlock;
@@ -31,6 +32,14 @@ public class ExecOpFrawBindJoinSPARQLwithVALUESorFILTER extends BaseForExecOpBin
                                                       final SPARQLEndpoint fm,
                                                       final boolean useOuterJoinSemantics,
                                                       final boolean collectExceptions ) {
+		super(query, fm, collectExceptions);
+		this.useOuterJoinSemantics = useOuterJoinSemantics;
+	}
+
+	public ExecOpFrawBindJoinSPARQLwithVALUESorFILTER(final SPARQLGraphPattern query,
+													  final FederationMemberAgglomeration fm,
+													  final boolean useOuterJoinSemantics,
+													  final boolean collectExceptions ) {
 		super(query, fm, collectExceptions);
 		this.useOuterJoinSemantics = useOuterJoinSemantics;
 	}

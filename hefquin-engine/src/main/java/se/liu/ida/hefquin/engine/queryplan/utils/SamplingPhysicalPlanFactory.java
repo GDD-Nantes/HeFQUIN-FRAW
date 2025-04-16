@@ -2,10 +2,7 @@ package se.liu.ida.hefquin.engine.queryplan.utils;
 
 import se.liu.ida.hefquin.base.data.VocabularyMapping;
 import se.liu.ida.hefquin.base.query.TriplePattern;
-import se.liu.ida.hefquin.engine.federation.BRTPFServer;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
-import se.liu.ida.hefquin.engine.federation.TPFServer;
+import se.liu.ida.hefquin.engine.federation.*;
 import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.engine.federation.access.impl.req.BGPRequestImpl;
 import se.liu.ida.hefquin.engine.federation.access.impl.req.SPARQLRequestImpl;
@@ -59,7 +56,13 @@ public class SamplingPhysicalPlanFactory
 	 */
 	public static <R extends DataRetrievalRequest, M extends FederationMember>
 	PhysicalPlan createPlanWithRequest( final LogicalOpRequest<R,M> lop ) {
-		final NullaryPhysicalOp pop = new PhysicalOpRequest<>(lop);
+		final NullaryPhysicalOp pop;
+
+		if(lop.getFederationMember() instanceof FederationMemberAgglomeration){
+			pop = new PhysicalOpFrawRequest((LogicalOpRequest<DataRetrievalRequest, FederationMemberAgglomeration>) lop);
+		} else {
+			pop = new PhysicalOpRequest<>(lop);
+		}
 		return createPlan(pop);
 	}
 

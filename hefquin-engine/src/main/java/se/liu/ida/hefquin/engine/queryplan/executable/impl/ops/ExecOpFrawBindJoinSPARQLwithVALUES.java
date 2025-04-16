@@ -78,7 +78,7 @@ public class ExecOpFrawBindJoinSPARQLwithVALUES extends BaseForExecOpFrawBindJoi
 		}
 
 		if (noJoinVars) {
-			return new ExecOpRequestSPARQL( new SPARQLRequestImpl(query), fm, false );
+			return new ExecOpFrawRequest( new SPARQLRequestImpl(query), fm, false );
 		}
 
 		if ( bindings.isEmpty() ) {
@@ -89,7 +89,7 @@ public class ExecOpFrawBindJoinSPARQLwithVALUES extends BaseForExecOpFrawBindJoi
 		final Op op = OpSequence.create( OpTable.create(table), QueryPatternUtils.convertToJenaOp(query) );
 		final SPARQLGraphPattern pattern = new GenericSPARQLGraphPatternImpl2(op);
 		final SPARQLRequest request = new SPARQLRequestImpl(pattern);
-		return new ExecOpRequestSPARQL(request, fm, false);
+		return new ExecOpFrawRequest(request, fm, false);
 	}
 
 }

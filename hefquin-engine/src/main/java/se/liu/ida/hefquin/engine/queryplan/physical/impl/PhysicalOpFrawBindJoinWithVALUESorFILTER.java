@@ -2,6 +2,7 @@ package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
+import se.liu.ida.hefquin.engine.federation.FederationMemberAgglomeration;
 import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.engine.queryplan.executable.UnaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpBindJoinSPARQLwithVALUESorFILTER;
@@ -61,11 +62,13 @@ public class PhysicalOpFrawBindJoinWithVALUESorFILTER extends PhysicalOpBindJoin
 	}
 
 	protected UnaryExecutableOp createExecOp( final SPARQLGraphPattern pattern,
-	                                          final FederationMember fm,
-	                                          final boolean useOuterJoinSemantics,
-	                                          final boolean collectExceptions ) {
+											  final FederationMember fm,
+											  final boolean useOuterJoinSemantics,
+											  final boolean collectExceptions ) {
 		if ( fm instanceof SPARQLEndpoint )
 			return new ExecOpFrawBindJoinSPARQLwithVALUESorFILTER(pattern, (SPARQLEndpoint) fm, useOuterJoinSemantics, collectExceptions );
+		else if ( fm instanceof FederationMemberAgglomeration)
+			return new ExecOpFrawBindJoinSPARQLwithVALUESorFILTER(pattern, (FederationMemberAgglomeration) fm, useOuterJoinSemantics, collectExceptions );
 		else
 			throw new IllegalArgumentException("Unsupported type of federation member: " + fm.getClass().getName() );
 	}

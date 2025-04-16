@@ -60,16 +60,16 @@
       <groupId>fr.gdd</groupId>
       <artifactId>fedup</artifactId>
       <version>0.1.2</version>
-<!--      <exclusions>-->
-<!--        <exclusion>-->
-<!--          <groupId>org.apache.jena</groupId>-->
-<!--          <artifactId>jena-fuseki-main</artifactId>-->
-<!--        </exclusion>-->
-<!--        <exclusion>-->
-<!--          <groupId>org.apache</groupId>-->
-<!--          <artifactId>apache-jena-libs</artifactId>-->
-<!--        </exclusion>-->
-<!--      </exclusions>-->
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.jena</groupId>
+          <artifactId>jena-fuseki-main</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache</groupId>
+          <artifactId>apache-jena-libs</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

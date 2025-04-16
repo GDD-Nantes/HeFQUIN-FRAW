@@ -1,19 +1,12 @@
 package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 
 import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
-import se.liu.ida.hefquin.engine.federation.BRTPFServer;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
-import se.liu.ida.hefquin.engine.federation.TPFServer;
-import se.liu.ida.hefquin.engine.federation.access.BindingsRestrictedTriplePatternRequest;
+import se.liu.ida.hefquin.engine.federation.*;
 import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.engine.federation.access.SPARQLRequest;
 import se.liu.ida.hefquin.engine.federation.access.TriplePatternRequest;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpRequestBRTPF;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpRequestSPARQL;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpRequestTPFatBRTPFServer;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpRequestTPFatTPFServer;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.*;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRequest;
 import se.liu.ida.hefquin.engine.queryplan.physical.NullaryPhysicalOpForLogicalOp;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
@@ -64,8 +57,8 @@ public class PhysicalOpRequest<ReqType extends DataRetrievalRequest, MemberType 
 	                                         final ExpectedVariables ... inputVars ) {
 		final ReqType req = lop.getRequest();
 		final MemberType fm = lop.getFederationMember();
-		if ( fm instanceof SPARQLEndpoint && req instanceof SPARQLRequest ) {
-			return new ExecOpRequestSPARQL( (SPARQLRequest) req, (SPARQLEndpoint) fm, collectExceptions );
+		if( fm instanceof FederationMemberAgglomeration && req instanceof SPARQLRequest ){
+			return new ExecOpFrawRequest((SPARQLRequest) req, (FederationMemberAgglomeration) fm, collectExceptions);
 		}
 		else if ( fm instanceof TPFServer && req instanceof TriplePatternRequest ) {
 			return new ExecOpRequestTPFatTPFServer( (TriplePatternRequest) req, (TPFServer) fm, collectExceptions );
@@ -73,8 +66,8 @@ public class PhysicalOpRequest<ReqType extends DataRetrievalRequest, MemberType 
 		else if ( fm instanceof BRTPFServer && req instanceof TriplePatternRequest ) {
 			return new ExecOpRequestTPFatBRTPFServer( (TriplePatternRequest) req, (BRTPFServer) fm, collectExceptions );
 		}
-		else if ( fm instanceof BRTPFServer && req instanceof TriplePatternRequest ) {
-			return new ExecOpRequestBRTPF( (BindingsRestrictedTriplePatternRequest) req, (BRTPFServer) fm, collectExceptions );
+		else if ( fm instanceof SPARQLEndpoint && req instanceof SPARQLRequest ) {
+			return new ExecOpRequestSPARQL( (SPARQLRequest) req, (SPARQLEndpoint) fm, collectExceptions );
 		}
 		else
 			throw new IllegalArgumentException("Unsupported combination of federation member (type: " + fm.getClass().getName() + ") and request type (" + req.getClass().getName() + ")");

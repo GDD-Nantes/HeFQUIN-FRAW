@@ -15,7 +15,9 @@ public class FedupBasedJOUSourcePlannerImpl extends FedupBasedSourcePlannerImpl 
 
     @Override
     protected Op getSourceSelection(Op jenaOp) throws SourcePlanningException {
+        System.out.println("JEVAISDEVENIRFOUUUUUUUU");
         Op op = super.getSourceSelection(jenaOp);
+        System.out.println("DIZODEIDQKSJHFQBFKQJSDBHFQDKSJHFJQKDHFLQHLF");
         return new JOUConverter().convert(op);
     }
 
