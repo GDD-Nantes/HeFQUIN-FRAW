@@ -60,7 +60,6 @@ public class SamplingResultElementIterWithNullaryExecOp extends SamplingResultEl
 			nextElement = this.getNextElement();
 
 			if(nextElement == null) {
-				System.out.println("Executed op once more; but didn't get any result. Producing an artificial empty mapping");
 				nextElement = new SolutionMappingImpl();
 			}
 		}

@@ -27,6 +27,7 @@ import se.liu.ida.hefquin.engine.queryproc.SourcePlanningStats;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This implementation of {@link SourcePlanner} does not actually perform
@@ -117,10 +118,43 @@ public class ServiceClauseBasedSourcePlannerImpl extends SourcePlannerBase
 		return mergeIntoMultiwayLeftJoin(leftSubPlan, rightSubPlan);
 	}
 
+//	protected LogicalPlan createPlanForUnion( final OpUnion jenaOp ) {
+//
+//		final LogicalPlan leftSubPlan = createPlan( jenaOp.getLeft() );
+//		final LogicalPlan rightSubPlan = createPlan( jenaOp.getRight() );
+//		return mergeIntoMultiwayUnion(leftSubPlan,rightSubPlan);
+//	}
+
 	protected LogicalPlan createPlanForUnion( final OpUnion jenaOp ) {
-		final LogicalPlan leftSubPlan = createPlan( jenaOp.getLeft() );
-		final LogicalPlan rightSubPlan = createPlan( jenaOp.getRight() );
-		return mergeIntoMultiwayUnion(leftSubPlan,rightSubPlan);
+		// Instead of creating then merging a quadrillion unions, we flatten the root union, and merge them into a mulitway union
+		List<Op> children = getNestedOpUnionChildren(jenaOp);
+		List<LogicalPlan> subPlansFlattened = children.stream().map(this::createPlan).collect(Collectors.toList());
+
+		if( subPlansFlattened.size() == 2 )
+			return new LogicalPlanWithBinaryRootImpl( LogicalOpUnion.getInstance(),
+					subPlansFlattened.get(0),
+					subPlansFlattened.get(1) );
+
+		return new LogicalPlanWithNaryRootImpl( LogicalOpMultiwayUnion.getInstance(),
+				subPlansFlattened );
+	}
+
+	private List<Op> getNestedOpUnionChildren( final OpUnion jenaOp ) {
+		List<Op> children = new ArrayList<>();
+
+		if(jenaOp.getLeft() instanceof OpUnion) {
+			children.addAll(getNestedOpUnionChildren((OpUnion) jenaOp.getLeft()));
+		} else {
+			children.add(jenaOp.getLeft());
+		}
+
+		if(jenaOp.getRight() instanceof OpUnion) {
+			children.addAll(getNestedOpUnionChildren((OpUnion) jenaOp.getRight()));
+		} else {
+			children.add(jenaOp.getRight());
+		}
+
+		return children;
 	}
 
 	protected LogicalPlan createPlanForFilter( final OpFilter jenaOp ) {
