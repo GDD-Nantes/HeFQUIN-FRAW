@@ -1,12 +1,8 @@
 package se.liu.ida.hefquin.engine.queryproc.impl.srcsel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.OpLeftJoin;
 import org.junit.Test;
-
 import se.liu.ida.hefquin.base.query.TriplePattern;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
 import se.liu.ida.hefquin.engine.federation.BRTPFServer;
@@ -21,6 +17,9 @@ import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRequest;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanner;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanningException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ServiceClauseBasedSourcePlannerImplTest extends SourcePlannerImplTestBase
 {
@@ -346,6 +345,26 @@ public class ServiceClauseBasedSourcePlannerImplTest extends SourcePlannerImplTe
 		assertEqualTriplePatternsVUV( "v", "http://example.org/r", "y", req3 );
 	}
 
+	@Test
+	public void optionalNesting2() throws SourcePlanningException {
+		// setup
+		final String queryString = "SELECT * WHERE {"
+				+ "  SERVICE <http://example.org> { ?x <http://example.org/p> ?y }"
+				+ "  OPTIONAL {"
+				+ "    SERVICE <http://example.org> { " +
+				"			?z <http://example.org/q> ?y." +
+				"			FILTER (?z != <http://example.org/examplesubject>)" +
+				"		}"
+				+ "  }"
+				+ "}";
+
+		final FederationCatalogImpl fedCat = new FederationCatalogImpl();
+		fedCat.addMember( "http://example.org", new TPFServerForTest() );
+
+		final LogicalPlan plan = createLogicalPlan(queryString, fedCat);
+
+
+	}
 
 	// --------- helper functions ---------
 
