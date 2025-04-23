@@ -11,4 +11,6 @@ public interface QueryProcStats extends Stats
 
 	QueryPlanningStats getQueryPlanningStats();
 	ExecutionStats getExecutionStats();
+
+	QueryProcStats addTimes(QueryProcStats stats);
 }

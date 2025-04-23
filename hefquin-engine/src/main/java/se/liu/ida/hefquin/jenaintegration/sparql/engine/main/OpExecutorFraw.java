@@ -153,13 +153,6 @@ public class OpExecutorFraw extends OpExecutor
 			return executeSupportedOp( opGroup, input );
 		}
 		else {
-//			// This works for sequential group bys (like in a join for example). That is, the current op group will
-//			// always be the right one.
-//			// However, it shouldn't work for nested group bys, but thankfully the current op group is only used for
-//			// raw aggregates, which are only relevant when they are at the very bottom of a group by nest, in which case
-//			// setting it here isn't a problem either! It's lucky, it's wanky, but hey, it works :)
-//			ARQ.getContext().set(CURRENT_OP_GROUP, opGroup);
-
 			QueryIterator qIter = exec(opGroup.getSubOp(), input);
 			return new QueryIterGroupFraw(qIter, opGroup.getGroupVars(), opGroup.getAggregators(), execCxt);
 		}
@@ -230,7 +223,7 @@ public class OpExecutorFraw extends OpExecutor
 				throw new QueryExecException("Processing the query operator using HeFQUIN failed.", ex);
 			}
 
-			execCxt.getContext().set( HeFQUINConstants.sysQueryProcStats,      statsAndExceptions.object1 );
+			execCxt.getContext().set( HeFQUINConstants.sysQueryProcStats,      statsAndExceptions.object1.addTimes(execCxt.getContext().get(HeFQUINConstants.sysQueryProcStats)));
 			execCxt.getContext().set( HeFQUINConstants.sysQueryProcExceptions, statsAndExceptions.object2 );
 
 			return new WrappingQueryIterator( sink.getSolMapsIter() );

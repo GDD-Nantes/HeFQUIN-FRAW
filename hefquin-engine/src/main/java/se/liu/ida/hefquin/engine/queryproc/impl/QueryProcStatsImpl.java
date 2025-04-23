@@ -30,6 +30,24 @@ public class QueryProcStatsImpl extends StatsImpl implements QueryProcStats
 		put( enExecStats,          execStats );
 	}
 
+	public QueryProcStats addTimes(QueryProcStats stats) {
+		if(stats == null) return this;
+
+		long sumOverallQueryProcessingTime = stats.getOverallQueryProcessingTime() + this.getOverallQueryProcessingTime();
+		long sumPlanningTime = stats.getPlanningTime() + this.getPlanningTime();
+		long sumCompilationTime = stats.getCompilationTime() + this.getCompilationTime();
+		long sumExecutionTime = stats.getExecutionTime() + this.getExecutionTime();
+
+        return new QueryProcStatsImpl(
+                sumOverallQueryProcessingTime,
+                sumPlanningTime,
+                sumCompilationTime,
+                sumExecutionTime,
+                null,
+                null
+        );
+	}
+
 	@Override
 	public long getOverallQueryProcessingTime() {
 		return (Long) getEntry(enOverallProcTime);
