@@ -113,6 +113,8 @@ public class RunSampleQueryWithoutSrcSel extends CmdARQ
 		final ExecutorService execServiceForFedAccess = HeFQUINEngineDefaultComponents.createExecutorServiceForFedAccess();
 		final ExecutorService execServiceForPlanTasks = HeFQUINEngineDefaultComponents.createExecutorServiceForPlanTasks();
 
+		ARQ.init();
+
 		final HeFQUINEngine e = modEngineConfig.getEngine( execServiceForFedAccess,
 		                                                   execServiceForPlanTasks,
 		                                                   modFederation.getFederationCatalog(),
@@ -121,7 +123,7 @@ public class RunSampleQueryWithoutSrcSel extends CmdARQ
 		                                                   modPlanPrinting.getSourceAssignmentPrinter(),
 		                                                   modPlanPrinting.getLogicalPlanPrinter(),
 		                                                   modPlanPrinting.getPhysicalPlanPrinter() );
-		ARQ.init();
+
 		e.integrateIntoJena();
 
 		final Query query = getQuery();
