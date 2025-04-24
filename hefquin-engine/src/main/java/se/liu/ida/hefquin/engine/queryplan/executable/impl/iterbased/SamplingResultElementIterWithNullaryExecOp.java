@@ -31,6 +31,10 @@ public class SamplingResultElementIterWithNullaryExecOp extends SamplingResultEl
 		createNewOpRunnerThread();
 	}
 
+	public void flush(){
+		while (getNextElement() != null);
+	}
+
 	@Override
 	public NullaryExecutableOp getOp() {
 		return this.op;

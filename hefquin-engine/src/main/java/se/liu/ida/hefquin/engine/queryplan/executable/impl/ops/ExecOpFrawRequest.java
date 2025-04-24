@@ -12,16 +12,19 @@ import se.liu.ida.hefquin.engine.federation.access.impl.response.SolMapsResponse
 import se.liu.ida.hefquin.engine.federation.access.utils.FederationAccessUtils;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+
+import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.random;
 
 public class ExecOpFrawRequest extends BaseForExecOpSolMapsRequest<DataRetrievalRequest, FederationMember>{
 
-    List<FederationMember> endpoints;
+    final List<FederationMember> endpoints;
+    final Map<FederationMember, Queue<SolMapsResponse>> endpoint2Cache = new HashMap<>();
+
 
     public ExecOpFrawRequest(DataRetrievalRequest req, SPARQLEndpoint fm, boolean collectExceptions) {
         super(req, fm, collectExceptions);
+
         if(fm instanceof FederationMemberAgglomeration){
             this.endpoints = ((FederationMemberAgglomeration) fm).getInterface().getMembers();
         }
@@ -36,38 +39,29 @@ public class ExecOpFrawRequest extends BaseForExecOpSolMapsRequest<DataRetrieval
 
         int chosen;
 
-        if(endpoints.size() == 1) {
-            chosen = 0;
-        }else {
-            Random random = new Random();
-            chosen = random.nextInt(endpoints.size());
-        }
+        chosen = random.nextInt(endpoints.size());
 
         FederationMember chosenFM = endpoints.get(chosen);
+
+        if(!endpoint2Cache.containsKey(chosenFM)){
+            endpoint2Cache.put(chosenFM, new LinkedList<>());
+        } else if(!endpoint2Cache.get(chosenFM).isEmpty()){
+            return endpoint2Cache.get(chosenFM).poll();
+        }
 
         if(chosenFM instanceof SPARQLEndpoint){
 
             SolMapsResponse solMapsResponse = FederationAccessUtils.performRequest(fedAccessMgr, (SPARQLRequest) req, (SPARQLEndpoint) chosenFM);
 
-            List<SolutionMapping> updatedSolutionMappingList = new ArrayList<>();
-
             solMapsResponse.getSolutionMappings().iterator().forEachRemaining(solutionMapping -> {
                 Binding updatedBinding = FrawUtils.updateProbaUnion(solutionMapping, endpoints.size(), chosen);
                 SolutionMapping updatedSolutionMapping = new SolutionMappingImpl(updatedBinding);
-                updatedSolutionMappingList.add(updatedSolutionMapping);
+                SolMapsResponse smr = new SolMapsResponseImpl(List.of(updatedSolutionMapping), fm, req, solMapsResponse.getRequestStartTime(), solMapsResponse.getRetrievalEndTime());
+                endpoint2Cache.get(chosenFM).offer(smr);
             });
 
-            SolMapsResponse updatedSolMapsResponse = new SolMapsResponseImpl(updatedSolutionMappingList, fm, req, solMapsResponse.getRequestStartTime(), solMapsResponse.getRetrievalEndTime());
-
-            return updatedSolMapsResponse;
+            return endpoint2Cache.get(chosenFM).poll();
         }
-
-//        else if ( fm instanceof TPFServer && req instanceof TriplePatternRequest) {
-//            return new ExecOpRequestTPFatTPFServer( (TriplePatternRequest) req, (TPFServer) fm, collectExceptions );
-//        }
-//        else if ( fm instanceof BRTPFServer && req instanceof TriplePatternRequest ) {
-//            return new ExecOpRequestTPFatBRTPFServer( (TriplePatternRequest) req, (BRTPFServer) fm, collectExceptions );
-//        }
 
         // TODO: handle this better
         throw new NotImplementedException("This operation is not implemented yet in ExecOpFrawRequest");

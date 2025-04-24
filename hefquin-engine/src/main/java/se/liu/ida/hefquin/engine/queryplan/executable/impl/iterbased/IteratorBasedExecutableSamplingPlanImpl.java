@@ -10,15 +10,17 @@ public class IteratorBasedExecutableSamplingPlanImpl extends IteratorBasedExecut
 {
 	private final int numberOfWalks;
 	private final int DEFAULT_TIMEOUT_MS = Integer.MAX_VALUE;
+	private final List<SamplingResultElementIterWithNullaryExecOp> leaves;
 
 	public IteratorBasedExecutableSamplingPlanImpl(final ResultElementIterator it) {
         super(it);
         throw new UnsupportedOperationException("Can't instantiate IteratorBasedExecutableSamplingPlanImpl without a budget");
 	}
 
-	public IteratorBasedExecutableSamplingPlanImpl( final ResultElementIterator it, final int numberOfWalks ) {
+	public IteratorBasedExecutableSamplingPlanImpl( final ResultElementIterator it, final int numberOfWalks, final List<SamplingResultElementIterWithNullaryExecOp> leaves ) {
 		super(it);
 		this.numberOfWalks = numberOfWalks;
+		this.leaves = leaves;
 	}
 
 	public void runWithBudget( final QueryResultSink resultSink ) throws ExecutionException {
@@ -29,6 +31,7 @@ public class IteratorBasedExecutableSamplingPlanImpl extends IteratorBasedExecut
 				resultSink.send( it.next() );
 				attempted++;
 			}
+			leaves.forEach(SamplingResultElementIterWithNullaryExecOp::flush);
 		}
 		catch ( final ResultElementIterException ex ) {
 			throw new ExecutionException( "An exception occurred during result iteration.", ex.getWrappedExecutionException() );
