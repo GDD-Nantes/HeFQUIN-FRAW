@@ -4,6 +4,8 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.util.Symbol;
 
+import java.util.Random;
+
 import static org.apache.jena.rdf.model.ResourceFactory.createProperty;
 
 
@@ -16,7 +18,7 @@ public class FrawConstants {
     public static final Symbol BUDGET = Symbol.create("budget");
     public static final Symbol SUB_BUDGET = Symbol.create("subBudget");
 
-
+    public static final Random random = new Random();
 
 
     // not in use
