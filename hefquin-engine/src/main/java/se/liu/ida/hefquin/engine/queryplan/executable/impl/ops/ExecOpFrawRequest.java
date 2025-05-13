@@ -53,7 +53,7 @@ public class ExecOpFrawRequest extends BaseForExecOpSolMapsRequest<DataRetrieval
 
             SolMapsResponse solMapsResponse = FederationAccessUtils.performRequest(fedAccessMgr, (SPARQLRequest) req, (SPARQLEndpoint) chosenFM);
 
-            solMapsResponse.getSolutionMappings().iterator().forEachRemaining(solutionMapping -> {
+            solMapsResponse.getResponseData().forEach(solutionMapping -> {
                 Binding updatedBinding = FrawUtils.updateProbaUnion(solutionMapping, endpoints.size(), chosen);
                 SolutionMapping updatedSolutionMapping = new SolutionMappingImpl(updatedBinding);
                 SolMapsResponse smr = new SolMapsResponseImpl(List.of(updatedSolutionMapping), fm, req, solMapsResponse.getRequestStartTime(), solMapsResponse.getRetrievalEndTime());
