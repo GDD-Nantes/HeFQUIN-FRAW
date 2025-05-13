@@ -574,7 +574,7 @@ public class SamplingPhysicalPlanFactory
 			final PhysicalPlan newSubPlan = createPlanWithDefaultUnaryOpIfPossible( inputPlan, oldSubPlan );
 			newUnionSubPlans[i] = newSubPlan;
 		}
-
+		if ( newUnionSubPlans.length == 2 ) return createPlan( LogicalOpUnion.getInstance(), newUnionSubPlans );
 		return createPlan( LogicalOpMultiwayUnion.getInstance(), newUnionSubPlans );
 	}
 
