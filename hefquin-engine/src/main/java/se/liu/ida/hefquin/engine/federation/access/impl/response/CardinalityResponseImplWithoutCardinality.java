@@ -1,53 +1,38 @@
 package se.liu.ida.hefquin.engine.federation.access.impl.response;
 
-import java.util.Date;
-
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.access.CardinalityResponse;
 import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.engine.federation.access.DataRetrievalResponse;
 
-public class CardinalityResponseImplWithoutCardinality implements CardinalityResponse
+/**
+ * A subclass of {@link CardinalityResponseImpl} representing a response where the cardinality is not available.
+ *
+ * This implementation wraps a {@link DataRetrievalResponse} and a {@link DataRetrievalRequest} and captures the
+ * exception that occurred, while assigning {@code Integer.MAX_VALUE} as a placeholder for the unknown cardinality.
+ */
+public class CardinalityResponseImplWithoutCardinality extends CardinalityResponseImpl
 {
-	protected final DataRetrievalResponse wrappedResponse;
-	protected final DataRetrievalRequest request;
+	protected final Exception exception;
 
-	public CardinalityResponseImplWithoutCardinality( final DataRetrievalResponse wrappedResponse,
+	/**
+	 * Constructs a {@code CardinalityResponseImplWithoutCardinality} with the given exception.
+	 *
+	 * @param exception       the exception that caused the absence of cardinality/cardinality estimate
+	 * @param wrappedResponse the original data retrieval response
+	 * @param request         the original data retrieval request
+	 */
+	public CardinalityResponseImplWithoutCardinality( final Exception exception,
+	                                                  final DataRetrievalResponse<?> wrappedResponse,
 	                                                  final DataRetrievalRequest request ) {
-		assert wrappedResponse != null;
-		assert request != null;
-
-		this.wrappedResponse = wrappedResponse;
-		this.request = request;
+		super( wrappedResponse, request, Integer.MAX_VALUE );
+		this.exception = exception;
 	}
 
-	public DataRetrievalResponse getWrappedResponse() {
-		return wrappedResponse;
+	/**
+	 * Returns the exception that caused the absence of cardinality/cardinality estimate.
+	 *
+	 * @return the associated exception
+	 */
+	public Exception getException() {
+		return exception;
 	}
-
-	@Override
-	public FederationMember getFederationMember() {
-		return wrappedResponse.getFederationMember();
-	}
-
-	@Override
-	public DataRetrievalRequest getRequest() {
-		return request;
-	}
-
-	@Override
-	public Date getRequestStartTime() {
-		return wrappedResponse.getRequestStartTime();
-	}
-
-	@Override
-	public Date getRetrievalEndTime() {
-		return wrappedResponse.getRetrievalEndTime();
-	}
-
-	@Override
-	public int getCardinality() {
-		return Integer.MAX_VALUE;
-	}
-
 }
