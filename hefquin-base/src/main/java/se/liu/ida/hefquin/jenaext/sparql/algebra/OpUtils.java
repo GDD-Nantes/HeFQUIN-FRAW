@@ -1,22 +1,14 @@
 package se.liu.ida.hefquin.jenaext.sparql.algebra;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.algebra.Op;
-import org.apache.jena.sparql.algebra.op.Op2;
-import org.apache.jena.sparql.algebra.op.OpBGP;
-import org.apache.jena.sparql.algebra.op.OpExtend;
-import org.apache.jena.sparql.algebra.op.OpFilter;
-import org.apache.jena.sparql.algebra.op.OpJoin;
-import org.apache.jena.sparql.algebra.op.OpLeftJoin;
-import org.apache.jena.sparql.algebra.op.OpService;
-import org.apache.jena.sparql.algebra.op.OpUnion;
+import org.apache.jena.sparql.algebra.op.*;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.Vars;
-
 import se.liu.ida.hefquin.jenaext.graph.TripleUtils;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class provides useful functionality related to Jena's

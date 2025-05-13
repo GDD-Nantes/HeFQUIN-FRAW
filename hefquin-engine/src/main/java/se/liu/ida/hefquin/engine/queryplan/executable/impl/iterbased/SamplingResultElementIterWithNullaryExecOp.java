@@ -32,7 +32,8 @@ public class SamplingResultElementIterWithNullaryExecOp extends SamplingResultEl
 	}
 
 	public void flush(){
-		while (getNextElement() != null);
+		sink.close();
+		getNextElement();
 	}
 
 	@Override

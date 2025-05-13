@@ -1,7 +1,7 @@
 package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 
 import se.liu.ida.hefquin.base.data.VocabularyMapping;
-import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
+import se.liu.ida.hefquin.base.query.ExpectedVariables;
 import se.liu.ida.hefquin.engine.federation.*;
 import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.engine.federation.access.FederationMemberAgglomerationInterface;
@@ -37,6 +37,7 @@ public class PhysicalOpFrawRequest
         FederationMemberAgglomeration fms = new FederationMemberAgglomeration() {
             @Override public FederationMemberAgglomerationInterface getInterface() {return iface;}
             @Override public VocabularyMapping getVocabularyMapping() {return null;}
+            @Override public String toString() {return super.toString();}
         };
 
         Iterator<DataRetrievalRequest> requests = memberToRequest.values().stream().distinct().iterator();
