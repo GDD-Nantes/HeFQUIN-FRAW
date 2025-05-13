@@ -15,6 +15,7 @@ import org.apache.jena.sparql.engine.main.OpExecutor;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
+import se.liu.ida.hefquin.base.query.VariableByBlankNodeSubstitutionException;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
 import se.liu.ida.hefquin.base.query.utils.QueryPatternUtils;
 import se.liu.ida.hefquin.base.utils.Pair;
@@ -205,7 +206,7 @@ public class OpExecutorFraw extends OpExecutor
 
 				try {
 					boundSGP = QueryPatternUtils.applySolMapToGraphPattern(sm, unboundSgp);
-				} catch (QueryPatternUtils.VariableByBlankNodeSubstitutionException e) {
+				} catch (VariableByBlankNodeSubstitutionException e) {
 					throw new RuntimeException(e);
 				}
 

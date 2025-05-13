@@ -55,6 +55,9 @@ public class OpUtils
 			addVariablesFromPattern( acc, opExtend.getSubOp() );
 			acc.addAll( opExtend.getVarExprList().getVars() );
 		}
+		else if ( op instanceof OpTriple opTriple ){
+			Vars.addVarsFromTriple(acc, opTriple.getTriple());
+		}
 		else {
 			throw new UnsupportedOperationException("Getting the variables from arbitrary SPARQL patterns is an open TODO (type of Jena Op in the current case: " + op.getClass().getName() + ").");
 		}

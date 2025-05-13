@@ -165,6 +165,13 @@ public class GenericSPARQLGraphPatternImpl2 implements SPARQLGraphPattern
 			return tps;
 		}
 
+		if (op instanceof OpTriple opTriple ) {
+			final Set<TriplePattern> tps = new HashSet<>();
+			tps.add( new TriplePatternImpl(opTriple.getTriple()) );
+			return tps;
+
+		}
+
 		throw new UnsupportedOperationException("Getting the triple patterns from arbitrary SPARQL patterns is an open TODO (type of Jena Op in the current case: " + op.getClass().getName() + ").");
 	}
 
