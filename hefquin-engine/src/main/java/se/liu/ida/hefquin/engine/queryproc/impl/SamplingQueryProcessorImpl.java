@@ -55,9 +55,11 @@ public class SamplingQueryProcessorImpl implements SamplingQueryProcessor
 	public Pair<QueryProcStats, List<Exception>> processQuery( final Query query, final QueryResultSink resultSink, int numberOfWalks )
 			throws QueryProcException
 	{
+		boolean skipExecution = ctxt.skipExecution();
 		final long t1 = System.currentTimeMillis();
 		final Pair<PhysicalPlan, QueryPlanningStats> qepAndStats = planner.createPlan(query);
-		if(Objects.isNull(qepAndStats)) return null;
+
+		skipExecution = Objects.isNull(qepAndStats.object1);
 
 		final long t2 = System.currentTimeMillis();
 
@@ -66,7 +68,7 @@ public class SamplingQueryProcessorImpl implements SamplingQueryProcessor
 		final ExecutionStats execStats;
 		final List<Exception> exceptionsCaughtDuringExecution;
 
-		if ( ctxt.skipExecution() ) {
+		if ( skipExecution ) {
 			t3 = System.currentTimeMillis();
 			t4 = System.currentTimeMillis();
 			prg = null;

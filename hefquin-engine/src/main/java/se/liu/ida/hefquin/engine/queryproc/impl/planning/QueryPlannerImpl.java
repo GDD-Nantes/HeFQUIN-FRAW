@@ -52,7 +52,23 @@ public class QueryPlannerImpl implements QueryPlanner
 	public Pair<PhysicalPlan, QueryPlanningStats> createPlan( final Query query ) throws QueryPlanningException {
 		final long t1 = System.currentTimeMillis();
 		final Pair<LogicalPlan, SourcePlanningStats> saAndStats = sourcePlanner.createSourceAssignment(query);
-		if(Objects.isNull(saAndStats)) return null;
+
+		boolean skipQueryPlanning = Objects.isNull(saAndStats.object1);
+
+		if (skipQueryPlanning) {
+
+			final long earlyStopTime = System.currentTimeMillis();
+
+			final QueryPlanningStats earlyStopStats = new QueryPlanningStatsImpl( earlyStopTime-t1, earlyStopTime-t1, 0, 0,
+					saAndStats.object2,
+                    null,
+					null,
+					null,
+					null );
+
+			return Pair.of(null, earlyStopStats);
+		}
+
 		if ( srcasgPrinter != null ) {
 			System.out.println("--------- Source Assignment ---------");
 			srcasgPrinter.print( saAndStats.object1, System.out );
