@@ -1,0 +1,87 @@
+PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
+PREFIX fd:     <http://www.example.org/se/liu/ida/hefquin/fd#>
+PREFIX ex:     <http://example.org/>
+
+ex:Affymetrix
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/Affymetrix> ] .
+
+
+ex:ChBI
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/ChEBI> ] .
+
+
+ex:DBPedia-Subset
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/DBPedia-Subset> ] .
+
+
+ex:DrugBank
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/DrugBank> ] .
+
+
+ex:GeoNames
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/GeoNames> ] .
+
+
+ex:Jamendo
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/Jamendo> ] .
+
+
+ex:KEGG
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/KEGG> ] .
+
+
+ex:LinkedTCGA-A
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/LinkedTCGA-A> ] .
+
+
+ex:LinkedTCGA-E
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/LinkedTCGA-E> ] .
+
+
+ex:LinkedTCGA-M
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/LinkedTCGA-M> ] .
+
+
+ex:LMDB
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/LMDB> ] .
+
+
+ex:NYT
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/NYT> ] .
+
+
+ex:SWDFood
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://example.org/SWDFood> ] .
+
+
+ex:empty
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=http://www.empty.fr/> ] .

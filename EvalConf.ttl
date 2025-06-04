@@ -61,8 +61,8 @@ _:bListOfHeuristics
         #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.PullUpLtgOverUnion" ]
         #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.PullUpLtgOverJoin" ]
         [ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.PushJoinUnderUnionWithRequests" ]
-       # [ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.PullUpLtgOverUnion" ]
-        [ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.RemovePairsOfG2lAndL2g" ]
+        #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.PullUpLtgOverUnion" ]
+        #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.RemovePairsOfG2lAndL2g" ]
     ) .
     
 _:bFormulaForSelectivity
@@ -75,8 +75,9 @@ _:bFormulaForSelectivity
 _:bServiceBasedSrcPlanner
     ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedSourcePlannerImpl" ;
     ec:constructorArguments ( ec:value:QueryProcContext
-                              "summaries/fedshop200-h0"
-                              "(e)->\"http://localhost:9999/blazegraph/sparql?default-graph-uri=\"+(e)" ) .
+                              "summaries/largerdfbench-h0"
+                              #"(e)->\"http://localhost:9999/blazegraph/sparql?default-graph-uri=\"+(e)" ) .
+                              "(e)->\"http://localhost:9999/blazegraph/sparql?default-graph-uri=\"+(e.replace(\"http://example.com/affymetrix\", \"http://example.org/Affymetrix\").replace(\"http://example.com/chebi\", \"http://example.org/ChEBI\").replace(\"http://example.com/nyt\", \"http://example.org/NYT\").replace(\"http://example.com/geonames\", \"http://example.org/GeoNames\").replace(\"http://example.com/drugbank\", \"http://example.org/DrugBank\").replace(\"http://example.com/LinkedTCGA-M\", \"http://example.org/LinkedTCGA-M\").replace(\"http://example.com/lmdb\", \"http://example.org/LMDB\").replace(\"http://example.com/kegg\", \"http://example.org/KEGG\").replace(\"http://example.com/LinkedTCGA-E\", \"http://example.org/LinkedTCGA-E\").replace(\"http://example.com/LinkedTCGA-A\", \"http://example.org/LinkedTCGA-A\").replace(\"http://example.com/dbpedia\", \"http://example.org/DBPedia-Subset\").replace(\"http://example.com/jamendo\", \"http://example.org/Jamendo\").replace(\"http://example.com/swdf\", \"http://example.org/SWDFood\"))") .
 
 _:bExhaustiveSrcPlanner
     ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ExhaustiveSourcePlannerImpl" ;

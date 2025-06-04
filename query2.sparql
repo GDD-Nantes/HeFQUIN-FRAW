@@ -1,0 +1,45 @@
+PREFIX ca: <http://customAgg/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rev: <http://purl.org/stuff/rev#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+# OBJECT AUTOCOMPLETION QUERY REDUCED
+SELECT ?qleverui_entity (MIN(?name) AS ?qleverui_name) (MIN(?alias) AS ?qleverui_alias) (ca:rawcount(?qleverui_entity) AS ?qleverui_count) WHERE {
+                  { ?localProduct <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature> ?localProdFeature .?localProduct <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1> ?simProperty1 .?localProduct <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric2> ?simProperty2 .?localProduct <http://www.w3.org/2002/07/owl#sameAs> ?product .?localProduct rdfs:label ?localProductLabel . ?localProdFeature <http://www.w3.org/2002/07/owl#sameAs> ?qleverui_entity .
+                  ?qleverui_entity rdfs:label ?name . BIND(?name AS ?alias) }
+                  UNION { ?localProduct <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature> ?localProdFeature .?localProduct <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1> ?simProperty1 .?localProduct <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric2> ?simProperty2 .?localProduct <http://www.w3.org/2002/07/owl#sameAs> ?product .?localProduct rdfs:label ?localProductLabel . ?localProdFeature <http://www.w3.org/2002/07/owl#sameAs> ?qleverui_entity .
+                  BIND(?qleverui_entity AS ?name) BIND(?qleverui_entity AS ?alias) }
+}
+GROUP BY ?qleverui_entity
+ORDER BY DESC(?qleverui_count)
+
+
+SELECT * WHERE {
+    # OBJECT AUTOCOMPLETION QUERY REDUCED
+    {
+        SELECT ?qleverui_entity
+                    (MIN(?name) AS ?qleverui_name)
+                    (MIN(?alias) AS ?qleverui_alias)
+                    (ca:rawcount(?qleverui_entity) AS ?qleverui_count) WHERE {
+                          ?localProduct <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature> ?localProdFeature .
+                          ?localProduct <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1> ?simProperty1 .
+                          ?localProduct <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric2> ?simProperty2 .
+                          ?localProduct <http://www.w3.org/2002/07/owl#sameAs> ?product .
+                          ?localProduct rdfs:label ?localProductLabel .
+                          ?localProdFeature <http://www.w3.org/2002/07/owl#sameAs> ?qleverui_entity .
+                          {
+                            ?qleverui_entity rdfs:label ?name .
+                          }UNION{
+
+                          }
+        }
+        GROUP BY ?qleverui_entity
+        ORDER BY DESC(?qleverui_count)
+    }
+    BIND(?name AS ?alias)
+}
