@@ -57,3 +57,9 @@ hefquin-service/dependency-reduced-pom.xml
 /.settings
 
 .DS_Store
+
+fedshop200.ttl
+SamplingConf.ttl
+summaries/*
+plan.txt
+SamplingConfId.ttl
