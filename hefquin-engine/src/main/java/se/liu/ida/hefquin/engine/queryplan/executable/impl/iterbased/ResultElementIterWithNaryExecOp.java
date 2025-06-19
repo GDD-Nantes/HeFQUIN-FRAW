@@ -12,7 +12,7 @@ public class ResultElementIterWithNaryExecOp extends ResultElementIterBase
 	protected final MyOpRunnerThread opRunnerThread;
 
 	public ResultElementIterWithNaryExecOp( final NaryExecutableOp op,
-											  final List<ResultBlockIterator> inputIters,
+											  final List<ResultElementIterator> inputIters,
 											  final ExecutionContext execCxt )
 	{
 		super(execCxt);
@@ -48,10 +48,10 @@ public class ResultElementIterWithNaryExecOp extends ResultElementIterBase
 	protected class MyOpRunnerThread extends OpRunnerThread
 	{
 		private final NaryExecutableOp op;
-		protected final List<ResultBlockIterator> inputIters;
+		protected final List<ResultElementIterator> inputIters;
 
 		public MyOpRunnerThread( final NaryExecutableOp op,
-								 List<ResultBlockIterator> inputIters )
+								 List<ResultElementIterator> inputIters )
 		{
 			this.op = op;
 			this.inputIters = inputIters;
@@ -60,7 +60,7 @@ public class ResultElementIterWithNaryExecOp extends ResultElementIterBase
 		@Override
 		public NaryExecutableOp getOp() { return op; }
 
-		public ResultBlockIterator getInputN(int n) { return inputIters.get(n); }
+		public ResultElementIterator getInputN(int n) { return inputIters.get(n); }
 
 		@Override
 		protected void _run() throws ExecutionException {
@@ -70,9 +70,9 @@ public class ResultElementIterWithNaryExecOp extends ResultElementIterBase
 			// input two.
 
 			for( int i = 0; i < inputIters.size(); i++ ) {
-				ResultBlockIterator it = inputIters.get(i);
+				ResultElementIterator it = inputIters.get(i);
 				while ( it.hasNext() ) {
-					op.processBlockFromXthChild( i, it.next(), sink, execCxt );
+					op.processInputFromXthChild( i, it.next(), sink, execCxt );
 				}
 				op.wrapUpForXthChild( i, sink, execCxt);
 			}

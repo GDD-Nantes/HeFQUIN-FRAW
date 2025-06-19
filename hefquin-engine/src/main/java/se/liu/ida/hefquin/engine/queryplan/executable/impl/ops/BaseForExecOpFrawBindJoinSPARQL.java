@@ -1,14 +1,10 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
 
-import org.apache.jena.sparql.core.Var;
-import se.liu.ida.hefquin.base.query.BGP;
+import se.liu.ida.hefquin.base.query.ExpectedVariables;
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
-import se.liu.ida.hefquin.base.query.TriplePattern;
-import se.liu.ida.hefquin.base.query.utils.QueryPatternUtils;
 import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
-
-import java.util.ArrayList;
-import java.util.List;
+import se.liu.ida.hefquin.engine.federation.access.impl.req.SPARQLRequestImpl;
+import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
 
 /**
  * A base class for all variations of the bind join algorithm that use
@@ -16,29 +12,17 @@ import java.util.List;
  */
 public abstract class BaseForExecOpFrawBindJoinSPARQL extends BaseForExecOpFrawBindJoinWithRequestOps<SPARQLGraphPattern, SPARQLEndpoint>
 {
-	protected final List<Var> varsInSubQuery;
-
-	public BaseForExecOpFrawBindJoinSPARQL(final TriplePattern query,
-                                           final SPARQLEndpoint fm,
-                                           final boolean useOuterJoinSemantics,
-                                           final boolean collectExceptions ) {
-		super(query, fm, useOuterJoinSemantics, QueryPatternUtils.getVariablesInPattern(query), collectExceptions);
-		varsInSubQuery = new ArrayList<>(varsInPatternForFM);
+	public BaseForExecOpFrawBindJoinSPARQL( final SPARQLGraphPattern p,
+										final SPARQLEndpoint fm,
+										final ExpectedVariables inputVars,
+										final boolean useOuterJoinSemantics,
+										final int batchSize,
+										final boolean collectExceptions ) {
+		super(p, p.getAllMentionedVariables(), fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions);
 	}
 
-	public BaseForExecOpFrawBindJoinSPARQL(final BGP query,
-                                           final SPARQLEndpoint fm,
-                                           final boolean useOuterJoinSemantics,
-                                           final boolean collectExceptions ) {
-		super(query, fm, useOuterJoinSemantics, QueryPatternUtils.getVariablesInPattern(query), collectExceptions);
-		varsInSubQuery = new ArrayList<>(varsInPatternForFM);
-	}
-
-	public BaseForExecOpFrawBindJoinSPARQL(final SPARQLGraphPattern query,
-                                           final SPARQLEndpoint fm,
-                                           final boolean useOuterJoinSemantics,
-                                           final boolean collectExceptions ) {
-		super(query, fm, useOuterJoinSemantics, QueryPatternUtils.getVariablesInPattern(query), collectExceptions);
-		varsInSubQuery = new ArrayList<>(varsInPatternForFM);
+	@Override
+	protected NullaryExecutableOp createExecutableReqOpForAll() {
+		return new ExecOpFrawRequest( new SPARQLRequestImpl(query), fm, false );
 	}
 }

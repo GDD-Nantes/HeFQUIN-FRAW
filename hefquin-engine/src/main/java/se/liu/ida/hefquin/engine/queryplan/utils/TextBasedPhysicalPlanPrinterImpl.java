@@ -1,32 +1,22 @@
 package se.liu.ida.hefquin.engine.queryplan.utils;
 
-import java.io.PrintStream;
-import java.util.Map;
-
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.util.ExprUtils;
-
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
 import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.engine.federation.access.SPARQLRequest;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpBGPAdd;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpBGPOptAdd;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpBind;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpFilter;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpGPAdd;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpGPOptAdd;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpGlobalToLocal;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRequest;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpTPAdd;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpTPOptAdd;
+import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalOperatorForLogicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.*;
+
+import java.io.PrintStream;
+import java.util.Map;
 
 /**
  * Internally, the functionality of this class is implemented based on
@@ -173,6 +163,38 @@ public class TextBasedPhysicalPlanPrinterImpl extends BaseForTextBasedPlanPrinte
 
 			out.append( indentLevelStringForOpDetail + singleBase );
 			out.append( System.lineSeparator() );
+		}
+
+		@Override
+		public void visit(PhysicalOpFrawBindJoinWithVALUES op) {
+			out.append( indentLevelString + "VALUES-based fraw bind join (" + op.getID() + ") " );
+			out.append( System.lineSeparator() );
+			printLogicalOperator( op, indentLevelStringForOpDetail + singleBase, out, np );
+			printOperatorInfoFmAndPattern( op, indentLevelStringForOpDetail );
+		}
+
+		@Override
+		public void visit(PhysicalOpFrawBindJoinWithUNION op) {
+			out.append( indentLevelString + "UNION-based fraw bind join (" + op.getID() + ") " );
+			out.append( System.lineSeparator() );
+			printLogicalOperator( op, indentLevelStringForOpDetail + singleBase, out, np );
+			printOperatorInfoFmAndPattern( op, indentLevelStringForOpDetail );
+		}
+
+		@Override
+		public void visit(PhysicalOpFrawBindJoinWithFILTER op) {
+			out.append( indentLevelString + "FILTER-based fraw bind join (" + op.getID() + ") " );
+			out.append( System.lineSeparator() );
+			printLogicalOperator( op, indentLevelStringForOpDetail + singleBase, out, np );
+			printOperatorInfoFmAndPattern( op, indentLevelStringForOpDetail );
+		}
+
+		@Override
+		public void visit(PhysicalOpFrawBindJoinWithVALUESorFILTER op) {
+			out.append( indentLevelString + "VALUES/FILTER-based fraw bind join (" + op.getID() + ") " );
+			out.append( System.lineSeparator() );
+			printLogicalOperator( op, indentLevelStringForOpDetail + singleBase, out, np );
+			printOperatorInfoFmAndPattern( op, indentLevelStringForOpDetail );
 		}
 
 		@Override

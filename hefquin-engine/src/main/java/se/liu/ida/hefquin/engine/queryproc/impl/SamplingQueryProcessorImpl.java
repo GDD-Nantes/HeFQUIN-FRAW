@@ -52,6 +52,11 @@ public class SamplingQueryProcessorImpl implements SamplingQueryProcessor
 	public ExecutionEngine getExecutionEngine() { return execEngine; }
 
 	@Override
+	public void shutdown() {
+		// TODO :
+	}
+
+	@Override
 	public Pair<QueryProcStats, List<Exception>> processQuery( final Query query, final QueryResultSink resultSink, int numberOfWalks )
 			throws QueryProcException
 	{

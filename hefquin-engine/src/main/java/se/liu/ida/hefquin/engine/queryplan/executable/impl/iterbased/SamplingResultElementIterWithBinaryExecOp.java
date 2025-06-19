@@ -12,12 +12,12 @@ import java.util.Random;
 public class SamplingResultElementIterWithBinaryExecOp extends SamplingResultElementIterBase<BinaryExecutableOp>
 {
 	protected final BinaryExecutableOp op;
-	protected final ResultBlockIterator inputIter1;
-	protected final ResultBlockIterator inputIter2;
+	protected final ResultElementIterator inputIter1;
+	protected final ResultElementIterator inputIter2;
 
 	public SamplingResultElementIterWithBinaryExecOp(final BinaryExecutableOp op,
-                                                     final ResultBlockIterator inputIter1,
-                                                     final ResultBlockIterator inputIter2,
+                                                     final ResultElementIterator inputIter1,
+                                                     final ResultElementIterator inputIter2,
                                                      final ExecutionContext execCxt )
 	{
 		super(execCxt);
@@ -71,9 +71,9 @@ public class SamplingResultElementIterWithBinaryExecOp extends SamplingResultEle
 		Random random = new Random();
 		int chosen = random.nextInt(2);
 		if (chosen == 0) {
-			op.processBlockFromChild1(inputIter1.next(), this, execCxt);
+			op.processInputFromChild1(inputIter1.next(), this, execCxt);
 		} else {
-			op.processBlockFromChild2(inputIter2.next(), this, execCxt);
+			op.processInputFromChild1(inputIter2.next(), this, execCxt);
         }
 	}
 }

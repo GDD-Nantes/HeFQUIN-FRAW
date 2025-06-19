@@ -10,10 +10,10 @@ import java.util.List;
 public class SamplingResultElementIterWithUnaryExecOp extends SamplingResultElementIterBase<UnaryExecutableOp>
 {
 	protected final UnaryExecutableOp op;
-	protected final ResultBlockIterator inputIter;
+	protected final ResultElementIterator inputIter;
 
 	public SamplingResultElementIterWithUnaryExecOp(final UnaryExecutableOp op,
-                                                    final ResultBlockIterator inputIter,
+                                                    final ResultElementIterator inputIter,
                                                     final ExecutionContext execCxt )
 	{
 		super(execCxt);

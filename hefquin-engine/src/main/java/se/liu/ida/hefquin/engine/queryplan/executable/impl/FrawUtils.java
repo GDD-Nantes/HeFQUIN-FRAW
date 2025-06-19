@@ -190,4 +190,38 @@ public class FrawUtils {
         return joinJson;
     }
 
+
+    /**
+     * Returns <code>true</code> if the first solution mapping, b1, is
+     * included in the second solution mapping, b2, where we say that
+     * 'b1 is included in b2' if the variables in b1 are a proper subset
+     * of the variables in b2 and the two solution mappings are compatible.
+     * In other words, b1 and b2 are the same for the subset of variables
+     * for which they both have bindings and, additionally, b2 has bindings
+     * for additional variables.
+     */
+    public static boolean includedIn( final Binding b1, final Binding b2 ) {
+        // First check: b1 can be included in b2 only if b1 has fewer
+        // variables than b2. If that is not the case, we can immediately
+        // conclude that b1 is not included in b2.
+        if ( b1.size() >= b2.size() ) return false;
+
+        // Now the main check: We iterate over the variables bound in b1 and,
+        // for each of these variables, we check that
+        // (1) if the variable is not the special probability variable :
+        // (a) the variable is also bound in b2 and
+        // (b) both solution mappings have the same term for the variable.
+        final Iterator<Var> it = b1.vars();
+        while ( it.hasNext() ) {
+            final Var var = it.next();
+            // check (1)
+            if ( var.equals(MAPPING_PROBABILITY) ) continue;
+            // check (a)
+            if ( ! b2.contains(var) ) return false;
+            // check (b)
+            if ( ! b1.get(var).equals(b2.get(var)) ) return false;
+        }
+
+        return true;
+    }
 }

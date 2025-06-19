@@ -15,7 +15,7 @@ public class PhysicalOpFrawBinaryUnion extends PhysicalOpBinaryUnion implements 
 
     @Override
     public BinaryExecutableOp createExecOp(boolean collectExceptions, ExpectedVariables... inputVars) {
-        return new  ExecOpFrawBinaryUnion(inputVars.length, collectExceptions);
+        return new ExecOpFrawBinaryUnion(collectExceptions);
     }
 
     @Override

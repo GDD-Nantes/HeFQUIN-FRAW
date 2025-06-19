@@ -12,10 +12,10 @@ import java.util.Random;
 public class SamplingResultElementIterWithNaryExecOp extends SamplingResultElementIterBase<NaryExecutableOp>
 {
 	protected final NaryExecutableOp op;
-	protected final List<ResultBlockIterator> inputIters;
+	protected final List<ResultElementIterator> inputIters;
 
 	public SamplingResultElementIterWithNaryExecOp(final NaryExecutableOp op,
-                                                   final List<ResultBlockIterator> inputIters,
+                                                   final List<ResultElementIterator> inputIters,
                                                    final ExecutionContext execCxt )
 	{
 		super(execCxt);
@@ -56,9 +56,9 @@ public class SamplingResultElementIterWithNaryExecOp extends SamplingResultEleme
 	private void runFrawMultiwayUnion() throws ExecutionException{
 		Random random = new Random();
 		int chosen = random.nextInt(inputIters.size());
-		ResultBlockIterator it = inputIters.get(chosen);
+		ResultElementIterator it = inputIters.get(chosen);
 		if(it.hasNext()){
-			op.processBlockFromXthChild( chosen, it.next(), this, execCxt );
+			op.processInputFromXthChild( chosen, it.next(), this, execCxt );
 		}
 	}
 }

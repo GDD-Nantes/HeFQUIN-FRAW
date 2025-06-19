@@ -2,7 +2,6 @@ package se.liu.ida.hefquin.engine.queryproc.impl.compiler;
 
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
 import se.liu.ida.hefquin.engine.queryplan.executable.*;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.GenericIntermediateResultBlockBuilderImpl;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
@@ -54,8 +53,7 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 			final UnaryExecutableOp execOp = (UnaryExecutableOp) qep.getRootOperator().createExecOp( true, subPlan.getExpectedVariables() );
 
 			final ResultElementIterator elmtIterSubPlan = compile(subPlan, execCxt, leaves);
-			final ResultBlockIterator blockIterSubPlan = createBlockIterator( elmtIterSubPlan, execOp.preferredInputBlockSize() );
-			return new SamplingResultElementIterWithUnaryExecOp(execOp, blockIterSubPlan, execCxt);
+			return new SamplingResultElementIterWithUnaryExecOp(execOp, elmtIterSubPlan, execCxt);
 		}
 		else if ( qep.numberOfSubPlans() == 2 )
 		{
@@ -68,15 +66,12 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 					subPlan2.getExpectedVariables() );
 
 			final ResultElementIterator elmtIterSubPlan1 = compile(subPlan1, execCxt, leaves);
-			final ResultBlockIterator blockIterSubPlan1 = createBlockIterator( elmtIterSubPlan1, execOp.preferredInputBlockSizeFromChild1() );
-
 			final ResultElementIterator elmtIterSubPlan2 = compile(subPlan2, execCxt, leaves);
-			final ResultBlockIterator blockIterSubPlan2 = createBlockIterator( elmtIterSubPlan2, execOp.preferredInputBlockSizeFromChild2() );
 
-			return new SamplingResultElementIterWithBinaryExecOp(execOp, blockIterSubPlan1, blockIterSubPlan2, execCxt);
+			return new SamplingResultElementIterWithBinaryExecOp(execOp, elmtIterSubPlan1, elmtIterSubPlan2, execCxt);
 		}
 		else {
-			List<ResultBlockIterator> blockIterators = new ArrayList<>();
+			List<ResultElementIterator> elementIterators = new ArrayList<>();
 			ExpectedVariables[] expectedVariables = new ExpectedVariables[qep.numberOfSubPlans()];
 
 			for (int i = 0; i < qep.numberOfSubPlans(); ++i) {
@@ -93,18 +88,11 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 				final PhysicalPlan subPlan = qep.getSubPlan(i);
 
 				final ResultElementIterator elmtIterSubPlan = compile(subPlan, execCxt, leaves);
-				final ResultBlockIterator blockIterSubPlan = createBlockIterator( elmtIterSubPlan, execOp.preferredInputBlockSizeFromChilden() );
-
-				blockIterators.add(blockIterSubPlan);
+				elementIterators.add(elmtIterSubPlan);
 			}
 
-			return new SamplingResultElementIterWithNaryExecOp( execOp, blockIterators, execCxt );
+			return new SamplingResultElementIterWithNaryExecOp( execOp, elementIterators, execCxt );
 		}
-	}
-
-	protected ResultBlockIterator createBlockIterator( final ResultElementIterator elmtIter, final int preferredBlockSize ) {
-		final IntermediateResultBlockBuilder blockBuilder = new GenericIntermediateResultBlockBuilderImpl();
-		return new ResultBlockIterOverResultElementIter( elmtIter, blockBuilder, 1 );
 	}
 
 }

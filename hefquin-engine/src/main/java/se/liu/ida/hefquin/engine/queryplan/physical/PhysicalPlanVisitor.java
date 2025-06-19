@@ -28,4 +28,9 @@ public interface PhysicalPlanVisitor
 	void visit( PhysicalOpBind op );
 	void visit( PhysicalOpLocalToGlobal op );
 	void visit( PhysicalOpGlobalToLocal op );
+
+	void visit( PhysicalOpFrawBindJoinWithVALUES op );
+	void visit( PhysicalOpFrawBindJoinWithUNION op );
+	void visit( PhysicalOpFrawBindJoinWithFILTER op );
+	void visit( PhysicalOpFrawBindJoinWithVALUESorFILTER op );
 }
