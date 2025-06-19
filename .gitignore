@@ -63,3 +63,4 @@ SamplingConf.ttl
 summaries/*
 plan.txt
 SamplingConfId.ttl
+hefquin-engine/cache/*
