@@ -2,14 +2,15 @@ package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
 import org.junit.Test;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
+import se.liu.ida.hefquin.engine.queryplan.executable.ExecOpExecutionException;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutableOperatorStats;
-import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultBlock;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.UnaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.BaseForExecOps;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 
 import java.util.Iterator;
+import java.util.List;
 
 public class SamplingResultElementIterWithUnaryExecOpTest
 {
@@ -18,7 +19,7 @@ public class SamplingResultElementIterWithUnaryExecOpTest
 		final UnaryExecutableOp1ForTest op = new UnaryExecutableOp1ForTest();
 		final ResultElementIterWithUnaryExecOp it = new ResultElementIterWithUnaryExecOp(
 				op,
-				TestUtils.createResultBlockIteratorForTests(2),
+				TestUtils.createResultElementIteratorForTests(),
 				TestUtils.createExecContextForTests() );
 
 		// assertEquals( op, it.getOp() );
@@ -81,7 +82,7 @@ public class SamplingResultElementIterWithUnaryExecOpTest
 		final UnaryExecutableOp op = new UnaryExecutableOp1ForTest();
 		return new ResultElementIterWithUnaryExecOp(
 				op,
-				TestUtils.createResultBlockIteratorForTests(blockSize, elements),
+				TestUtils.createResultElementIteratorForTests(elements),
 				TestUtils.createExecContextForTests() );
 	}
 
@@ -89,7 +90,7 @@ public class SamplingResultElementIterWithUnaryExecOpTest
 		final UnaryExecutableOp op = new UnaryExecutableOp2ForTest();
 		return new ResultElementIterWithUnaryExecOp(
 				op,
-				TestUtils.createResultBlockIteratorForTests(blockSize, elements),
+				TestUtils.createResultElementIteratorForTests(elements),
 				TestUtils.createExecContextForTests() );
 	}
 
@@ -108,11 +109,14 @@ public class SamplingResultElementIterWithUnaryExecOpTest
 		public UnaryExecutableOp2ForTest() { super(false); }
 
 		@Override
-		public void process( final IntermediateResultBlock input,
-		                     final IntermediateResultElementSink sink,
-		                     final ExecutionContext execCxt )
-		{
-			final Iterator<SolutionMapping> it = input.getSolutionMappings().iterator();
+		public void process(SolutionMapping inputSolMap, IntermediateResultElementSink sink, ExecutionContext execCxt) throws ExecOpExecutionException {
+			final String token = inputSolMap.toString() + "ok";
+			sink.send( TestUtils.createSolutionMappingForTests(token) );
+		}
+
+		@Override
+		public void process(List<SolutionMapping> inputSolMaps, IntermediateResultElementSink sink, ExecutionContext execCxt) throws ExecOpExecutionException {
+			final Iterator<SolutionMapping> it = inputSolMaps.iterator();
 			while ( it.hasNext() ) {
 				final String token = it.next().toString() + "ok";
 				sink.send( TestUtils.createSolutionMappingForTests(token) );
@@ -124,9 +128,6 @@ public class SamplingResultElementIterWithUnaryExecOpTest
 		                               final ExecutionContext execCxt )
 		{
 		}
-
-		@Override
-		public int preferredInputBlockSize() { return 1; }
 
 		@Override
 		public void resetStats()

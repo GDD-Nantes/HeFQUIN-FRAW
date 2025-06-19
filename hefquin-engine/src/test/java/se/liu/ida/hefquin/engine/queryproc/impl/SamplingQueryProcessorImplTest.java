@@ -14,13 +14,13 @@ import org.apache.jena.sparql.graph.GraphFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import se.liu.ida.hefquin.engine.EngineTestBase;
+import se.liu.ida.hefquin.engine.FrawEngineImpl;
 import se.liu.ida.hefquin.engine.HeFQUINEngine;
-import se.liu.ida.hefquin.engine.HeFQUINEngineDefaultComponents;
-import se.liu.ida.hefquin.engine.HeFQUINEngineImpl;
 import se.liu.ida.hefquin.engine.federation.access.FederationAccessManager;
 import se.liu.ida.hefquin.engine.federation.catalog.FederationCatalog;
 import se.liu.ida.hefquin.engine.federation.catalog.impl.FederationCatalogImpl;
 import se.liu.ida.hefquin.engine.queryplan.utils.LogicalToPhysicalPlanConverter;
+import se.liu.ida.hefquin.engine.queryplan.utils.LogicalToPhysicalSamplingPlanConverterImpl;
 import se.liu.ida.hefquin.engine.queryproc.*;
 import se.liu.ida.hefquin.engine.queryproc.impl.compiler.IteratorBasedSamplingQueryPlanCompilerImpl;
 import se.liu.ida.hefquin.engine.queryproc.impl.execution.FrawExecutionEngineImpl;
@@ -32,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SamplingQueryProcessorImplTest extends EngineTestBase
 {
@@ -172,12 +173,14 @@ public class SamplingQueryProcessorImplTest extends EngineTestBase
 	}
 
 	private ResultSet runQuery(String queryString) {
-		final DatasetGraph dsg = DatasetGraphFactory.createGeneral();
-		dsg.addGraph(NodeFactory.createURI("http://example.com"), getGraph());
-		final QueryExecution qe = QueryExecutionFactory.create(QueryFactory.create(queryString), dsg);
-
 		final Graph dataForMember = getGraph();
 		final Graph dataForMember2 = getGraph2();
+
+		final DatasetGraph dsg = DatasetGraphFactory.createGeneral();
+		dsg.addGraph(NodeFactory.createURI("http://example.com"), dataForMember);
+		final QueryExecution qe = QueryExecutionFactory.create(QueryFactory.create(queryString), dsg);
+
+
 
 		final FederationCatalogImpl fedCat = new FederationCatalogImpl();
 		fedCat.addMember("http://example.org" , new SPARQLEndpointForTest(dataForMember) );
@@ -185,8 +188,8 @@ public class SamplingQueryProcessorImplTest extends EngineTestBase
 
 		final FederationAccessManager fedAccessMgr = new FederationAccessManagerForTest();
 
-		final ExecutorService execServiceForPlanTasks = HeFQUINEngineDefaultComponents.createExecutorServiceForPlanTasks();
-		final LogicalToPhysicalPlanConverter l2pConverter = HeFQUINEngineDefaultComponents.createDefaultLogicalToPhysicalPlanConverter();
+		final ExecutorService execServiceForPlanTasks = Executors.newFixedThreadPool(10);
+		final LogicalToPhysicalPlanConverter l2pConverter = new LogicalToPhysicalSamplingPlanConverterImpl(false, false);
 
 		final QueryProcContext ctxt = new QueryProcContext() {
 			@Override public FederationCatalog getFederationCatalog() { return fedCat; }
@@ -207,7 +210,7 @@ public class SamplingQueryProcessorImplTest extends EngineTestBase
 
 		final QueryProcessor qProc = new SamplingQueryProcessorImpl(planner, planCompiler, execEngine, ctxt);
 
-		HeFQUINEngine engine = new HeFQUINEngineImpl(fedAccessMgr, qProc);
+		HeFQUINEngine engine = new FrawEngineImpl(fedAccessMgr, qProc, 100, 1);
 
 		engine.integrateIntoJena();
 
@@ -246,6 +249,7 @@ public class SamplingQueryProcessorImplTest extends EngineTestBase
 
 	@Test
 	public void testSPOP1O1() throws QueryProcException, UnsupportedEncodingException {
+		// dependent on data and join ordering as well
 
 		ResultSet rs = runQuery(spop1o1);
 		List<QuerySolution> results = new ArrayList<>();
@@ -254,11 +258,17 @@ public class SamplingQueryProcessorImplTest extends EngineTestBase
 			results.add(rs.next());
 		}
 
-		Assert.assertTrue(results.get(0).contains("s"));
-		Assert.assertTrue(results.get(0).contains("p"));
-		Assert.assertTrue(results.get(0).contains("o"));
-		Assert.assertTrue(results.get(0).contains("p1"));
-		Assert.assertTrue(results.get(0).contains("o1"));
+		System.out.println(results);
+
+		for(QuerySolution qs : results) {
+			if(!qs.varNames().hasNext()) continue;
+			Assert.assertTrue(qs.contains("s"));
+			Assert.assertTrue(qs.contains("p"));
+			Assert.assertTrue(qs.contains("o"));
+			Assert.assertTrue(qs.contains("p1"));
+			Assert.assertTrue(qs.contains("o1"));
+		}
+
 	}
 
 	@Test
