@@ -1,6 +1,14 @@
 package se.liu.ida.hefquin.engine.queryplan.utils;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprList;
+import org.apache.jena.sparql.util.ExprUtils;
 
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
@@ -39,10 +47,7 @@ public class BaseForTextBasedPlanPrinters
 		}
 
 		if ( upperRootOpIndentString.endsWith(nonLastChildIndentBase) ) {
-			String indentLevelString = "";
-			for ( int i = 1; i < planLevel; i++ ) {
-				indentLevelString += levelIndentBase;
-			}
+			final String indentLevelString = upperRootOpIndentString.substring( 0, upperRootOpIndentString.length() - nonLastChildIndentBase.length() ) + levelIndentBase;
 
 			if ( planNumber < numberOfSiblings-1 ) {
 				return indentLevelString + nonLastChildIndentBase;
@@ -85,14 +90,8 @@ public class BaseForTextBasedPlanPrinters
 		else if ( indentLevelString.endsWith(nonLastChildIndentBase) ) {
 			return indentLevelString.substring( 0, indentLevelString.length() - nonLastChildIndentBase.length() ) + levelIndentBase;
 		}
-		else if ( indentLevelString.endsWith(lastChildIndentBase) && indentLevelString.startsWith(" ") ) {
-			return indentLevelString.replaceAll( ".", " " );
-		}
-		else if ( indentLevelString.endsWith(lastChildIndentBase) && indentLevelString.startsWith(levelIndentBase) ) {
+		else if ( indentLevelString.endsWith(lastChildIndentBase) ) {
 			return indentLevelString.substring( 0, indentLevelString.length() - lastChildIndentBase.length() ) + spaceBase;
-		}
-		else if ( indentLevelString.equals(lastChildIndentBase) ) {
-			return indentLevelString.replaceAll( ".", " " );
 		}
 
 		return "";
@@ -106,14 +105,43 @@ public class BaseForTextBasedPlanPrinters
 		out.append( System.lineSeparator() );
 	}
 
-	protected static void printSPARQLGraphPattern( final SPARQLGraphPattern gp,
-	                                               final String indentString,
-	                                               final PrintStream out ) {
+	protected static String printSPARQLGraphPattern( final SPARQLGraphPattern gp,
+	                                                 final String indentString,
+	                                                 final PrintStream out ) {
+		final String gpAsString = gp.toStringForPlanPrinters();
+		final String gpAsString2 = gpAsString.replaceAll( "\\s+", " ");
+		final String gpAsShortString;
+		if ( gpAsString2.length() > 88 )
+			gpAsShortString = gpAsString2.substring(0, 40) + "[...]" + gpAsString2.substring( gpAsString2.length()-40 );
+		else
+			gpAsShortString = gpAsString2;
+
 		out.append( indentString );
-		out.append( "  - pattern (" + gp.hashCode() +  ") (" + gp.toString() + ")" );
+		out.append( "  - pattern (" + gp.hashCode() +  "): " + gpAsShortString );
 		out.append( System.lineSeparator() );
+
+		return gpAsString;
 	}
 
+	protected static void printExpressions( final ExprList exprs,
+	                                        final String indentString,
+	                                        final PrintStream out ) {
+		final int numberOfExprs = exprs.size();
+		if ( numberOfExprs == 1 ) {
+			final Expr expr = exprs.get(0);
+			out.append( indentString + "  - expression: " + ExprUtils.fmtSPARQL(expr) );
+			out.append( System.lineSeparator() );
+		}
+		else {
+			out.append( indentString + "  - number of expressions: " + numberOfExprs );
+			out.append( System.lineSeparator() );
+			for ( int i = 0; i < numberOfExprs; i++ ) {
+				final Expr expr = exprs.get(i);
+				out.append( indentString + "  - expression " + (i+1) + ": " + ExprUtils.fmtSPARQL(expr) );
+				out.append( System.lineSeparator() );
+			}
+		}
+	}
 
 	protected static void printLogicalOperatorBase( final LogicalOperator lop,
 	                                                final String indentString,
@@ -178,6 +206,49 @@ public class BaseForTextBasedPlanPrinters
 
 		@Override
 		public void visit( final LogicalOpGlobalToLocal op )    { out.append("g2l"); }
+	}
+
+	protected static class OpPrinterBase {
+		protected final PrintStream out;
+		protected final OpNamePrinter np;
+
+		protected String indentLevelString = null;
+		protected String indentLevelStringForOpDetail = null;
+
+		protected Set<SPARQLGraphPattern> graphPatterns = new HashSet<>();
+		protected List<String> fullStringsForGraphPatterns = new ArrayList<>();
+
+		public OpPrinterBase( final PrintStream out ) {
+			this.out = out;
+			this.np = new OpNamePrinter(out);
+		}
+
+		public void setIndentLevelString( final String s ) { indentLevelString = s; }
+		public void setIndentLevelStringForOpDetail( final String s ) { indentLevelStringForOpDetail = s; }
+
+		public void printFullStringsForGraphPatterns() {
+			if ( fullStringsForGraphPatterns.isEmpty() )
+				return;
+
+			for ( final String s : fullStringsForGraphPatterns ) {
+				out.append( s + System.lineSeparator() );
+			}
+		}
+
+		protected void printSPARQLGraphPattern( final SPARQLGraphPattern gp,
+		                                        final String indentString ) {
+			final String full = BaseForTextBasedPlanPrinters.printSPARQLGraphPattern(gp, indentString, out);
+
+			if ( ! graphPatterns.contains(gp) ) {
+				final String full2 =
+						"--- pattern (" + gp.hashCode() + ") "
+						+ gp.getClass().getName()
+						+ System.lineSeparator()
+						+ full
+						+ System.lineSeparator();
+				fullStringsForGraphPatterns.add(full2);
+			}
+		}
 	}
 
 }

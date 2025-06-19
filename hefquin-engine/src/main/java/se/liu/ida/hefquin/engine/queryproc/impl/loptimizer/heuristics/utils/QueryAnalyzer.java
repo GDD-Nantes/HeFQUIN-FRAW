@@ -49,9 +49,9 @@ public class QueryAnalyzer {
     protected Set<TriplePattern> extractTPsAndRecordFms( final LogicalPlan plan ) {
         final LogicalOperator lop = plan.getRootOperator();
 
-        if( lop instanceof LogicalOpRequest) {
-            fms.add( ((LogicalOpRequest<?, ?>) lop).getFederationMember() );
-            return LogicalOpUtils.getTriplePatternsOfReq( (LogicalOpRequest<?, ?>) lop);
+        if ( lop instanceof LogicalOpRequest reqOp ) {
+            fms.add( reqOp.getFederationMember() );
+            return LogicalOpUtils.getTriplePatternsOfReq(reqOp);
         }
         else if ( lop instanceof LogicalOpMultiwayUnion || lop instanceof LogicalOpUnion ) {
             final int numOfSubPlans = plan.numberOfSubPlans();
@@ -60,10 +60,12 @@ public class QueryAnalyzer {
             for ( int i = 0; i < numOfSubPlans; i++ ) {
                 final LogicalOperator subLop = plan.getSubPlan(i).getRootOperator();
 
-                if ( subLop instanceof LogicalOpRequest ) {
-                    fms.add( ((LogicalOpRequest<?, ?>) subLop).getFederationMember() );
-                    final Set<TriplePattern> currentTPs = LogicalOpUtils.getTriplePatternsOfReq( (LogicalOpRequest<?, ?>) subLop);
-                    if( !currentTPs.isEmpty() && previousTPs != null && !currentTPs.equals( previousTPs) ) {
+                if ( subLop instanceof LogicalOpRequest subReqOp ) {
+                    fms.add( subReqOp.getFederationMember() );
+                    final Set<TriplePattern> currentTPs = LogicalOpUtils.getTriplePatternsOfReq(subReqOp);
+                    if(    ! currentTPs.isEmpty()
+                        && previousTPs != null
+                        && ! currentTPs.equals(previousTPs) ) {
                         throw new IllegalArgumentException("UNION is not added as a result of source selection");
                     }
                     previousTPs = currentTPs;

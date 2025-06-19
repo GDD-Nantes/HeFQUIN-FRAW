@@ -2,12 +2,16 @@ package se.liu.ida.hefquin.base.query.impl;
 
 import java.util.*;
 
+import org.apache.jena.atlas.io.IndentedLineBuffer;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.PathBlock;
 import org.apache.jena.sparql.core.TriplePath;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.serializer.FormatterElement;
+import org.apache.jena.sparql.serializer.SerializationContext;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementPathBlock;
@@ -364,4 +368,17 @@ public class BGPImpl implements BGP
 		return new GenericSPARQLGraphPatternImpl1(resultElmt);
 	}
 
+	@Override
+	public String toStringForPlanPrinters() {
+		// convert into an Element object and use
+		// pretty printing via FormatterElement
+		final ElementTriplesBlock block = new ElementTriplesBlock();
+		for ( final TriplePattern t : tps ) {
+			block.addTriple( t.asJenaTriple() );
+		}
+		final IndentedLineBuffer buf = new IndentedLineBuffer();
+		final SerializationContext sCxt = new SerializationContext( ARQConstants.getGlobalPrefixMap() );
+		FormatterElement.format( buf, sCxt, block );
+		return "{ " + buf.asString() + " }";
+	}
 }

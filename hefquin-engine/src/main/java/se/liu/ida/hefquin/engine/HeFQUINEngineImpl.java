@@ -114,4 +114,9 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 		}
 	}
 
+	@Override
+	public void shutdown() {
+		fedAccessMgr.shutdown();
+		qProc.shutdown();
+	}
 }

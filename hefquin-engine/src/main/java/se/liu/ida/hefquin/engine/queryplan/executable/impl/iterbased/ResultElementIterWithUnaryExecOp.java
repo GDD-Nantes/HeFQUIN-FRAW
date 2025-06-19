@@ -1,19 +1,19 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
+import java.util.List;
+
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlanStats;
 import se.liu.ida.hefquin.engine.queryplan.executable.UnaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
-
-import java.util.List;
 
 public class ResultElementIterWithUnaryExecOp extends ResultElementIterBase
 {
 	protected final MyOpRunnerThread opRunnerThread;
 
 	public ResultElementIterWithUnaryExecOp( final UnaryExecutableOp op,
-											 final ResultBlockIterator inputIter,
-											 final ExecutionContext execCxt )
+	                                         final ResultElementIterator inputIter,
+	                                         final ExecutionContext execCxt )
 	{
 		super(execCxt);
 
@@ -45,10 +45,10 @@ public class ResultElementIterWithUnaryExecOp extends ResultElementIterBase
 	protected class MyOpRunnerThread extends OpRunnerThread
 	{
 		private final UnaryExecutableOp op;
-		protected final ResultBlockIterator inputIter;
+		protected final ResultElementIterator inputIter;
 
 		public MyOpRunnerThread( final UnaryExecutableOp op,
-								 final ResultBlockIterator inputIter )
+		                         final ResultElementIterator inputIter )
 		{
 			this.op = op;
 			this.inputIter = inputIter;
@@ -59,7 +59,7 @@ public class ResultElementIterWithUnaryExecOp extends ResultElementIterBase
 			return op;
 		}
 
-		public ResultBlockIterator getInput() {
+		public ResultElementIterator getInput() {
 			return inputIter;
 		}
 

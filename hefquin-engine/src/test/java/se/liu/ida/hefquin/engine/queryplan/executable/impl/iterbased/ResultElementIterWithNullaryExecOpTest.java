@@ -87,9 +87,7 @@ public class ResultElementIterWithNullaryExecOpTest
 							 final ExecutionContext execCxt )
 		{
 			if ( list != null ) {
-				for ( final SolutionMapping sm : list ) {
-					sink.send(sm);
-				}
+				sink.send(list);
 			}
 		}
 

@@ -131,9 +131,6 @@ public class HeFQUINEngineConfigReader
 	                                                            final Context ctx ) {
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( confRsrc, ECVocab.fedAccessMgr );
 
-		if ( rsrc.equals(ECVocab.DefaultFederationAccessManager) )
-			return createDefaultFederationAccessManager(ctx);
-
 		final ExtendedContext ctxx = new ExtendedContextImpl1(ctx);
 
 		final Object i;
@@ -146,11 +143,6 @@ public class HeFQUINEngineConfigReader
 
 		return (FederationAccessManager) i;
 	}
-
-	public FederationAccessManager createDefaultFederationAccessManager( final Context ctx ) {
-		return HeFQUINEngineDefaultComponents.createDefaultFederationAccessManager( ctx.getExecutorServiceForFederationAccess() );
-	}
-
 
 	// ------------ query processor ------------
 
@@ -176,9 +168,6 @@ public class HeFQUINEngineConfigReader
 
 		if ( rsrc == null )
 			return null;
-
-		if ( rsrc.equals(ECVocab.DefaultCostModel) )
-			return createDefaultCostModel(ctx);
 
 		final Object i;
 		try {
@@ -208,9 +197,6 @@ public class HeFQUINEngineConfigReader
 	public SourcePlanner readSourcePlanner( final Resource qplRsrc, final ExtendedContext ctx ) {
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( qplRsrc, ECVocab.sourcePlanner );
 
-		if ( rsrc.equals(ECVocab.DefaultSourcePlanner) )
-			return createDefaultSourcePlanner(ctx);
-
 		final Object i;
 		try {
 			i = instantiate(rsrc, ctx);
@@ -224,9 +210,6 @@ public class HeFQUINEngineConfigReader
 
 	public LogicalOptimizer readLogicalOptimizer( final Resource qplRsrc, final ExtendedContext ctx ) {
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( qplRsrc, ECVocab.logicalOptimizer );
-
-		if ( rsrc.equals(ECVocab.DefaultLogicalOptimizer) )
-			return createDefaultLogicalOptimizer(ctx);
 
 		final Object i;
 		try {
@@ -242,9 +225,6 @@ public class HeFQUINEngineConfigReader
 	public PhysicalOptimizer readPhysicalOptimizer( final Resource qplRsrc, final ExtendedContext ctx ) {
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( qplRsrc, ECVocab.physicalOptimizer );
 
-		if ( rsrc.equals(ECVocab.DefaultPhysicalOptimizer) )
-			return HeFQUINEngineDefaultComponents.createDefaultPhysicalOptimizer();
-
 		final Object i;
 		try {
 			i = instantiate(rsrc, ctx);
@@ -258,9 +238,6 @@ public class HeFQUINEngineConfigReader
 
 	public QueryPlanCompiler readQueryPlanCompiler( final Resource qprocRsrc, final ExtendedContext ctx ) {
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( qprocRsrc, ECVocab.planCompiler );
-
-		if ( rsrc.equals(ECVocab.DefaultPlanCompiler) )
-			return createDefaultPlanCompiler(ctx);
 
 		final Object i;
 		try {
@@ -276,9 +253,6 @@ public class HeFQUINEngineConfigReader
 	public ExecutionEngine readExecutionEngine( final Resource qprocRsrc, final ExtendedContext ctx ) {
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( qprocRsrc, ECVocab.executionEngine );
 
-		if ( rsrc.equals(ECVocab.DefaultExecutionEngine) )
-			return HeFQUINEngineDefaultComponents.createDefaultExecutionEngine();
-
 		final Object i;
 		try {
 			i = instantiate(rsrc, ctx);
@@ -289,23 +263,6 @@ public class HeFQUINEngineConfigReader
 
 		return (ExecutionEngine) i;
 	}
-
-	public CostModel createDefaultCostModel( final ExtendedContext ctx ) {
-		return HeFQUINEngineDefaultComponents.createDefaultCostModel( ctx.getQueryProcContext() );
-	}
-
-	public SourcePlanner createDefaultSourcePlanner( final ExtendedContext ctx ) {
-		return HeFQUINEngineDefaultComponents.createDefaultSourcePlanner( ctx.getQueryProcContext() );
-	}
-
-	public LogicalOptimizer createDefaultLogicalOptimizer( final ExtendedContext ctx ) {
-		return HeFQUINEngineDefaultComponents.createDefaultLogicalOptimizer( ctx.getQueryProcContext() );
-	}
-
-	public QueryPlanCompiler createDefaultPlanCompiler( final ExtendedContext ctx ) {
-		return HeFQUINEngineDefaultComponents.createDefaultPlanCompiler( ctx.getQueryProcContext() );
-	}
-
 
 	// ------------ helper functions ------------
 

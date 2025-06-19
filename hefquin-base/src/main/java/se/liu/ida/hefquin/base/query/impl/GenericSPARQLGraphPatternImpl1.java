@@ -5,8 +5,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.jena.atlas.io.IndentedLineBuffer;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVars;
@@ -15,6 +17,8 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprTransformSubstitute;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.serializer.FormatterElement;
+import org.apache.jena.sparql.serializer.SerializationContext;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementFilter;
@@ -31,6 +35,7 @@ import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.base.query.SPARQLGroupPattern;
 import se.liu.ida.hefquin.base.query.TriplePattern;
 import se.liu.ida.hefquin.base.query.VariableByBlankNodeSubstitutionException;
+import se.liu.ida.hefquin.base.query.utils.QueryPatternUtils;
 import se.liu.ida.hefquin.jenaext.sparql.algebra.OpUtils;
 
 /**
@@ -200,4 +205,15 @@ public class GenericSPARQLGraphPatternImpl1 implements SPARQLGraphPattern
 
 		return tps;
 	}
+
+	@Override
+	public String toStringForPlanPrinters() {
+		// convert into an Element object and use
+		// pretty printing via FormatterElement
+		final IndentedLineBuffer buf = new IndentedLineBuffer();
+		final SerializationContext sCxt = new SerializationContext( ARQConstants.getGlobalPrefixMap() );
+		FormatterElement.format( buf, sCxt, asJenaElement() );
+		return buf.asString();
+	}
+
 }
