@@ -1,5 +1,6 @@
 package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 
+import se.liu.ida.hefquin.base.query.ExpectedVariables;
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.engine.federation.FederationMember;
 import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
@@ -76,12 +77,54 @@ public class PhysicalOpFrawBindJoinWithFILTER extends PhysicalOpBindJoinWithFILT
 				&& ((PhysicalOpFrawBindJoinWithFILTER) o).lop.equals(lop);
 	}
 
-	protected UnaryExecutableOp createExecOp( final SPARQLGraphPattern pattern,
-	                                          final FederationMember fm,
-	                                          final boolean useOuterJoinSemantics,
-	                                          final boolean collectExceptions ) {
-		if ( fm instanceof SPARQLEndpoint )
-			return new ExecOpFrawBindJoinSPARQLwithFILTER( pattern, (SPARQLEndpoint) fm, useOuterJoinSemantics, collectExceptions );
+	@Override
+	public UnaryExecutableOp createExecOp( final boolean collectExceptions,
+										   final ExpectedVariables... inputVars ) {
+		final SPARQLGraphPattern pt;
+		final FederationMember fm;
+		final boolean useOuterJoinSemantics;
+
+		if ( lop instanceof LogicalOpTPAdd tpAdd ) {
+			pt = tpAdd.getTP();
+			fm = tpAdd.getFederationMember();
+			useOuterJoinSemantics = false;
+		}
+		else if ( lop instanceof LogicalOpTPOptAdd tpOptAdd ) {
+			pt = tpOptAdd.getTP();
+			fm = tpOptAdd.getFederationMember();
+			useOuterJoinSemantics = true;
+		}
+		else if ( lop instanceof LogicalOpBGPAdd bgpAdd ) {
+			pt = bgpAdd.getBGP();
+			fm = bgpAdd.getFederationMember();
+			useOuterJoinSemantics = false;
+		}
+		else if ( lop instanceof LogicalOpBGPOptAdd bgpOptAdd ) {
+			pt = bgpOptAdd.getBGP();
+			fm = bgpOptAdd.getFederationMember();
+			useOuterJoinSemantics = true;
+		}
+		else if ( lop instanceof LogicalOpGPAdd gpAdd ) {
+			pt = gpAdd.getPattern();
+			fm = gpAdd.getFederationMember();
+			useOuterJoinSemantics = false;
+		}
+		else if ( lop instanceof LogicalOpGPOptAdd gpOptAdd ) {
+			pt = gpOptAdd.getPattern();
+			fm = gpOptAdd.getFederationMember();
+			useOuterJoinSemantics = true;
+		}
+		else {
+			throw new IllegalArgumentException("Unsupported type of operator: " + lop.getClass().getName() );
+		}
+
+		if ( fm instanceof SPARQLEndpoint sparqlEndpoint )
+			return new ExecOpFrawBindJoinSPARQLwithFILTER( pt,
+					sparqlEndpoint,
+					inputVars[0],
+					useOuterJoinSemantics,
+					ExecOpBindJoinSPARQLwithFILTER.DEFAULT_BATCH_SIZE,
+					collectExceptions );
 		else
 			throw new IllegalArgumentException("Unsupported type of federation member: " + fm.getClass().getName() );
 	}
