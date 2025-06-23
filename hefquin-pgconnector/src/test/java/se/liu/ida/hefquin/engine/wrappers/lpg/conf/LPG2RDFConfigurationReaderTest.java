@@ -1,9 +1,5 @@
 package se.liu.ida.hefquin.engine.wrappers.lpg.conf;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -11,8 +7,9 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RDFParserBuilder;
 import org.junit.Test;
-
 import se.liu.ida.hefquin.engine.wrappers.lpg.data.impl.LPGNode;
+
+import static org.junit.Assert.*;
 
 public class LPG2RDFConfigurationReaderTest {
 
@@ -707,7 +704,7 @@ public class LPG2RDFConfigurationReaderTest {
         final Node resultNode = lpg2RDFConfiguration.getRDFTermForLPGNode(node);
         assertNotNull(resultNode);
         assertTrue(resultNode.isBlank());
-        assertEquals(resultNode.getBlankNodeId().toString(), "0");
+        assertEquals(resultNode.getBlankNodeLabel(), "0");
 
         final String label = "0";
         final Node resultNodeLabel = lpg2RDFConfiguration.getRDFTermForNodeLabel(label);
@@ -768,7 +765,7 @@ public class LPG2RDFConfigurationReaderTest {
         final Node resultNode = lpg2RDFConfiguration.getRDFTermForLPGNode(node);
         assertNotNull(resultNode);
         assertTrue(resultNode.isBlank());
-        assertEquals(resultNode.getBlankNodeId().toString(), "0");
+        assertEquals(resultNode.getBlankNodeLabel(), "0");
 
         final String label = "0";
         final Node resultNodeLabel = lpg2RDFConfiguration.getRDFTermForNodeLabel(label);

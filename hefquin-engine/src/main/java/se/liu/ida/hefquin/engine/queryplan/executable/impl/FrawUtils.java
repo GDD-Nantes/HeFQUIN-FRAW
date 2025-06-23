@@ -57,7 +57,7 @@ public class FrawUtils {
                 if(v.equals(MAPPING_PROBABILITY)){
                     if(!computedProba){
                         builder.add(v,
-                                NodeFactory.createLiteral(String.valueOf(Double.valueOf(String.valueOf(n1.getLiteralValue())) * Double.valueOf(String.valueOf(n2.getLiteralValue()))), XSDDatatype.XSDdouble));
+                                NodeFactory.createLiteralDT(String.valueOf(Double.valueOf(String.valueOf(n1.getLiteralValue())) * Double.valueOf(String.valueOf(n2.getLiteralValue()))), XSDDatatype.XSDdouble));
                     } else {
                         System.out.println("Tried to compute probability of joined binding twice! This shouldn't happen");
                     }
@@ -87,7 +87,7 @@ public class FrawUtils {
             }else if(!bb.contains(MAPPING_PROBABILITY)) {
                 // Processing global mapping probability
                 Double newProbability = Double.valueOf(String.valueOf(binding.get(MAPPING_PROBABILITY).getLiteralValue())) / Double.valueOf(numberOfChildren);
-                bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(newProbability), XSDDatatype.XSDdouble));
+                bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteralDT(String.valueOf(newProbability), XSDDatatype.XSDdouble));
             }
             // We never copy union objects since we always create a new one right after this
         }

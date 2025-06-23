@@ -22,14 +22,14 @@ public class FrawUtilsTest {
 
     private Binding buildBindingWithProbability(Double proba){
         BindingBuilder bb = BindingBuilder.create();
-        bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(proba)));
+        bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteralString(String.valueOf(proba)));
         return bb.build();
     }
 
     private Binding buildBindingWithProbabilityAndValue(Double proba, String value){
         BindingBuilder bb = BindingBuilder.create();
-        bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(proba)));
-        bb.add(Var.alloc("value"), NodeFactory.createLiteral(value));
+        bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteralString(String.valueOf(proba)));
+        bb.add(Var.alloc("value"), NodeFactory.createLiteralString(value));
         return bb.build();
     }
 
@@ -39,7 +39,7 @@ public class FrawUtilsTest {
     }
 
     private Node createProbaNode(Double proba){
-        return NodeFactory.createLiteral(String.valueOf(proba), XSDDatatype.XSDdouble);
+        return NodeFactory.createLiteralDT(String.valueOf(proba), XSDDatatype.XSDdouble);
     }
 
     @Test

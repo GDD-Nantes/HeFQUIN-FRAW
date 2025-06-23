@@ -1,13 +1,5 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -17,13 +9,18 @@ import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.junit.Test;
-
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.utils.SolutionMappingUtils;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecOpExecutionException;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.CollectingIntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased.TestUtils;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.CollectingIntermediateResultElementSink;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class ExecOpFilterTest
 {
@@ -32,9 +29,9 @@ public class ExecOpFilterTest
 		final CollectingIntermediateResultElementSink sink = new CollectingIntermediateResultElementSink();
 		final Expr lessThan10 = ExprUtils.parse("?x < 10");
 		
-		final Node value8 = NodeFactory.createLiteral("8", XSDDatatype.XSDinteger);
-		final Node value9 = NodeFactory.createLiteral("9", XSDDatatype.XSDinteger);
-		final Node value12 = NodeFactory.createLiteral("12", XSDDatatype.XSDinteger);
+		final Node value8 = NodeFactory.createLiteralDT("8", XSDDatatype.XSDinteger);
+		final Node value9 = NodeFactory.createLiteralDT("9", XSDDatatype.XSDinteger);
+		final Node value12 = NodeFactory.createLiteralDT("12", XSDDatatype.XSDinteger);
 		final Var x = Var.alloc("x");
 		
 		final SolutionMapping sol8 = SolutionMappingUtils.createSolutionMapping(x, value8);
@@ -57,8 +54,8 @@ public class ExecOpFilterTest
 		final CollectingIntermediateResultElementSink sink = new CollectingIntermediateResultElementSink();
 		final Expr lessThan10 = ExprUtils.parse("?x < 10");
 		
-		final Node value8 = NodeFactory.createLiteral("8", XSDDatatype.XSDinteger);
-		final Node value9 = NodeFactory.createLiteral("9", XSDDatatype.XSDinteger);
+		final Node value8 = NodeFactory.createLiteralDT("8", XSDDatatype.XSDinteger);
+		final Node value9 = NodeFactory.createLiteralDT("9", XSDDatatype.XSDinteger);
 		final Var x = Var.alloc("x");
 		final Var y = Var.alloc("y");
 		
@@ -80,11 +77,11 @@ public class ExecOpFilterTest
 		final CollectingIntermediateResultElementSink sink = new CollectingIntermediateResultElementSink();
 		final Expr after2019 = ExprUtils.parse("?x > \"2019-12-31\"^^xsd:date");
 
-		final Node date2020 = NodeFactory.createLiteral("2020-10-20", XSDDatatype.XSDdate);
-		final Node date2019 = NodeFactory.createLiteral("2019-10-20", XSDDatatype.XSDdate);
-		final Node date2021 = NodeFactory.createLiteral("2021-02-01", XSDDatatype.XSDdate);
-		final Node dateNewYearsEve = NodeFactory.createLiteral("2019-12-31", XSDDatatype.XSDdate);
-		final Node dateNewYearsDay = NodeFactory.createLiteral("2020-01-01", XSDDatatype.XSDdate);
+		final Node date2020 = NodeFactory.createLiteralDT("2020-10-20", XSDDatatype.XSDdate);
+		final Node date2019 = NodeFactory.createLiteralDT("2019-10-20", XSDDatatype.XSDdate);
+		final Node date2021 = NodeFactory.createLiteralDT("2021-02-01", XSDDatatype.XSDdate);
+		final Node dateNewYearsEve = NodeFactory.createLiteralDT("2019-12-31", XSDDatatype.XSDdate);
+		final Node dateNewYearsDay = NodeFactory.createLiteralDT("2020-01-01", XSDDatatype.XSDdate);
 		final Var x = Var.alloc("x");
 
 		final SolutionMapping sol2020 = SolutionMappingUtils.createSolutionMapping(x, date2020);
@@ -113,10 +110,10 @@ public class ExecOpFilterTest
 		exprs.add( ExprUtils.parse("?x < 13") );
 		exprs.add( ExprUtils.parse("?x > 8") );
 
-		final Node value8  = NodeFactory.createLiteral("8",  XSDDatatype.XSDinteger);
-		final Node value9  = NodeFactory.createLiteral("9",  XSDDatatype.XSDinteger);
-		final Node value12 = NodeFactory.createLiteral("12", XSDDatatype.XSDinteger);
-		final Node value15 = NodeFactory.createLiteral("15", XSDDatatype.XSDinteger);
+		final Node value8  = NodeFactory.createLiteralDT("8",  XSDDatatype.XSDinteger);
+		final Node value9  = NodeFactory.createLiteralDT("9",  XSDDatatype.XSDinteger);
+		final Node value12 = NodeFactory.createLiteralDT("12", XSDDatatype.XSDinteger);
+		final Node value15 = NodeFactory.createLiteralDT("15", XSDDatatype.XSDinteger);
 		final Var x = Var.alloc("x");
 
 		final SolutionMapping sm1 = SolutionMappingUtils.createSolutionMapping(x, value8);
@@ -155,10 +152,10 @@ public class ExecOpFilterTest
 		exprs.add( ExprUtils.parse("?x < 13") );
 		exprs.add( ExprUtils.parse("?x > 8") );
 
-		final Node value8  = NodeFactory.createLiteral("8",  XSDDatatype.XSDinteger);
-		final Node value9  = NodeFactory.createLiteral("9",  XSDDatatype.XSDinteger);
-		final Node value12 = NodeFactory.createLiteral("12", XSDDatatype.XSDinteger);
-		final Node value15 = NodeFactory.createLiteral("15", XSDDatatype.XSDinteger);
+		final Node value8  = NodeFactory.createLiteralDT("8",  XSDDatatype.XSDinteger);
+		final Node value9  = NodeFactory.createLiteralDT("9",  XSDDatatype.XSDinteger);
+		final Node value12 = NodeFactory.createLiteralDT("12", XSDDatatype.XSDinteger);
+		final Node value15 = NodeFactory.createLiteralDT("15", XSDDatatype.XSDinteger);
 		final Var x = Var.alloc("x");
 
 		final List<SolutionMapping> input1 = new ArrayList<>(2);
@@ -197,10 +194,10 @@ public class ExecOpFilterTest
 		exprs.add( ExprUtils.parse("?x < 13") );
 		exprs.add( ExprUtils.parse("?x > 8") );
 
-		final Node value8  = NodeFactory.createLiteral("8",  XSDDatatype.XSDinteger);
-		final Node value9  = NodeFactory.createLiteral("9",  XSDDatatype.XSDinteger);
-		final Node value12 = NodeFactory.createLiteral("12", XSDDatatype.XSDinteger);
-		final Node value15 = NodeFactory.createLiteral("15", XSDDatatype.XSDinteger);
+		final Node value8  = NodeFactory.createLiteralDT("8",  XSDDatatype.XSDinteger);
+		final Node value9  = NodeFactory.createLiteralDT("9",  XSDDatatype.XSDinteger);
+		final Node value12 = NodeFactory.createLiteralDT("12", XSDDatatype.XSDinteger);
+		final Node value15 = NodeFactory.createLiteralDT("15", XSDDatatype.XSDinteger);
 		final Var x = Var.alloc("x");
 
 		final List<SolutionMapping> input = new ArrayList<>(2);

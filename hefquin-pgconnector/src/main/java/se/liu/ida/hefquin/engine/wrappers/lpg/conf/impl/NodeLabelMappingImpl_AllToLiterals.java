@@ -3,14 +3,13 @@ package se.liu.ida.hefquin.engine.wrappers.lpg.conf.impl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.vocabulary.XSD;
-
 import se.liu.ida.hefquin.engine.wrappers.lpg.impl.exceptions.UnSupportedNodeLabelException;
 
 public class NodeLabelMappingImpl_AllToLiterals implements NodeLabelMapping{
 
     @Override
     public Node map(final String label) {
-        return NodeFactory.createLiteral(label);
+        return NodeFactory.createLiteralByValue(label);
     }
 
     @Override

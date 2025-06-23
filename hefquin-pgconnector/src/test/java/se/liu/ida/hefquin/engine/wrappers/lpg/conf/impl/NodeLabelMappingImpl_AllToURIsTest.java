@@ -1,13 +1,10 @@
 package se.liu.ida.hefquin.engine.wrappers.lpg.conf.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class NodeLabelMappingImpl_AllToURIsTest {
     protected final String NSNODELABEL = "https://example.org/label/";
@@ -33,7 +30,7 @@ public class NodeLabelMappingImpl_AllToURIsTest {
 
     @Test
     public void nodeLabelIsPossibleResult(){
-        final Node literalNode = NodeFactory.createLiteral("0");
+        final Node literalNode = NodeFactory.createLiteralByValue("0");
         final Node IRINode = NodeFactory.createURI(NSNODELABEL + "0");
         final boolean literalIsPossible = nodeLabelMapping.isPossibleResult(literalNode);
         final boolean IRIIsPossible = nodeLabelMapping.isPossibleResult(IRINode);
@@ -46,7 +43,7 @@ public class NodeLabelMappingImpl_AllToURIsTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void unmapNonURINodeLabel(){
-        final Node literalNode = NodeFactory.createLiteral("literalnode");
+        final Node literalNode = NodeFactory.createLiteralByValue("literalnode");
         nodeLabelMapping.unmap(literalNode);
     }
 

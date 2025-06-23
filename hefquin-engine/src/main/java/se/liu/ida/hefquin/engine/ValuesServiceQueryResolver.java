@@ -1,34 +1,20 @@
 package se.liu.ida.hefquin.engine;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingLib;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.syntax.Element;
-import org.apache.jena.sparql.syntax.ElementBind;
-import org.apache.jena.sparql.syntax.ElementData;
-import org.apache.jena.sparql.syntax.ElementGroup;
-import org.apache.jena.sparql.syntax.ElementService;
-import org.apache.jena.sparql.syntax.ElementUnion;
-import org.apache.jena.sparql.syntax.ElementVisitorBase;
-import org.apache.jena.sparql.syntax.ElementWalker;
-import org.apache.jena.sparql.syntax.PatternVarsVisitor;
+import org.apache.jena.sparql.syntax.*;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformCleanGroupsOfOne;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformCopyBase;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformer;
-
 import se.liu.ida.hefquin.jenaext.PatternVarsAll;
 import se.liu.ida.hefquin.jenaext.sparql.syntax.ElementUtils;
+
+import java.util.*;
 
 /**
  * Queries with a WHERE clause of a form such as the following one need to be
@@ -642,7 +628,7 @@ public class ValuesServiceQueryResolver
 
 			if ( ! newServiceNode.isURI() ) {
 				final String typeNameForMsg = ( newServiceNode.isLiteral() ) ? "literal" : newServiceNode.getClass().getName();
-				throw new MyIllegalQueryException("A VALUES clause can only assign IRIs to service variables. This is not the case for variable ?" + sn.getName() + ", which is assigned a " + typeNameForMsg + " (" + newServiceNode.toString(true)+ ").");
+				throw new MyIllegalQueryException("A VALUES clause can only assign IRIs to service variables. This is not the case for variable ?" + sn.getName() + ", which is assigned a " + typeNameForMsg + " (" + newServiceNode + ").");
 			}
 
 			return new ElementService( newServiceNode, inside, e.getSilent() );

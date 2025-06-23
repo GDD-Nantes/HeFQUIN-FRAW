@@ -1,47 +1,30 @@
 package se.liu.ida.hefquin.engine.wrappers.lpg.impl;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.junit.Test;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import se.liu.ida.hefquin.engine.wrappers.lpg.Neo4jException;
 import se.liu.ida.hefquin.engine.wrappers.lpg.conf.LPG2RDFConfiguration;
 import se.liu.ida.hefquin.engine.wrappers.lpg.data.TableRecord;
 import se.liu.ida.hefquin.engine.wrappers.lpg.data.impl.LPGNode;
 import se.liu.ida.hefquin.engine.wrappers.lpg.query.CypherQuery;
 import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.CypherUnionQueryImpl;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.AliasedExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.CypherVar;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.EXISTSExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.EqualityExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.FirstLabelExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.GetItemExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.KeysExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.LiteralExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.MarkerExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.PropertyAccessExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.PropertyAccessWithVarExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.TripleMapExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.TypeExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.UnwindIteratorImpl;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.VariableIDExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.VariableLabelExpression;
+import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.*;
 import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.match.EdgeMatchClause;
 import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.match.NodeMatchClause;
 import se.liu.ida.hefquin.engine.wrappers.lpg.utils.CypherQueryBuilder;
 import se.liu.ida.hefquin.engine.wrappers.lpg.utils.CypherUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * This tests are outdated, they need to be changed to include the latest changes
@@ -228,7 +211,7 @@ public class Record2SolutionMappingTranslationImplTest {
                 .translateRecords(records, conf, query, varMap);
 
         final Binding expected = BindingFactory.binding( Var.alloc("o"),
-                                                         NodeFactory.createLiteral("Cuba Gooding Jr.") );
+                                                         NodeFactory.createLiteralString("Cuba Gooding Jr.") );
         assertEquals(1, solMaps.size());
         assertEquals(expected, solMaps.get(0));
     }
@@ -463,15 +446,15 @@ public class Record2SolutionMappingTranslationImplTest {
 
         final List<Binding> expected = new ArrayList<>();
         expected.add( BindingFactory.binding(Var.alloc("s"), conf.getRDFTermForLPGNode(node1),
-                Var.alloc("o"), NodeFactory.createLiteral("Keanu")) );
+                Var.alloc("o"), NodeFactory.createLiteralString("Keanu")) );
         expected.add( BindingFactory.binding(Var.alloc("s"), conf.getRDFTermForLPGNode(node2),
-                Var.alloc("o"), NodeFactory.createLiteral("Carrie-Anne")) );
+                Var.alloc("o"), NodeFactory.createLiteralString("Carrie-Anne")) );
         expected.add( BindingFactory.binding(Var.alloc("s"), conf.getRDFTermForLPGNode(node3),
-                Var.alloc("o"), NodeFactory.createLiteral("Laurence")) );
+                Var.alloc("o"), NodeFactory.createLiteralString("Laurence")) );
         expected.add( BindingFactory.binding(Var.alloc("s"), conf.getRDFTermForLPGNode(node4),
-                Var.alloc("o"), NodeFactory.createLiteral("Hugo")) );
+                Var.alloc("o"), NodeFactory.createLiteralString("Hugo")) );
         expected.add( BindingFactory.binding(Var.alloc("s"), conf.getRDFTermForLPGNode(node5),
-                Var.alloc("o"), NodeFactory.createLiteral("Andy")) );
+                Var.alloc("o"), NodeFactory.createLiteralString("Andy")) );
         assertEquals(expected, solMaps);
     }
 
@@ -638,9 +621,9 @@ public class Record2SolutionMappingTranslationImplTest {
         expected.add( BindingFactory.binding(Var.alloc("p"), conf.getLabelPredicate(),
                 Var.alloc("o"), conf.getRDFTermForNodeLabel("Person")) );
         expected.add( BindingFactory.binding(Var.alloc("p"), conf.getIRIForPropertyName("born"),
-                Var.alloc("o"), NodeFactory.createLiteral("1986")) );
+                Var.alloc("o"), NodeFactory.createLiteralString("1986")) );
         expected.add( BindingFactory.binding(Var.alloc("p"), conf.getIRIForPropertyName("name"),
-                Var.alloc("o"), NodeFactory.createLiteral("Cuba Gooding Jr.")) );
+                Var.alloc("o"), NodeFactory.createLiteralString("Cuba Gooding Jr.")) );
         expected.add( BindingFactory.binding(Var.alloc("p"), conf.getIRIForEdgeLabel("ACTED_IN"),
                 Var.alloc("o"), conf.getRDFTermForLPGNode(node0)) );
         assertEquals(expected, solMaps);
@@ -712,14 +695,14 @@ public class Record2SolutionMappingTranslationImplTest {
         expected.add( BindingFactory.binding(Var.alloc("s"), conf.getRDFTermForLPGNode(node0),
                 Var.alloc("p"), conf.getLabelPredicate(), Var.alloc("o"), conf.getRDFTermForNodeLabel("Movie")) );
         expected.add( BindingFactory.binding(Var.alloc("s"), conf.getRDFTermForLPGNode(node0),
-                Var.alloc("p"), conf.getIRIForPropertyName("title"), Var.alloc("o"), NodeFactory.createLiteral("The Matrix")) );
+                Var.alloc("p"), conf.getIRIForPropertyName("title"), Var.alloc("o"), NodeFactory.createLiteralString("The Matrix")) );
         expected.add( BindingFactory.binding(Var.alloc("s"), conf.getRDFTermForLPGNode(node0),
-                Var.alloc("p"), conf.getIRIForPropertyName("tagline"), Var.alloc("o"), NodeFactory.createLiteral("Welcome to the Real World")) );
+                Var.alloc("p"), conf.getIRIForPropertyName("tagline"), Var.alloc("o"), NodeFactory.createLiteralString("Welcome to the Real World")) );
         expected.add( BindingFactory.binding(Var.alloc("s"), conf.getRDFTermForLPGNode(node0),
-                Var.alloc("p"), conf.getIRIForPropertyName("released"), Var.alloc("o"), NodeFactory.createLiteral("1999")) );
+                Var.alloc("p"), conf.getIRIForPropertyName("released"), Var.alloc("o"), NodeFactory.createLiteralByValue("1999")) );
         expected.add( BindingFactory.binding(Var.alloc("s"),
                 NodeFactory.createTripleNode(conf.getRDFTermForLPGNode(node1), conf.getIRIForEdgeLabel("ACTED_IN"), conf.getRDFTermForLPGNode(node87)),
-                Var.alloc("p"), conf.getIRIForPropertyName("roles"), Var.alloc("o"), NodeFactory.createLiteral("Shane Falco")) );
+                Var.alloc("p"), conf.getIRIForPropertyName("roles"), Var.alloc("o"), NodeFactory.createLiteralString("Shane Falco")) );
         for (int i = 0; i < expected.size(); i++) {
             assertEquals(expected.get(i), solMaps.get(i));
         }

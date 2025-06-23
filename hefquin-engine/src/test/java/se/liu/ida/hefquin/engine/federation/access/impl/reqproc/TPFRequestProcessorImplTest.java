@@ -1,14 +1,9 @@
 package se.liu.ida.hefquin.engine.federation.access.impl.reqproc;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.junit.Test;
-
 import se.liu.ida.hefquin.base.data.Triple;
 import se.liu.ida.hefquin.base.query.TriplePattern;
 import se.liu.ida.hefquin.base.query.impl.TriplePatternImpl;
@@ -19,6 +14,8 @@ import se.liu.ida.hefquin.engine.federation.access.TPFRequest;
 import se.liu.ida.hefquin.engine.federation.access.TPFResponse;
 import se.liu.ida.hefquin.engine.federation.access.UnsupportedOperationDueToRetrievalError;
 import se.liu.ida.hefquin.engine.federation.access.impl.req.TPFRequestImpl;
+
+import static org.junit.Assert.*;
 
 public class TPFRequestProcessorImplTest extends EngineTestBase
 {
@@ -83,7 +80,7 @@ public class TPFRequestProcessorImplTest extends EngineTestBase
 		// setting up
 		final Node s = NodeFactory.createURI("http://dbpedia.org/resource/Berlin");
 		final Node p = NodeFactory.createVariable("p");
-		final Node o = NodeFactory.createLiteral("Berlin", "en");
+		final Node o = NodeFactory.createLiteralLang("Berlin", "en");
 
 		// performing the tested operation
 		final TPFResponse resp = performTestRequest(s, p, o);
@@ -100,7 +97,7 @@ public class TPFRequestProcessorImplTest extends EngineTestBase
 		// setting up
 		final Node s = NodeFactory.createURI("http://dbpedia.org/resource/Berlin");
 		final Node p = NodeFactory.createVariable("p");
-		final Node o = NodeFactory.createLiteral("38.1", XSDDatatype.XSDdouble);
+		final Node o = NodeFactory.createLiteralByValue("38.1", XSDDatatype.XSDdouble);
 
 		// performing the tested operation
 		final TPFResponse resp = performTestRequest(s, p, o);

@@ -1,5 +1,6 @@
 package se.liu.ida.hefquin.engine;
 
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.algebra.op.OpGroup;
 import org.apache.jena.sparql.core.Var;
@@ -15,7 +16,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import se.liu.ida.hefquin.base.utils.Pair;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.CURRENT_OP_GROUP;
@@ -41,30 +41,30 @@ public class RawCountAggregatorTest {
     private Context createContext(String... groupedVars){
         Context cxt = new Context();
 
-        List<Var> vars = new ArrayList<Var>();
+        VarExprList varExprList = new VarExprList();
+
         for(String groupedVar : groupedVars){
-            vars.add(Var.alloc(groupedVar));
+            varExprList.add(Var.alloc(groupedVar));
         }
 
-        VarExprList varExprList = new VarExprList(vars);
         cxt.set(CURRENT_OP_GROUP, new OpGroup(null, varExprList, List.of()));
         return cxt;
     }
 
     private Binding buildBindingWithProbabilityAndValue(Double proba, String value){
         BindingBuilder bb = BindingBuilder.create();
-        bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(proba)));
-        bb.add(Var.alloc("value"), NodeFactory.createLiteral(value));
+        bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteralByValue(String.valueOf(proba), XSDDatatype.XSDdouble));
+        bb.add(Var.alloc("value"), NodeFactory.createLiteralByValue(value));
         return bb.build();
     }
 
     private Binding buildBindingWithProbabilityAndValues(Double proba, String... values){
         BindingBuilder bb = BindingBuilder.create();
-        bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteral(String.valueOf(proba)));
+        bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteralDT(String.valueOf(proba), XSDDatatype.XSDdouble));
         int i = 0;
         for(String value : values){
             i++;
-            bb.add(Var.alloc("value" + i), NodeFactory.createLiteral(value));
+            bb.add(Var.alloc("value" + i), NodeFactory.createLiteralString(value));
         }
         return bb.build();
     }
@@ -74,7 +74,7 @@ public class RawCountAggregatorTest {
         int i = 0;
         for(Pair<String, String> kvp : keyValPairs){
             i++;
-            bb.add(Var.alloc(kvp.object1), NodeFactory.createLiteral(kvp.object2));
+            bb.add(Var.alloc(kvp.object1), NodeFactory.createLiteralByValue(kvp.object2));
         }
         return bb.build();
     }
