@@ -1,12 +1,11 @@
 package se.liu.ida.hefquin.cli;
 
-import java.io.File;
-
 import org.apache.jena.cmd.CmdGeneral;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
-
 import se.liu.ida.hefquin.cli.modules.ModServer;
+
+import java.io.File;
 
 public class RunHeFQUINServer extends CmdGeneral
 {
@@ -63,7 +62,7 @@ public class RunHeFQUINServer extends CmdGeneral
 		System.setProperty( "hefquin.configuration", modServer.getConfDescr() );
 		System.setProperty( "hefquin.federation", modServer.getFederationDescription() );
 
-		final Server server = run( modServer.getPort() );
+		final Server server = run( modServer.getPort(), modServer.getPath() );
 		try {
 			server.start();
 		} catch ( Exception e ) {
@@ -76,7 +75,9 @@ public class RunHeFQUINServer extends CmdGeneral
 		}
 	}
 
-	public static Server run( final int port ) {
+	public static Server run( final int port, final String path ) {
+//		final InetSocketAddress  addr = new InetSocketAddress( "localhost:8080/UOJ", port );
+//		final Server server = new Server( addr );
 		final Server server = new Server( port );
 		System.out.println("Running on: http://localhost:" + port);
 		final WebAppContext webAppContext = new WebAppContext();

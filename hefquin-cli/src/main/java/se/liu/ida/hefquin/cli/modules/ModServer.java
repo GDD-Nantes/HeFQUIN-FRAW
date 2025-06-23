@@ -11,10 +11,12 @@ import org.apache.jena.cmd.ModBase;
 public class ModServer extends ModBase
 {
 	protected final ArgDecl argPort = new ArgDecl( ArgDecl.HasValue, "port" );
+	protected final ArgDecl argPath = new ArgDecl( ArgDecl.HasValue, "path" );
 	protected final ArgDecl argConfDescr = new ArgDecl( ArgDecl.HasValue, "configurationDescription", "confDescr" );
 	protected final ArgDecl argFedDescr = new ArgDecl( ArgDecl.HasValue, "federationDescription", "fd" );
 
 	protected int port;
+	protected String path;
 	protected String fedDescr;
 	protected String confDescr;
 
@@ -23,6 +25,7 @@ public class ModServer extends ModBase
 		cmdLine.getUsage().startCategory( "Settings" );
 
 		cmdLine.add( argPort, "--port", "Server port (default: 8080)" );
+		cmdLine.add( argPath, "--path", "Server path (default: \"\")" );
 		cmdLine.add( argConfDescr, "--confDescr",
 				"File with an RDF description of the configuration (default: DefaultEngineConf.ttl)" );
 		cmdLine.add( argFedDescr, "--federationDescription",
@@ -35,6 +38,11 @@ public class ModServer extends ModBase
 			port = Integer.parseInt(cmdLine.getValue( argPort ));
 		} else {
 			port = 8080;
+		}
+		if ( cmdLine.contains( argPath ) ) {
+			path = cmdLine.getValue( argPath );
+		} else {
+			path = "";
 		}
 		if ( cmdLine.contains( argConfDescr ) ) {
 			confDescr = cmdLine.getValue( argConfDescr );
@@ -50,6 +58,10 @@ public class ModServer extends ModBase
 
 	public int getPort() {
 		return port;
+	}
+
+	public String getPath() {
+		return path;
 	}
 
 	public String getConfDescr() {
