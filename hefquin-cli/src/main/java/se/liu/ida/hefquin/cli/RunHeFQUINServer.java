@@ -76,8 +76,6 @@ public class RunHeFQUINServer extends CmdGeneral
 	}
 
 	public static Server run( final int port, final String path ) {
-//		final InetSocketAddress  addr = new InetSocketAddress( "localhost:8080/UOJ", port );
-//		final Server server = new Server( addr );
 		final Server server = new Server( port );
 		System.out.println("Running on: http://localhost:" + port);
 		final WebAppContext webAppContext = new WebAppContext();
@@ -91,6 +89,8 @@ public class RunHeFQUINServer extends CmdGeneral
 			String webappPath = RunHeFQUINServer.class.getClassLoader().getResource("webapp").toExternalForm();
 			webAppContext.setResourceBase(webappPath);
 		}
+
+		webAppContext.setContextPath( path );
 
 		server.setHandler( webAppContext );
 
