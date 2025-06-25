@@ -20,11 +20,6 @@ public class FrawConstants {
 
     public static final Random random = new Random();
 
-
-    // not in use
-    // TODO : delete eventually
-
-    public static final Var RANDOM_WALK_HOLDER = Var.alloc("randomWalkHolder");
-    public static final String VAR_PROBABILITY_PREFIX = "probabilityOfRetrievingVariable_";
+    public static final String VAR_PROVENANCE_PREFIX = "provenance_";
 }
 

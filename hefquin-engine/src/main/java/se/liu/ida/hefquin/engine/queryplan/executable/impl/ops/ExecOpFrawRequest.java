@@ -1,6 +1,7 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
@@ -54,7 +55,15 @@ public class ExecOpFrawRequest extends BaseForExecOpSolMapsRequest<DataRetrieval
             SolMapsResponse solMapsResponse = FederationAccessUtils.performRequest(fedAccessMgr, (SPARQLRequest) req, (SPARQLEndpoint) chosenFM);
 
             solMapsResponse.getResponseData().forEach(solutionMapping -> {
+                // Probability
                 Binding updatedBinding = FrawUtils.updateProbaUnion(solutionMapping, endpoints.size(), chosen);
+
+                // Provenance
+                Set<Var> variablesFromFM = req.getExpectedVariables().getCertainVariables();
+                variablesFromFM.addAll(req.getExpectedVariables().getPossibleVariables());
+                updatedBinding = FrawUtils.updateProvenance(updatedBinding, chosenFM, variablesFromFM);
+
+                // Wrapping
                 SolutionMapping updatedSolutionMapping = new SolutionMappingImpl(updatedBinding);
                 SolMapsResponse smr = new SolMapsResponseImpl(List.of(updatedSolutionMapping), fm, req, solMapsResponse.getRequestStartTime(), solMapsResponse.getRetrievalEndTime());
                 endpoint2Cache.get(chosenFM).offer(smr);
