@@ -7,6 +7,8 @@ import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.*;
 
+import java.util.Map;
+
 /**
  * This class provides methods to convert logical operators into
  * physical operators by using the respective default type of
@@ -33,6 +35,9 @@ public class LogicalToPhysicalSamplingOpConverter
 	public static NullaryPhysicalOp convert( final LogicalOpRequest<?,?> lop ) {
 		if(lop.getFederationMember() instanceof FederationMemberAgglomeration){
 			return new PhysicalOpFrawRequest((LogicalOpRequest<DataRetrievalRequest, FederationMemberAgglomeration>) lop);
+		}
+		if(lop.getFederationMember() instanceof SPARQLEndpoint){
+			return PhysicalOpFrawRequest.instantiate(Map.of(lop.getFederationMember(), lop.getRequest()));
 		}
 		return new PhysicalOpRequest<>(lop);
 	}
