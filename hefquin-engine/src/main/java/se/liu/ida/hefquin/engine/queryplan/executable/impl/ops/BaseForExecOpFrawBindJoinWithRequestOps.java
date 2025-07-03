@@ -125,16 +125,12 @@ public abstract class BaseForExecOpFrawBindJoinWithRequestOps<QueryType extends 
 			currentSolMapsForRequest.add(inputSolMapRestricted);
 		}
 
-		// If we have accumulated enough solution mappings for the next
-		// bind-join request, then let's perform this request.
-		if ( currentSolMapsForRequest.size() == requestBlockSize ) {
-			performRequestAndHandleResponse(sink, execCxt);
+		performRequestAndHandleResponse(sink, execCxt);
 
-			// After performing the request (and handling its response), we can
-			// forget about the solution mappings considered for the request.
-			currentSolMapsForRequest.clear();
-			currentBatch.clear();
-		}
+		// After performing the request (and handling its response), we can
+		// forget about the solution mappings considered for the request.
+		currentSolMapsForRequest.clear();
+		currentBatch.clear();
 	}
 
 	protected boolean alreadyCovered( final Binding inputSolMapRestricted ) {

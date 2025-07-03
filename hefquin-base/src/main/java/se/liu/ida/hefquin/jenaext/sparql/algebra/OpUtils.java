@@ -57,8 +57,11 @@ public class OpUtils
 		}
 		else if ( op instanceof OpTriple opTriple ){
 			Vars.addVarsFromTriple(acc, opTriple.getTriple());
-		}
-		else {
+		} else if ( op instanceof OpSequence opSequence) {
+			for ( final Op element : opSequence.getElements()){
+				addVariablesFromPattern( acc, element );
+			}
+		} else {
 			throw new UnsupportedOperationException("Getting the variables from arbitrary SPARQL patterns is an open TODO (type of Jena Op in the current case: " + op.getClass().getName() + ").");
 		}
 	}

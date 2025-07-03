@@ -81,10 +81,10 @@ public class ExecOpFrawBindJoinSPARQLwithVALUESorFILTER extends BaseForExecOpFra
 	@Override
 	protected NullaryExecutableOp createExecutableReqOp(final Set<Binding> solMaps ) {
 		if ( useFilterBasedApproach ) {
-			return ExecOpBindJoinSPARQLwithFILTER.createExecutableReqOp(solMaps, pattern, fm);
+			return ExecOpFrawBindJoinSPARQLwithFILTER.createExecutableReqOp(solMaps, pattern, fm);
 		}
 		else {
-			return ExecOpBindJoinSPARQLwithVALUES.createExecutableReqOp(solMaps, pattern, fm);
+			return ExecOpFrawBindJoinSPARQLwithVALUES.createExecutableReqOp(solMaps, pattern, fm);
 		}
 	}
 
