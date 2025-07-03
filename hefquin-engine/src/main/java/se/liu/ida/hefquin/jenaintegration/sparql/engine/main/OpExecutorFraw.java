@@ -24,6 +24,7 @@ import se.liu.ida.hefquin.engine.queryproc.QueryProcException;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
 import se.liu.ida.hefquin.engine.queryproc.SamplingQueryProcessor;
 import se.liu.ida.hefquin.engine.queryproc.impl.MaterializingQueryResultSinkWithInputBindingImpl;
+import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
 
 import java.util.Iterator;
@@ -168,7 +169,26 @@ public class OpExecutorFraw extends OpExecutor
 	}
 
 	protected QueryIterator executeSupportedOp( final Op op, final QueryIterator input ) {
-		return new MainQueryIterator( op, input, nextQueryProcSingleWalk ? subBudget : budget );
+		Integer queryBudget;
+		try {
+			Integer customQueryBudget = execCxt.getContext().get(FrawConstants.BUDGET);
+			queryBudget = Math.min(customQueryBudget, budget);
+		} catch ( Exception e ) {
+			queryBudget = budget;
+		}
+
+		Integer querySubBudget;
+		try {
+			Integer customQuerySubBudget = execCxt.getContext().get(FrawConstants.SUB_BUDGET);
+			querySubBudget = Math.min(customQuerySubBudget, subBudget);
+		} catch ( Exception e ) {
+			querySubBudget = subBudget;
+		}
+
+		queryBudget = Math.max(queryBudget, 1);
+		querySubBudget = Math.max(querySubBudget, 1);
+
+		return new MainQueryIterator( op, input, nextQueryProcSingleWalk ? querySubBudget : queryBudget );
 	}
 
 

@@ -8,7 +8,7 @@
     <!-- Servlet Configuration -->
     <servlet>
         <servlet-name>SparqlServlet</servlet-name>
-        <servlet-class>se.liu.ida.hefquin.service.SparqlServlet</servlet-class>
+        <servlet-class>se.liu.ida.hefquin.service.FrawServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>
