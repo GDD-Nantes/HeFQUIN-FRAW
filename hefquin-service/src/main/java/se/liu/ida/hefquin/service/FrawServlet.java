@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.atlas.json.JsonString;
 import org.apache.jena.atlas.json.JsonValue;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.resultset.ResultsFormat;
@@ -66,7 +67,11 @@ public class FrawServlet extends HttpServlet {
 	@Override
 	public void init( final ServletConfig config ) throws ServletException {
 		super.init( config );
-		engine = (FrawEngine) getServletContext().getAttribute( "engine" );
+		try {
+			engine = (FrawEngine) getServletContext().getAttribute( "frawEngine" );
+		} catch (Exception e) {
+			throw new ServletException( "'frawEngine' in servletContext is not a FrawEngine.", e );
+		}
 	}
 
 	/**
@@ -98,6 +103,7 @@ public class FrawServlet extends HttpServlet {
 			writeJsonError( response, 415, new JsonString(  "Unsupported 'Content-Type' header." ) );
 			return;
 		}
+		ARQ.init();
 		executeRequest( query, request, response, budget, subBudget );
 	}
 

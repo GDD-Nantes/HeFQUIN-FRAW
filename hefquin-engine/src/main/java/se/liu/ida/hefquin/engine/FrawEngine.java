@@ -16,4 +16,8 @@ public interface FrawEngine extends HeFQUINEngine
 														Integer budget,
 														Integer subBudget)
 			throws UnsupportedQueryException, IllegalQueryException;
+
+	Integer getBudget();
+
+	Integer getSubBudget();
 }

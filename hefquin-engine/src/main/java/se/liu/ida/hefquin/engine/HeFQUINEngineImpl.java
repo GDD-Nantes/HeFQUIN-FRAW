@@ -4,7 +4,6 @@ import org.apache.jena.query.*;
 import org.apache.jena.sparql.algebra.optimize.Optimize;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
-import org.apache.jena.sparql.engine.main.OpExecutorFactory;
 import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.resultset.ResultsFormat;
 import org.apache.jena.sparql.util.QueryExecUtils;
@@ -13,12 +12,14 @@ import se.liu.ida.hefquin.engine.federation.access.FederationAccessManager;
 import se.liu.ida.hefquin.engine.federation.access.FederationAccessStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
+import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
-import se.liu.ida.hefquin.jenaintegration.sparql.engine.main.OpExecutorHeFQUIN;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HeFQUINEngineImpl implements HeFQUINEngine
 {
@@ -38,9 +39,14 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 
 	@Override
 	public void integrateIntoJena() {
-		final OpExecutorFactory factory = execCxt -> new OpExecutorHeFQUIN(qProc, execCxt);
+		ARQ.getContext().setIfUndef(FrawConstants.ENGINE_TO_QPROC, new HashMap<>());
+		Map<HeFQUINEngine, QueryProcessor> engineToQProc = ARQ.getContext().get(FrawConstants.ENGINE_TO_QPROC);
 
-		QC.setFactory( ARQ.getContext(), factory );
+		// No need to sync here because integrateIntoJena calls are never made in parallel, it's only called once
+		// sequentially for each service during server initialization.
+		engineToQProc.put(this, qProc);
+
+		QC.setFactory( ARQ.getContext(), FrawConstants.factory );
 	}
 
 	@Override
@@ -89,6 +95,8 @@ public class HeFQUINEngineImpl implements HeFQUINEngine
 	                                   final PrintStream output ) throws Exception {
 		final ResultSet rs;
 		try {
+			// Every time i run a query, is qe different ...? if it is, then this works, otherwise not a good idea
+			qe.getContext().set(FrawConstants.ENGINE, this);
 			rs = qe.execSelect();
 		}
 		catch ( final Exception e ) {

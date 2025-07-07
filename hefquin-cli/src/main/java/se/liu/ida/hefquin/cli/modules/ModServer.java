@@ -13,12 +13,14 @@ public class ModServer extends ModBase
 	protected final ArgDecl argPort = new ArgDecl( ArgDecl.HasValue, "port" );
 	protected final ArgDecl argPath = new ArgDecl( ArgDecl.HasValue, "path" );
 	protected final ArgDecl argConfDescr = new ArgDecl( ArgDecl.HasValue, "configurationDescription", "confDescr" );
+	protected final ArgDecl argFrawConfDescr = new ArgDecl( ArgDecl.HasValue, "frawConfigurationDescription", "frawConfDescr" );
 	protected final ArgDecl argFedDescr = new ArgDecl( ArgDecl.HasValue, "federationDescription", "fd" );
 
 	protected int port;
 	protected String path;
 	protected String fedDescr;
 	protected String confDescr;
+	protected String frawConfDescr;
 
 	@Override
 	public void registerWith( final CmdGeneral cmdLine ) {
@@ -28,6 +30,8 @@ public class ModServer extends ModBase
 		cmdLine.add( argPath, "--path", "Server path (default: \"\")" );
 		cmdLine.add( argConfDescr, "--confDescr",
 				"File with an RDF description of the configuration (default: DefaultEngineConf.ttl)" );
+		cmdLine.add( argFrawConfDescr, "--frawConfDescr",
+				"File with an RDF description of the configuration for the federated random walk engine (default: DefaultEngineConf.ttl, aka if no configuration is given, /raw works like a classic sparql endpoint)" );
 		cmdLine.add( argFedDescr, "--federationDescription",
 				"File with an RDF description of the federation (default: DefaultFederation.ttl)" );
 	}
@@ -49,6 +53,11 @@ public class ModServer extends ModBase
 		} else {
 			confDescr = "DefaultEngineConf.ttl";
 		}
+		if ( cmdLine.contains( argFrawConfDescr ) ) {
+			frawConfDescr = cmdLine.getValue( argFrawConfDescr );
+		} else {
+			frawConfDescr = "DefaultEngineConf.ttl";
+		}
 		if ( cmdLine.contains( argFedDescr ) ) {
 			fedDescr = cmdLine.getValue( argFedDescr );
 		} else {
@@ -66,7 +75,10 @@ public class ModServer extends ModBase
 
 	public String getConfDescr() {
 		return confDescr;
+	}
 
+	public String getFrawConfDescr() {
+		return frawConfDescr;
 	}
 
 	public String getFederationDescription() {

@@ -7,8 +7,13 @@
 
     <!-- Servlet Configuration -->
     <servlet>
-        <servlet-name>SparqlServlet</servlet-name>
+        <servlet-name>FrawServlet</servlet-name>
         <servlet-class>se.liu.ida.hefquin.service.FrawServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <servlet-name>SparqlServlet</servlet-name>
+        <servlet-class>se.liu.ida.hefquin.service.SparqlServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>
@@ -18,6 +23,10 @@
     </servlet>
 
     <!-- Servlet Mapping -->
+    <servlet-mapping>
+        <servlet-name>FrawServlet</servlet-name>
+        <url-pattern>/raw</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>SparqlServlet</servlet-name>
         <url-pattern>/sparql</url-pattern>

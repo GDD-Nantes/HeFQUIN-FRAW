@@ -60,6 +60,7 @@ public class RunHeFQUINServer extends CmdGeneral
 	@Override
 	protected void exec() {
 		System.setProperty( "hefquin.configuration", modServer.getConfDescr() );
+		System.setProperty( "fraw.configuration", modServer.getFrawConfDescr());
 		System.setProperty( "hefquin.federation", modServer.getFederationDescription() );
 
 		final Server server = run( modServer.getPort(), modServer.getPath() );
