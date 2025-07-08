@@ -25,7 +25,7 @@
     <!-- Servlet Mapping -->
     <servlet-mapping>
         <servlet-name>FrawServlet</servlet-name>
-        <url-pattern>/fraw</url-pattern>
+        <url-pattern>/raw</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>SparqlServlet</servlet-name>

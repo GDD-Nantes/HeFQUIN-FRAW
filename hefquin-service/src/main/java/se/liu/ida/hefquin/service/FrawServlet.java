@@ -144,21 +144,21 @@ public class FrawServlet extends HttpServlet {
 			return;
 		}
 
-		Integer budgetInt = 0;
+		Integer budgetInt = null;
 		if ( budget != null && !budget.trim().isEmpty() ) {
 			try {
 				budgetInt = Integer.parseInt( budget );
 			} catch ( NumberFormatException e ) {
-				writeJsonError( response, 400, new JsonString( "Budget is missing or empty" ) );
+				writeJsonError( response, 400, new JsonString( "Budget is not parsable to an integer : " + budget ) );
 			}
 		}
 
-		Integer subBudgetInt = 0;
+		Integer subBudgetInt = null;
 		if ( subBudget != null && !subBudget.trim().isEmpty() ) {
 			try {
 				subBudgetInt = Integer.parseInt( subBudget );
 			} catch ( NumberFormatException e ) {
-				writeJsonError(response, 400, new JsonString("Sub Budget is missing or empty"));
+				writeJsonError(response, 400, new JsonString("Sub Budget is not parsable to an integer : " + subBudget ) );
 			}
 		}
 

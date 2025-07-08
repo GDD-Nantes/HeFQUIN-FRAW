@@ -172,7 +172,7 @@ public class OpExecutorFraw extends OpExecutor
 		Integer queryBudget;
 		try {
 			Integer customQueryBudget = execCxt.getContext().get(FrawConstants.BUDGET);
-			queryBudget = Math.min(customQueryBudget, budget);
+			queryBudget = customQueryBudget == null ? budget : Math.min(customQueryBudget, budget);
 		} catch ( Exception e ) {
 			queryBudget = budget;
 		}
@@ -180,7 +180,7 @@ public class OpExecutorFraw extends OpExecutor
 		Integer querySubBudget;
 		try {
 			Integer customQuerySubBudget = execCxt.getContext().get(FrawConstants.SUB_BUDGET);
-			querySubBudget = Math.min(customQuerySubBudget, subBudget);
+			querySubBudget = customQuerySubBudget == null ? subBudget : Math.min(customQuerySubBudget, subBudget);
 		} catch ( Exception e ) {
 			querySubBudget = subBudget;
 		}
