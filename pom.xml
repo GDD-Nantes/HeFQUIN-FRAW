@@ -4,11 +4,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>se.liu.research.hefquin</groupId>
   <artifactId>hefquin</artifactId>
-  <version>0.0.6-SNAPSHOT</version>
+  <version>0.0.7-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <modules>
     <module>hefquin-base</module>
+    <module>hefquin-vocabs</module>
+    <module>hefquin-access</module>
     <module>hefquin-engine</module>
     <module>hefquin-cli</module>
     <module>hefquin-graphqlconnector</module>

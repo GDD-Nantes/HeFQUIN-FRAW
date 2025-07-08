@@ -2,9 +2,6 @@ package se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.costmodel;
 
 import java.util.concurrent.CompletableFuture;
 
-import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
-import se.liu.ida.hefquin.engine.federation.access.SPARQLRequest;
-import se.liu.ida.hefquin.engine.federation.access.TriplePatternRequest;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalOperator;
@@ -14,6 +11,9 @@ import se.liu.ida.hefquin.engine.queryplan.physical.impl.*;
 import se.liu.ida.hefquin.engine.queryplan.utils.PhysicalPlanFactory;
 import se.liu.ida.hefquin.engine.queryplan.utils.PhysicalPlanUtils;
 import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.CardinalityEstimation;
+import se.liu.ida.hefquin.federation.access.DataRetrievalRequest;
+import se.liu.ida.hefquin.federation.access.SPARQLRequest;
+import se.liu.ida.hefquin.federation.access.TriplePatternRequest;
 
 public class CFRNumberOfVarsShippedInRequests extends CFRBase
 {
@@ -30,29 +30,7 @@ public class CFRNumberOfVarsShippedInRequests extends CFRBase
 		final int numberOfJoinVars;
 		final CompletableFuture<Integer> futureIntResSize;
 
-		if ( lop instanceof LogicalOpTPAdd tpAdd ) {
-			numberOfVars = tpAdd.getTP().getNumberOfVarMentions();
-
-			final PhysicalPlan subplan = plan.getSubPlan(0);
-			final PhysicalPlan reqTP = PhysicalPlanFactory.extractRequestAsPlan(tpAdd);
-			numberOfJoinVars = PhysicalPlanUtils.intersectionOfCertainVariables(subplan,reqTP).size();
-
-			futureIntResSize = initiateCardinalityEstimation(subplan);
-		}
-		else if ( lop instanceof LogicalOpBGPAdd bgpAdd ) {
-			numberOfVars = bgpAdd.getBGP().getNumberOfVarMentions();
-
-			final PhysicalPlan subplan = plan.getSubPlan(0);
-			final PhysicalPlan reqBGP = PhysicalPlanFactory.extractRequestAsPlan(bgpAdd);
-			numberOfJoinVars = PhysicalPlanUtils.intersectionOfCertainVariables(subplan,reqBGP).size();
-
-			if ( pop instanceof PhysicalOpBindJoinWithVALUES ) {
-				futureIntResSize = null; // irrelevant
-			} else {
-				futureIntResSize = initiateCardinalityEstimation(subplan);
-			}
-		}
-		else if ( lop instanceof LogicalOpGPAdd gpAdd ) {
+		if ( lop instanceof LogicalOpGPAdd gpAdd ) {
 			numberOfVars = gpAdd.getPattern().getNumberOfVarMentions();
 
 			final PhysicalPlan subplan = plan.getSubPlan(0);

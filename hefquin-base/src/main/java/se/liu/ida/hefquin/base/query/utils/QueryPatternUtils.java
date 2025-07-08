@@ -2,6 +2,10 @@ package se.liu.ida.hefquin.base.query.utils;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.*;
 import org.apache.jena.sparql.core.BasicPattern;
@@ -26,6 +30,7 @@ import se.liu.ida.hefquin.base.query.*;
 import se.liu.ida.hefquin.base.query.impl.*;
 
 import java.util.*;
+import se.liu.ida.hefquin.base.query.impl.TriplePatternImpl;
 
 public class QueryPatternUtils
 {

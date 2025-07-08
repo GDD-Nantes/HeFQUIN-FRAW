@@ -1,6 +1,5 @@
 package se.liu.ida.hefquin.engine.queryproc.impl;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -8,8 +7,18 @@ import java.util.concurrent.TimeUnit;
 import se.liu.ida.hefquin.base.query.Query;
 import se.liu.ida.hefquin.base.utils.Pair;
 import se.liu.ida.hefquin.base.utils.StatsPrinter;
+import se.liu.ida.hefquin.engine.QueryProcessingStatsAndExceptions;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlan;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
+import se.liu.ida.hefquin.engine.queryproc.ExecutionEngine;
+import se.liu.ida.hefquin.engine.queryproc.ExecutionStats;
+import se.liu.ida.hefquin.engine.queryproc.QueryPlanCompiler;
+import se.liu.ida.hefquin.engine.queryproc.QueryPlanner;
+import se.liu.ida.hefquin.engine.queryproc.QueryPlanningStats;
+import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
+import se.liu.ida.hefquin.engine.queryproc.QueryProcException;
+import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
+import se.liu.ida.hefquin.engine.queryproc.QueryResultSink;
 import se.liu.ida.hefquin.engine.queryproc.*;
 
 import java.util.Collections;
@@ -51,7 +60,8 @@ public class QueryProcessorImpl implements QueryProcessor
 	public ExecutionEngine getExecutionEngine() { return execEngine; }
 
 	@Override
-	public Pair<QueryProcStats, List<Exception>> processQuery( final Query query, final QueryResultSink resultSink )
+	public QueryProcessingStatsAndExceptions processQuery( final Query query,
+	                                                       final QueryResultSink resultSink )
 			throws QueryProcException
 	{
 		final long t1 = System.currentTimeMillis();
@@ -70,7 +80,7 @@ public class QueryProcessorImpl implements QueryProcessor
 			t4 = System.currentTimeMillis();
 			prg = null;
 			execStats = null;
-			exceptionsCaughtDuringExecution = Collections.emptyList();
+			exceptionsCaughtDuringExecution = null;
 		}
 		else {
 			prg = planCompiler.compile(qepAndStats.object1);
@@ -82,13 +92,13 @@ public class QueryProcessorImpl implements QueryProcessor
 			exceptionsCaughtDuringExecution = prg.getExceptionsCaughtDuringExecution();
 		}
 
-		final QueryProcStatsImpl myStats = new QueryProcStatsImpl( t4-t1, t2-t1, t3-t2, t4-t3, qepAndStats.object2, execStats );
+		final QueryProcessingStatsAndExceptions s = new QueryProcessingStatsAndExceptionsImpl( t4-t1, t2-t1, t3-t2, t4-t3, qepAndStats.object2, execStats, exceptionsCaughtDuringExecution );
 
 		if ( ctxt.isExperimentRun() ) {
-			StatsPrinter.print( myStats, System.out, true );
+			StatsPrinter.print( s, System.out, true );
 		}
 
-		return new Pair<>(myStats, exceptionsCaughtDuringExecution);
+		return s;
 	}
 
 	@Override

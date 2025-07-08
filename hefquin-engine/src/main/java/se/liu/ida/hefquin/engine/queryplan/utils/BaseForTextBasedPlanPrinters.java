@@ -11,10 +11,10 @@ import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.util.ExprUtils;
 
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlanVisitor;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
+import se.liu.ida.hefquin.federation.FederationMember;
 
 public class BaseForTextBasedPlanPrinters
 {
@@ -160,19 +160,7 @@ public class BaseForTextBasedPlanPrinters
 		public void visit( final LogicalOpRequest<?, ?> op )    { out.append("req"); }
 
 		@Override
-		public void visit( final LogicalOpTPAdd op )            { out.append("tpAdd"); }
-
-		@Override
-		public void visit( final LogicalOpBGPAdd op )           { out.append("bgpAdd"); }
-
-		@Override
 		public void visit( final LogicalOpGPAdd op )            { out.append("gpAdd"); }
-
-		@Override
-		public void visit( final LogicalOpTPOptAdd op )         { out.append("tpOptAdd"); }
-
-		@Override
-		public void visit( final LogicalOpBGPOptAdd op )        { out.append("bgpOptAdd"); }
 
 		@Override
 		public void visit( final LogicalOpGPOptAdd op )         { out.append("gpOptAdd"); }

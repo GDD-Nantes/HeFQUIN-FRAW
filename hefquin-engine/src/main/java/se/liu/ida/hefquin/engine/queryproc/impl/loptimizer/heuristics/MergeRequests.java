@@ -17,16 +17,16 @@ import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl1;
 import se.liu.ida.hefquin.base.query.impl.SPARQLUnionPatternImpl;
 import se.liu.ida.hefquin.base.query.utils.QueryPatternUtils;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
-import se.liu.ida.hefquin.engine.federation.access.SPARQLRequest;
-import se.liu.ida.hefquin.engine.federation.access.impl.req.SPARQLRequestImpl;
-import se.liu.ida.hefquin.engine.federation.access.utils.SPARQLRequestUtils;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlanUtils;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.HeuristicForLogicalOptimization;
+import se.liu.ida.hefquin.federation.FederationMember;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
+import se.liu.ida.hefquin.federation.access.SPARQLRequest;
+import se.liu.ida.hefquin.federation.access.impl.req.SPARQLRequestImpl;
+import se.liu.ida.hefquin.federation.access.utils.SPARQLRequestUtils;
 
 /**
  * Merges subplans that consists of multiple requests to the same federation
@@ -83,69 +83,16 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 		{
 			// nothing to do here - we are in a leaf node
 		}
-		else if ( rootOp instanceof LogicalOpTPAdd tpAdd )
-		{
-			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
-			if ( childOp instanceof LogicalOpRequest reqOp ) {
-				final FederationMember fm = tpAdd.getFederationMember();
-				if ( fm.getInterface().supportsBGPRequests() ) {
-					if ( reqOp.getFederationMember().equals(fm) ) {
-						return mergePatternIntoRequest( tpAdd.getTP(),
-						                                fm,
-						                                (SPARQLRequest) reqOp.getRequest() );
-					}
-				}
-			}
-		}
-		else if ( rootOp instanceof LogicalOpBGPAdd bgpAdd )
-		{
-			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
-			if ( childOp instanceof LogicalOpRequest reqOp ) {
-				final FederationMember fm = bgpAdd.getFederationMember();
-				if ( reqOp.getFederationMember().equals(fm) ) {
-					return mergePatternIntoRequest( bgpAdd.getBGP(),
-					                                fm,
-					                                (SPARQLRequest) reqOp.getRequest() );
-				}
-			}
-		}
 		else if ( rootOp instanceof LogicalOpGPAdd gpAdd )
 		{
 			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
 			if ( childOp instanceof LogicalOpRequest reqOp ) {
 				final FederationMember fm = gpAdd.getFederationMember();
-				if ( reqOp.getFederationMember().equals(fm) ) {
+				if (    fm.getInterface().supportsSPARQLPatternRequests()
+				     && reqOp.getFederationMember().equals(fm) ) {
 					return mergePatternIntoRequest( gpAdd.getPattern(),
 					                                fm,
 					                                (SPARQLRequest) reqOp.getRequest() );
-				}
-			}
-		}
-		else if ( rootOp instanceof LogicalOpTPOptAdd tpOptAdd )
-		{
-			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
-			if ( childOp instanceof LogicalOpRequest reqOp ) {
-				final FederationMember fm = tpOptAdd.getFederationMember();
-				if ( fm.getInterface().supportsSPARQLPatternRequests() ) {
-					if ( reqOp.getFederationMember().equals(fm) ) {
-						return mergeOptPatternsIntoRequest( Collections.singletonList(tpOptAdd.getTP()),
-						                                    (SPARQLEndpoint) fm,
-						                                    (SPARQLRequest) reqOp.getRequest() );
-					}
-				}
-			}
-		}
-		else if ( rootOp instanceof LogicalOpBGPOptAdd bgpOptAdd )
-		{
-			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
-			if ( childOp instanceof LogicalOpRequest reqOp ) {
-				final FederationMember fm = bgpOptAdd.getFederationMember();
-				if ( fm.getInterface().supportsSPARQLPatternRequests() ) {
-					if ( reqOp.getFederationMember().equals(fm) ) {
-						return mergeOptPatternsIntoRequest( Collections.singletonList(bgpOptAdd.getBGP()),
-						                                    (SPARQLEndpoint) fm,
-						                                    (SPARQLRequest) reqOp.getRequest() );
-					}
 				}
 			}
 		}
@@ -154,12 +101,11 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
 			if ( childOp instanceof LogicalOpRequest reqOp ) {
 				final FederationMember fm = gpOptAdd.getFederationMember();
-				if ( fm.getInterface().supportsSPARQLPatternRequests() ) {
-					if ( reqOp.getFederationMember().equals(fm) ) {
-						return mergeOptPatternsIntoRequest( Collections.singletonList(gpOptAdd.getPattern()),
-						                                    (SPARQLEndpoint) fm,
-						                                    (SPARQLRequest) reqOp.getRequest() );
-					}
+				if (    fm.getInterface().supportsSPARQLPatternRequests()
+				     && reqOp.getFederationMember().equals(fm) ) {
+					return mergeOptPatternsIntoRequest( Collections.singletonList(gpOptAdd.getPattern()),
+					                                    (SPARQLEndpoint) fm,
+					                                    (SPARQLRequest) reqOp.getRequest() );
 				}
 			}
 		}

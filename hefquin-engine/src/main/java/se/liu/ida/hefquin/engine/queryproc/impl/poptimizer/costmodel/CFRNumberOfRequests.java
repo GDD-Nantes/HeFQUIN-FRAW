@@ -1,19 +1,18 @@
 package se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.costmodel;
 
 import java.util.concurrent.CompletableFuture;
-import se.liu.ida.hefquin.engine.federation.BRTPFServer;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
-import se.liu.ida.hefquin.engine.federation.TPFServer;
+
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.BaseForExecOpBindJoinWithRequestOps;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpBGPAdd;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpGPAdd;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpTPAdd;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.*;
 import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.CardinalityEstimation;
+import se.liu.ida.hefquin.federation.BRTPFServer;
+import se.liu.ida.hefquin.federation.FederationMember;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
+import se.liu.ida.hefquin.federation.TPFServer;
 
 public class CFRNumberOfRequests extends CFRBase
 {
@@ -30,30 +29,14 @@ public class CFRNumberOfRequests extends CFRBase
 		final double blockSize = BaseForExecOpBindJoinWithRequestOps.DEFAULT_BATCH_SIZE;
 		final CompletableFuture<Integer> numReq;
 
-		if ( rootOp instanceof PhysicalOpIndexNestedLoopsJoin ) {
-			LogicalOperator lop = (((PhysicalOpIndexNestedLoopsJoin) rootOp).getLogicalOperator());
-			if ( lop instanceof LogicalOpBGPAdd) {
-				FederationMember fm = ((LogicalOpBGPAdd)((PhysicalOpIndexNestedLoopsJoin) rootOp).getLogicalOperator()).getFederationMember();
-				if (fm instanceof SPARQLEndpoint) {
-					return initiateCardinalityEstimation(plan.getSubPlan(0));
-				}
-				else
-					throw new IllegalArgumentException("Unsupported type of federation member: " + fm.getClass().getName() );
-			}
-			else if ( lop instanceof LogicalOpGPAdd) {
-				FederationMember fm = ((LogicalOpGPAdd)((PhysicalOpIndexNestedLoopsJoin) rootOp).getLogicalOperator()).getFederationMember();
-				if (fm instanceof SPARQLEndpoint) {
-					return initiateCardinalityEstimation(plan.getSubPlan(0));
-				}
-				else
-					throw new IllegalArgumentException("Unsupported type of federation member: " + fm.getClass().getName() );
-			}
-			else if ( lop instanceof LogicalOpTPAdd) {
-				FederationMember fm = ((LogicalOpTPAdd)((PhysicalOpIndexNestedLoopsJoin) rootOp).getLogicalOperator()).getFederationMember();
-				if (fm instanceof SPARQLEndpoint) {
+		if ( rootOp instanceof PhysicalOpIndexNestedLoopsJoin inljOp ) {
+			final LogicalOperator lop = inljOp.getLogicalOperator();
+			if ( lop instanceof LogicalOpGPAdd gpAdd ) {
+				FederationMember fm = gpAdd.getFederationMember();
+				if ( fm instanceof SPARQLEndpoint ) {
 					return initiateCardinalityEstimation( plan.getSubPlan(0) );
 				}
-				else if ((fm instanceof TPFServer) || (fm instanceof BRTPFServer)) {
+				else if ( fm instanceof TPFServer || fm instanceof BRTPFServer ) {
 //				The actual number of requests depends on the page size of response.
 //				This implementation is under an assumption that the number of pages is evenly distributed among bind-join requests.
 					numReq = initiateCardinalityEstimation(plan);
@@ -65,10 +48,10 @@ public class CFRNumberOfRequests extends CFRBase
 					});
 				}
 				else
-					throw new IllegalArgumentException("Unsupported type of federation member: " + fm.getClass().getName() );
+					throw new IllegalArgumentException( "Unsupported type of federation member: " + fm.getClass().getName() );
 			}
 			else
-				throw new IllegalArgumentException("Unsupported type of operator: " + lop.getClass().getName() );
+				throw new IllegalArgumentException( "Unsupported type of operator: " + lop.getClass().getName() );
 		}
 		else if ( rootOp instanceof PhysicalOpBindJoin ){
 //			The actual number of requests depends on the block size used for the bind-join requests, and page size of response.
