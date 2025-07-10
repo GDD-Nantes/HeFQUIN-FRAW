@@ -1,7 +1,5 @@
 package se.liu.ida.hefquin.engine;
 
-import java.io.PrintStream;
-
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -10,12 +8,14 @@ import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.resultset.ResultsFormat;
 import org.apache.jena.sparql.util.QueryExecUtils;
-
 import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
 import se.liu.ida.hefquin.engine.queryproc.impl.QueryProcessingStatsAndExceptionsImpl;
 import se.liu.ida.hefquin.federation.access.FederationAccessManager;
 import se.liu.ida.hefquin.federation.access.FederationAccessStats;
+import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
+
+import java.io.PrintStream;
 
 /**
  * An object of this class can be used in two ways to process queries over
@@ -276,6 +276,8 @@ public class HeFQUINEngine
 
 		final DatasetGraph dsg = DatasetGraphFactory.createGeneral();
 		final QueryExecution qe = QueryExecutionFactory.create(query, dsg);
+
+		qe.getContext().set(FrawConstants.ENGINE, this);
 
 		return qe;
 	}

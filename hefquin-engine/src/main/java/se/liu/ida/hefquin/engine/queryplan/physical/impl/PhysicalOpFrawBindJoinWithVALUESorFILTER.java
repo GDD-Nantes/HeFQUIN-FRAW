@@ -2,13 +2,14 @@ package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.engine.queryplan.executable.UnaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpBindJoinSPARQLwithVALUESorFILTER;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpFrawBindJoinSPARQLwithVALUESorFILTER;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
+import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpGPAdd;
+import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpGPOptAdd;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
+import se.liu.ida.hefquin.federation.FederationMember;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
 
 /**
  * A physical operator that implements (a batching version of) the bind
@@ -25,26 +26,6 @@ import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
  */
 public class PhysicalOpFrawBindJoinWithVALUESorFILTER extends BaseForPhysicalOpSingleInputJoin
 {
-	public PhysicalOpFrawBindJoinWithVALUESorFILTER( final LogicalOpTPAdd lop ) {
-		super(lop);
-		assert lop.getFederationMember() instanceof SPARQLEndpoint;
-	}
-
-	public PhysicalOpFrawBindJoinWithVALUESorFILTER( final LogicalOpTPOptAdd lop ) {
-		super(lop);
-		assert lop.getFederationMember() instanceof SPARQLEndpoint;
-	}
-
-	public PhysicalOpFrawBindJoinWithVALUESorFILTER( final LogicalOpBGPAdd lop ) {
-		super(lop);
-		assert lop.getFederationMember() instanceof SPARQLEndpoint;
-	}
-
-	public PhysicalOpFrawBindJoinWithVALUESorFILTER( final LogicalOpBGPOptAdd lop ) {
-		super(lop);
-		assert lop.getFederationMember() instanceof SPARQLEndpoint;
-	}
-
 	public PhysicalOpFrawBindJoinWithVALUESorFILTER( final LogicalOpGPAdd lop ) {
 		super(lop);
 		assert lop.getFederationMember() instanceof SPARQLEndpoint;
@@ -68,27 +49,7 @@ public class PhysicalOpFrawBindJoinWithVALUESorFILTER extends BaseForPhysicalOpS
 		final FederationMember fm;
 		final boolean useOuterJoinSemantics;
 
-		if ( lop instanceof LogicalOpTPAdd tpAdd ) {
-			pt = tpAdd.getTP();
-			fm = tpAdd.getFederationMember();
-			useOuterJoinSemantics = false;
-		}
-		else if ( lop instanceof LogicalOpTPOptAdd tpOptAdd ) {
-			pt = tpOptAdd.getTP();
-			fm = tpOptAdd.getFederationMember();
-			useOuterJoinSemantics = true;
-		}
-		else if ( lop instanceof LogicalOpBGPAdd bgpAdd ) {
-			pt = bgpAdd.getBGP();
-			fm = bgpAdd.getFederationMember();
-			useOuterJoinSemantics = false;
-		}
-		else if ( lop instanceof LogicalOpBGPOptAdd bgpOptAdd ) {
-			pt = bgpOptAdd.getBGP();
-			fm = bgpOptAdd.getFederationMember();
-			useOuterJoinSemantics = true;
-		}
-		else if ( lop instanceof LogicalOpGPAdd gpAdd ) {
+		if ( lop instanceof LogicalOpGPAdd gpAdd ) {
 			pt = gpAdd.getPattern();
 			fm = gpAdd.getFederationMember();
 			useOuterJoinSemantics = false;

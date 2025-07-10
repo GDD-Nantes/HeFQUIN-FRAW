@@ -1,6 +1,6 @@
-package se.liu.ida.hefquin.engine.federation;
+package se.liu.ida.hefquin.federation;
 
-import se.liu.ida.hefquin.engine.federation.access.FederationMemberAgglomerationInterface;
+import se.liu.ida.hefquin.federation.access.FederationMemberAgglomerationInterface;
 
 public interface FederationMemberAgglomeration extends SPARQLEndpoint {
 

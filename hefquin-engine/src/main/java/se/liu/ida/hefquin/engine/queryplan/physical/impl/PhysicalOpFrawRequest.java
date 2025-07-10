@@ -2,16 +2,16 @@ package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 
 import se.liu.ida.hefquin.base.data.VocabularyMapping;
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
-import se.liu.ida.hefquin.engine.federation.*;
-import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
-import se.liu.ida.hefquin.engine.federation.access.FederationMemberAgglomerationInterface;
-import se.liu.ida.hefquin.engine.federation.access.SPARQLRequest;
-import se.liu.ida.hefquin.engine.federation.access.TriplePatternRequest;
-import se.liu.ida.hefquin.engine.federation.access.impl.iface.FederationMemberAgglomerationInterfaceImpl;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpFrawRequest;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRequest;
 import se.liu.ida.hefquin.engine.queryplan.physical.NullaryPhysicalOpForLogicalOp;
+import se.liu.ida.hefquin.federation.*;
+import se.liu.ida.hefquin.federation.access.DataRetrievalRequest;
+import se.liu.ida.hefquin.federation.access.FederationMemberAgglomerationInterface;
+import se.liu.ida.hefquin.federation.access.SPARQLRequest;
+import se.liu.ida.hefquin.federation.access.TriplePatternRequest;
+import se.liu.ida.hefquin.federation.access.impl.iface.FederationMemberAgglomerationInterfaceImpl;
 
 import java.util.Iterator;
 import java.util.List;

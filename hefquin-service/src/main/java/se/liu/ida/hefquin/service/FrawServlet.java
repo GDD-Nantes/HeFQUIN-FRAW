@@ -14,11 +14,10 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.resultset.ResultsFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.liu.ida.hefquin.base.utils.Pair;
 import se.liu.ida.hefquin.engine.FrawEngine;
 import se.liu.ida.hefquin.engine.IllegalQueryException;
+import se.liu.ida.hefquin.engine.QueryProcessingStatsAndExceptions;
 import se.liu.ida.hefquin.engine.UnsupportedQueryException;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -26,7 +25,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -239,14 +237,14 @@ public class FrawServlet extends HttpServlet {
 		final ResultsFormat resultsFormat = ServletUtils.convert( mimeType );
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-		final Pair<QueryProcStats, List<Exception>> statsAndExceptions;
+		final QueryProcessingStatsAndExceptions queryProcessingStatsAndExceptions;
 		try ( PrintStream ps = new PrintStream( baos, true, StandardCharsets.UTF_8 ) ) {
-			statsAndExceptions = engine.executeQuery( query, resultsFormat, ps, budget, subBudget );
+			queryProcessingStatsAndExceptions = engine.executeQuery( query, resultsFormat, ps, budget, subBudget );
 		}
 
 		final JsonObject res = new JsonObject();
 		res.put( "result", baos.toString() );
-		res.put( "exceptions", ServletUtils.getExceptions( statsAndExceptions.object2 ) );
+		res.put( "exceptions", ServletUtils.getExceptions( queryProcessingStatsAndExceptions.getExceptions() ) );
 		return res;
 	}
 

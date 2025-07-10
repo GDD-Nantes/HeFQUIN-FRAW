@@ -3,6 +3,7 @@ package se.liu.ida.hefquin.engine.queryproc.impl;
 import se.liu.ida.hefquin.base.query.Query;
 import se.liu.ida.hefquin.base.utils.Pair;
 import se.liu.ida.hefquin.base.utils.StatsPrinter;
+import se.liu.ida.hefquin.engine.QueryProcessingStatsAndExceptions;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlan;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
 import se.liu.ida.hefquin.engine.queryproc.*;
@@ -38,7 +39,7 @@ public class SamplingQueryProcessorImpl implements SamplingQueryProcessor
 
 
 	@Override
-	public Pair<QueryProcStats, List<Exception>> processQuery(Query query, QueryResultSink resultSink) throws QueryProcException {
+	public QueryProcessingStatsAndExceptions processQuery(Query query, QueryResultSink resultSink) throws QueryProcException {
 		throw new UnsupportedOperationException("Can't process query without a budget");
 	}
 
@@ -57,7 +58,7 @@ public class SamplingQueryProcessorImpl implements SamplingQueryProcessor
 	}
 
 	@Override
-	public Pair<QueryProcStats, List<Exception>> processQuery( final Query query, final QueryResultSink resultSink, int numberOfWalks )
+	public QueryProcessingStatsAndExceptions processQuery( final Query query, final QueryResultSink resultSink, int numberOfWalks )
 			throws QueryProcException
 	{
 		boolean skipExecution = ctxt.skipExecution();
@@ -90,12 +91,19 @@ public class SamplingQueryProcessorImpl implements SamplingQueryProcessor
 			exceptionsCaughtDuringExecution = prg.getExceptionsCaughtDuringExecution();
 		}
 
-		final QueryProcStatsImpl myStats = new QueryProcStatsImpl( t4-t1, t2-t1, t3-t2, t4-t3, qepAndStats.object2, execStats );
+		final QueryProcessingStatsAndExceptions queryProcessingStatsAndExceptions = new QueryProcessingStatsAndExceptionsImpl(
+				t4-t1,
+				t2-t1,
+				t3-t2,
+				t4-t3,
+				qepAndStats.object2,
+				execStats,
+				exceptionsCaughtDuringExecution );
 
 		if ( ctxt.isExperimentRun() ) {
-			StatsPrinter.print( myStats, System.out, true );
+			StatsPrinter.print( queryProcessingStatsAndExceptions, System.out, true );
 		}
 
-		return new Pair<>(myStats, exceptionsCaughtDuringExecution);
+		return queryProcessingStatsAndExceptions;
 	}
 }

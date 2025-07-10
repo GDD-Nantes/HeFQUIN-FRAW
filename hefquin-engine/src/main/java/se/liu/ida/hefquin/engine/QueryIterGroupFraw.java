@@ -65,7 +65,7 @@ public class QueryIterGroupFraw extends QueryIterPlainWrapper {
                         return Iter.nullIterator() ;
                     if ( ! hasAggregators ) {
                         // No GROUP BY, no aggregators. One result row of no columns.
-                        return Iter.singleton(BindingFactory.binding());
+                        return Iter.of(BindingFactory.binding());
                     }
                     // No GROUP BY, has aggregators. Insert default values.
                     BindingBuilder builder = Binding.builder();
@@ -76,7 +76,7 @@ public class QueryIterGroupFraw extends QueryIterPlainWrapper {
                         Var v = agg.getVar();
                         builder.add(v, value);
                     }
-                    return Iter.singleton(builder.build());
+                    return Iter.of(builder.build());
                 }
 
                 // Case: there is input.

@@ -5,13 +5,14 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.FederationMemberAgglomeration;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
-import se.liu.ida.hefquin.engine.federation.access.*;
-import se.liu.ida.hefquin.engine.federation.access.impl.response.SolMapsResponseImpl;
+import se.liu.ida.hefquin.base.data.utils.SolutionMappingUtils;
 import se.liu.ida.hefquin.engine.federation.access.utils.FederationAccessUtils;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils;
+import se.liu.ida.hefquin.federation.FederationMember;
+import se.liu.ida.hefquin.federation.FederationMemberAgglomeration;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
+import se.liu.ida.hefquin.federation.access.*;
+import se.liu.ida.hefquin.federation.access.impl.response.SolMapsResponseImpl;
 
 import java.util.*;
 
@@ -53,6 +54,17 @@ public class ExecOpFrawRequest extends BaseForExecOpSolMapsRequest<DataRetrieval
         if(chosenFM instanceof SPARQLEndpoint){
 
             SolMapsResponse solMapsResponse = FederationAccessUtils.performRequest(fedAccessMgr, (SPARQLRequest) req, (SPARQLEndpoint) chosenFM);
+
+            // We got nothing from Raw endpoints. We want raw endpoints to always return results
+            // even if empty or with a probability of 0. However, it is technically possible for raw ep to reach
+            // timeout before producing anything, so this check is relevant.
+            if (solMapsResponse.getSize() == 0)
+                return new SolMapsResponseImpl(
+                        List.of(SolutionMappingUtils.createSolutionMapping()),
+                        fm,
+                        req, solMapsResponse.getRequestStartTime(),
+                        solMapsResponse.getRetrievalEndTime()
+                );
 
             solMapsResponse.getResponseData().forEach(solutionMapping -> {
                 // Probability

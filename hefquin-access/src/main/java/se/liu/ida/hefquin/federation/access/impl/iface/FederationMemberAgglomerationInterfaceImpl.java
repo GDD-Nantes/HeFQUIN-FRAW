@@ -1,9 +1,10 @@
-package se.liu.ida.hefquin.engine.federation.access.impl.iface;
+package se.liu.ida.hefquin.federation.access.impl.iface;
 
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
-import se.liu.ida.hefquin.engine.federation.access.FederationMemberAgglomerationInterface;
-import se.liu.ida.hefquin.engine.federation.access.impl.DataRetrievalInterfaceBase;
+import se.liu.ida.hefquin.federation.FederationMember;
+import se.liu.ida.hefquin.federation.access.DataRetrievalRequest;
+import se.liu.ida.hefquin.federation.access.FederationMemberAgglomerationInterface;
+import se.liu.ida.hefquin.federation.access.SPARQLRequest;
+import se.liu.ida.hefquin.federation.access.impl.DataRetrievalInterfaceBase;
 
 import java.util.List;
 
@@ -35,8 +36,7 @@ public class FederationMemberAgglomerationInterfaceImpl extends DataRetrievalInt
 
     @Override
     public boolean supportsRequest(DataRetrievalRequest req) {
-        // idk
-        return true;
+        return req instanceof SPARQLRequest;
     }
 
     @Override

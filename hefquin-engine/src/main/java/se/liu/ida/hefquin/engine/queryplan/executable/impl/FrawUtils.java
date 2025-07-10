@@ -10,7 +10,7 @@ import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingLib;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
+import se.liu.ida.hefquin.federation.FederationMember;
 
 import java.util.Iterator;
 import java.util.Set;

@@ -1207,3 +1207,1210 @@ ex:empty
       a            fd:FederationMember ;
       fd:interface [ a                  fd:SPARQLEndpointInterface ;
                      fd:endpointAddress <http://localhost:3030/fedshop200/raw?default-graph-uri=http://www.empty.fr/> ] .
+
+
+
+ex:sparqlVendor0
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor0.fr/> ] .
+
+
+ex:sparqlVendor1
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor1.fr/> ] .
+
+
+ex:sparqlVendor2
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor2.fr/> ] .
+
+
+ex:sparqlVendor3
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor3.fr/> ] .
+
+
+ex:sparqlVendor4
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor4.fr/> ] .
+
+
+ex:sparqlVendor5
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor5.fr/> ] .
+
+
+ex:sparqlVendor6
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor6.fr/> ] .
+
+
+ex:sparqlVendor7
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor7.fr/> ] .
+
+
+ex:sparqlVendor8
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor8.fr/> ] .
+
+
+ex:sparqlVendor9
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor9.fr/> ] .
+
+
+ex:sparqlVendor10
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor10.fr/> ] .
+
+
+ex:sparqlVendor11
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor11.fr/> ] .
+
+
+ex:sparqlVendor12
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor12.fr/> ] .
+
+
+ex:sparqlVendor13
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor13.fr/> ] .
+
+
+ex:sparqlVendor14
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor14.fr/> ] .
+
+
+ex:sparqlVendor15
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor15.fr/> ] .
+
+
+ex:sparqlVendor16
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor16.fr/> ] .
+
+
+ex:sparqlVendor17
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor17.fr/> ] .
+
+
+ex:sparqlVendor18
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor18.fr/> ] .
+
+
+ex:sparqlVendor19
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor19.fr/> ] .
+
+
+ex:sparqlVendor20
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor20.fr/> ] .
+
+
+ex:sparqlVendor21
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor21.fr/> ] .
+
+
+ex:sparqlVendor22
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor22.fr/> ] .
+
+
+ex:sparqlVendor23
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor23.fr/> ] .
+
+
+ex:sparqlVendor24
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor24.fr/> ] .
+
+
+ex:sparqlVendor25
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor25.fr/> ] .
+
+
+ex:sparqlVendor26
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor26.fr/> ] .
+
+
+ex:sparqlVendor27
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor27.fr/> ] .
+
+
+ex:sparqlVendor28
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor28.fr/> ] .
+
+
+ex:sparqlVendor29
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor29.fr/> ] .
+
+
+ex:sparqlVendor30
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor30.fr/> ] .
+
+
+ex:sparqlVendor31
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor31.fr/> ] .
+
+
+ex:sparqlVendor32
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor32.fr/> ] .
+
+
+ex:sparqlVendor33
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor33.fr/> ] .
+
+
+ex:sparqlVendor34
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor34.fr/> ] .
+
+
+ex:sparqlVendor35
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor35.fr/> ] .
+
+
+ex:sparqlVendor36
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor36.fr/> ] .
+
+
+ex:sparqlVendor37
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor37.fr/> ] .
+
+
+ex:sparqlVendor38
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor38.fr/> ] .
+
+
+ex:sparqlVendor39
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor39.fr/> ] .
+
+
+ex:sparqlVendor40
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor40.fr/> ] .
+
+
+ex:sparqlVendor41
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor41.fr/> ] .
+
+
+ex:sparqlVendor42
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor42.fr/> ] .
+
+
+ex:sparqlVendor43
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor43.fr/> ] .
+
+
+ex:sparqlVendor44
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor44.fr/> ] .
+
+
+ex:sparqlVendor45
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor45.fr/> ] .
+
+
+ex:sparqlVendor46
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor46.fr/> ] .
+
+
+ex:sparqlVendor47
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor47.fr/> ] .
+
+
+ex:sparqlVendor48
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor48.fr/> ] .
+
+
+ex:sparqlVendor49
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor49.fr/> ] .
+
+
+ex:sparqlVendor50
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor50.fr/> ] .
+
+
+ex:sparqlVendor51
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor51.fr/> ] .
+
+
+ex:sparqlVendor52
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor52.fr/> ] .
+
+
+ex:sparqlVendor53
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor53.fr/> ] .
+
+
+ex:sparqlVendor54
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor54.fr/> ] .
+
+
+ex:sparqlVendor55
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor55.fr/> ] .
+
+
+ex:sparqlVendor56
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor56.fr/> ] .
+
+
+ex:sparqlVendor57
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor57.fr/> ] .
+
+
+ex:sparqlVendor58
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor58.fr/> ] .
+
+
+ex:sparqlVendor59
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor59.fr/> ] .
+
+
+ex:sparqlVendor60
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor60.fr/> ] .
+
+
+ex:sparqlVendor61
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor61.fr/> ] .
+
+
+ex:sparqlVendor62
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor62.fr/> ] .
+
+
+ex:sparqlVendor63
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor63.fr/> ] .
+
+
+ex:sparqlVendor64
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor64.fr/> ] .
+
+
+ex:sparqlVendor65
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor65.fr/> ] .
+
+
+ex:sparqlVendor66
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor66.fr/> ] .
+
+
+ex:sparqlVendor67
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor67.fr/> ] .
+
+
+ex:sparqlVendor68
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor68.fr/> ] .
+
+
+ex:sparqlVendor69
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor69.fr/> ] .
+
+
+ex:sparqlVendor70
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor70.fr/> ] .
+
+
+ex:sparqlVendor71
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor71.fr/> ] .
+
+
+ex:sparqlVendor72
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor72.fr/> ] .
+
+
+ex:sparqlVendor73
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor73.fr/> ] .
+
+
+ex:sparqlVendor74
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor74.fr/> ] .
+
+
+ex:sparqlVendor75
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor75.fr/> ] .
+
+
+ex:sparqlVendor76
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor76.fr/> ] .
+
+
+ex:sparqlVendor77
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor77.fr/> ] .
+
+
+ex:sparqlVendor78
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor78.fr/> ] .
+
+
+ex:sparqlVendor79
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor79.fr/> ] .
+
+
+ex:sparqlVendor80
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor80.fr/> ] .
+
+
+ex:sparqlVendor81
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor81.fr/> ] .
+
+
+ex:sparqlVendor82
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor82.fr/> ] .
+
+
+ex:sparqlVendor83
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor83.fr/> ] .
+
+
+ex:sparqlVendor84
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor84.fr/> ] .
+
+
+ex:sparqlVendor85
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor85.fr/> ] .
+
+
+ex:sparqlVendor86
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor86.fr/> ] .
+
+
+ex:sparqlVendor87
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor87.fr/> ] .
+
+
+ex:sparqlVendor88
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor88.fr/> ] .
+
+
+ex:sparqlVendor89
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor89.fr/> ] .
+
+
+ex:sparqlVendor90
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor90.fr/> ] .
+
+
+ex:sparqlVendor91
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor91.fr/> ] .
+
+
+ex:sparqlVendor92
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor92.fr/> ] .
+
+
+ex:sparqlVendor93
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor93.fr/> ] .
+
+
+ex:sparqlVendor94
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor94.fr/> ] .
+
+
+ex:sparqlVendor95
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor95.fr/> ] .
+
+
+ex:sparqlVendor96
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor96.fr/> ] .
+
+
+ex:sparqlVendor97
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor97.fr/> ] .
+
+
+ex:sparqlVendor98
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor98.fr/> ] .
+
+
+ex:sparqlVendor99
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.vendor99.fr/> ] .
+
+
+ex:sparqlRatingSite0
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite0.fr/> ] .
+
+
+ex:sparqlRatingSite1
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite1.fr/> ] .
+
+
+ex:sparqlRatingSite2
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite2.fr/> ] .
+
+
+ex:sparqlRatingSite3
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite3.fr/> ] .
+
+
+ex:sparqlRatingSite4
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite4.fr/> ] .
+
+
+ex:sparqlRatingSite5
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite5.fr/> ] .
+
+
+ex:sparqlRatingSite6
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite6.fr/> ] .
+
+
+ex:sparqlRatingSite7
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite7.fr/> ] .
+
+
+ex:sparqlRatingSite8
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite8.fr/> ] .
+
+
+ex:sparqlRatingSite9
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite9.fr/> ] .
+
+
+ex:sparqlRatingSite10
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite10.fr/> ] .
+
+
+ex:sparqlRatingSite11
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite11.fr/> ] .
+
+
+ex:sparqlRatingSite12
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite12.fr/> ] .
+
+
+ex:sparqlRatingSite13
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite13.fr/> ] .
+
+
+ex:sparqlRatingSite14
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite14.fr/> ] .
+
+
+ex:sparqlRatingSite15
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite15.fr/> ] .
+
+
+ex:sparqlRatingSite16
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite16.fr/> ] .
+
+
+ex:sparqlRatingSite17
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite17.fr/> ] .
+
+
+ex:sparqlRatingSite18
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite18.fr/> ] .
+
+
+ex:sparqlRatingSite19
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite19.fr/> ] .
+
+
+ex:sparqlRatingSite20
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite20.fr/> ] .
+
+
+ex:sparqlRatingSite21
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite21.fr/> ] .
+
+
+ex:sparqlRatingSite22
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite22.fr/> ] .
+
+
+ex:sparqlRatingSite23
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite23.fr/> ] .
+
+
+ex:sparqlRatingSite24
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite24.fr/> ] .
+
+
+ex:sparqlRatingSite25
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite25.fr/> ] .
+
+
+ex:sparqlRatingSite26
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite26.fr/> ] .
+
+
+ex:sparqlRatingSite27
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite27.fr/> ] .
+
+
+ex:sparqlRatingSite28
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite28.fr/> ] .
+
+
+ex:sparqlRatingSite29
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite29.fr/> ] .
+
+
+ex:sparqlRatingSite30
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite30.fr/> ] .
+
+
+ex:sparqlRatingSite31
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite31.fr/> ] .
+
+
+ex:sparqlRatingSite32
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite32.fr/> ] .
+
+
+ex:sparqlRatingSite33
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite33.fr/> ] .
+
+
+ex:sparqlRatingSite34
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite34.fr/> ] .
+
+
+ex:sparqlRatingSite35
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite35.fr/> ] .
+
+
+ex:sparqlRatingSite36
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite36.fr/> ] .
+
+
+ex:sparqlRatingSite37
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite37.fr/> ] .
+
+
+ex:sparqlRatingSite38
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite38.fr/> ] .
+
+
+ex:sparqlRatingSite39
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite39.fr/> ] .
+
+
+ex:sparqlRatingSite40
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite40.fr/> ] .
+
+
+ex:sparqlRatingSite41
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite41.fr/> ] .
+
+
+ex:sparqlRatingSite42
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite42.fr/> ] .
+
+
+ex:sparqlRatingSite43
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite43.fr/> ] .
+
+
+ex:sparqlRatingSite44
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite44.fr/> ] .
+
+
+ex:sparqlRatingSite45
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite45.fr/> ] .
+
+
+ex:sparqlRatingSite46
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite46.fr/> ] .
+
+
+ex:sparqlRatingSite47
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite47.fr/> ] .
+
+
+ex:sparqlRatingSite48
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite48.fr/> ] .
+
+
+ex:sparqlRatingSite49
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite49.fr/> ] .
+
+
+ex:sparqlRatingSite50
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite50.fr/> ] .
+
+
+ex:sparqlRatingSite51
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite51.fr/> ] .
+
+
+ex:sparqlRatingSite52
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite52.fr/> ] .
+
+
+ex:sparqlRatingSite53
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite53.fr/> ] .
+
+
+ex:sparqlRatingSite54
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite54.fr/> ] .
+
+
+ex:sparqlRatingSite55
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite55.fr/> ] .
+
+
+ex:sparqlRatingSite56
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite56.fr/> ] .
+
+
+ex:sparqlRatingSite57
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite57.fr/> ] .
+
+
+ex:sparqlRatingSite58
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite58.fr/> ] .
+
+
+ex:sparqlRatingSite59
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite59.fr/> ] .
+
+
+ex:sparqlRatingSite60
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite60.fr/> ] .
+
+
+ex:sparqlRatingSite61
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite61.fr/> ] .
+
+
+ex:sparqlRatingSite62
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite62.fr/> ] .
+
+
+ex:sparqlRatingSite63
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite63.fr/> ] .
+
+
+ex:sparqlRatingSite64
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite64.fr/> ] .
+
+
+ex:sparqlRatingSite65
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite65.fr/> ] .
+
+
+ex:sparqlRatingSite66
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite66.fr/> ] .
+
+
+ex:sparqlRatingSite67
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite67.fr/> ] .
+
+
+ex:sparqlRatingSite68
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite68.fr/> ] .
+
+
+ex:sparqlRatingSite69
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite69.fr/> ] .
+
+
+ex:sparqlRatingSite70
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite70.fr/> ] .
+
+
+ex:sparqlRatingSite71
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite71.fr/> ] .
+
+
+ex:sparqlRatingSite72
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite72.fr/> ] .
+
+
+ex:sparqlRatingSite73
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite73.fr/> ] .
+
+
+ex:sparqlRatingSite74
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite74.fr/> ] .
+
+
+ex:sparqlRatingSite75
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite75.fr/> ] .
+
+
+ex:sparqlRatingSite76
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite76.fr/> ] .
+
+
+ex:sparqlRatingSite77
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite77.fr/> ] .
+
+
+ex:sparqlRatingSite78
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite78.fr/> ] .
+
+
+ex:sparqlRatingSite79
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite79.fr/> ] .
+
+
+ex:sparqlRatingSite80
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite80.fr/> ] .
+
+
+ex:sparqlRatingSite81
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite81.fr/> ] .
+
+
+ex:sparqlRatingSite82
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite82.fr/> ] .
+
+
+ex:sparqlRatingSite83
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite83.fr/> ] .
+
+
+ex:sparqlRatingSite84
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite84.fr/> ] .
+
+
+ex:sparqlRatingSite85
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite85.fr/> ] .
+
+
+ex:sparqlRatingSite86
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite86.fr/> ] .
+
+
+ex:sparqlRatingSite87
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite87.fr/> ] .
+
+
+ex:sparqlRatingSite88
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite88.fr/> ] .
+
+
+ex:sparqlRatingSite89
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite89.fr/> ] .
+
+
+ex:sparqlRatingSite90
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite90.fr/> ] .
+
+
+ex:sparqlRatingSite91
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite91.fr/> ] .
+
+
+ex:sparqlRatingSite92
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite92.fr/> ] .
+
+
+ex:sparqlRatingSite93
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite93.fr/> ] .
+
+
+ex:sparqlRatingSite94
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite94.fr/> ] .
+
+
+ex:sparqlRatingSite95
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite95.fr/> ] .
+
+
+ex:sparqlRatingSite96
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite96.fr/> ] .
+
+
+ex:sparqlRatingSite97
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite97.fr/> ] .
+
+
+ex:sparqlRatingSite98
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite98.fr/> ] .
+
+
+ex:sparqlRatingSite99
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.ratingsite99.fr/> ] .
+
+
+ex:empty
+      a            fd:FederationMember ;
+      fd:interface [ a                  fd:SPARQLEndpointInterface ;
+                     fd:endpointAddress <http://localhost:3030/fedshop200/sparql?default-graph-uri=http://www.empty.fr/> ] .

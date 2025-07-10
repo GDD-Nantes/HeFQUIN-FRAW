@@ -1,8 +1,6 @@
 package se.liu.ida.hefquin.engine.queryplan.utils;
 
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.engine.queryplan.executable.NaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.logical.*;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
@@ -11,7 +9,8 @@ import se.liu.ida.hefquin.engine.queryplan.physical.impl.BaseForPhysicalOpMultiw
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.PhysicalOpFrawRequest;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.PhysicalOpParallelMultiLeftJoin;
 import se.liu.ida.hefquin.engine.queryplan.physical.impl.PhysicalOpRequest;
-import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.rewriting.rules.IdentifyLogicalOp;
+import se.liu.ida.hefquin.federation.FederationMember;
+import se.liu.ida.hefquin.federation.access.DataRetrievalRequest;
 
 import java.util.*;
 
@@ -125,8 +124,8 @@ public class LogicalToPhysicalSamplingPlanConverterImpl implements LogicalToPhys
 				return foundQueries.size() == 1;
 			}
 
-			if(!IdentifyLogicalOp.isMultiwayUnion(root.getRootOperator()) &&
-					!IdentifyLogicalOp.isUnion(root.getRootOperator())) return false;
+			if(!isMultiwayUnion(root.getRootOperator()) &&
+					!isUnion(root.getRootOperator())) return false;
 
 
 			for (int i = 0; i < root.numberOfSubPlans(); i++){
@@ -293,4 +292,13 @@ public class LogicalToPhysicalSamplingPlanConverterImpl implements LogicalToPhys
 
 	} // end of helper class Worker
 
+	public static boolean isUnion( final PhysicalOperator op ) {
+		final LogicalOperator lop = ((PhysicalOperatorForLogicalOperator) op).getLogicalOperator();
+		return lop instanceof LogicalOpUnion;
+	}
+	
+	public static boolean isMultiwayUnion( final PhysicalOperator op ) {
+		final LogicalOperator lop = ((PhysicalOperatorForLogicalOperator) op).getLogicalOperator();
+		return lop instanceof LogicalOpMultiwayUnion;
+	}
 }

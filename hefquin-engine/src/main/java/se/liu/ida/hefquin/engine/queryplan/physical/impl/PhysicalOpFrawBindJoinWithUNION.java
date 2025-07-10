@@ -1,12 +1,10 @@
 package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpBindJoinSPARQLwithUNION;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpBGPAdd;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpGPAdd;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpGPOptAdd;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpTPAdd;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
 
 /**
  * A physical operator that implements (a batching version of) the bind
@@ -32,17 +30,6 @@ import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
  */
 public class PhysicalOpFrawBindJoinWithUNION extends PhysicalOpBindJoinWithUNION
 {
-	public PhysicalOpFrawBindJoinWithUNION(final LogicalOpTPAdd lop) {
-		super(lop);
-
-		assert lop.getFederationMember() instanceof SPARQLEndpoint;
-	}
-
-	public PhysicalOpFrawBindJoinWithUNION(final LogicalOpBGPAdd lop) {
-		super(lop);
-
-		assert lop.getFederationMember() instanceof SPARQLEndpoint;
-	}
 
 	public PhysicalOpFrawBindJoinWithUNION(final LogicalOpGPAdd lop) {
 		super(lop);

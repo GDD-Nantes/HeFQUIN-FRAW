@@ -5,9 +5,6 @@ import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.vocabulary.RDF;
-import se.liu.ida.hefquin.engine.federation.access.FederationAccessManager;
-import se.liu.ida.hefquin.engine.federation.catalog.FederationCatalog;
-
 import se.liu.ida.hefquin.engine.queryplan.utils.LogicalPlanPrinter;
 import se.liu.ida.hefquin.engine.queryplan.utils.PhysicalPlanPrinter;
 import se.liu.ida.hefquin.engine.queryproc.*;
@@ -20,6 +17,7 @@ import se.liu.ida.hefquin.federation.access.FederationAccessManager;
 import se.liu.ida.hefquin.federation.catalog.FederationCatalog;
 import se.liu.ida.hefquin.jenaext.ModelUtils;
 import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
+import se.liu.ida.hefquin.vocabulary.ECVocab;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -27,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import se.liu.ida.hefquin.vocabulary.ECVocab;
 
 /**
  * Reads an RDF description of a configuration for the HeFQUIN engine and
@@ -89,14 +86,11 @@ public class HeFQUINEngineConfigReader
 		final FederationAccessManager fedAccessMgr = readFederationAccessManager(confRsrc, ctx);
 		final QueryProcessor qproc = readQueryProcessor(confRsrc, ctx, fedAccessMgr);
 
-		final ExtendedContext ctxx = new ExtendedContextImpl2(ctx, fedAccessMgr);
-		final QueryProcessor qproc = readQueryProcessor(confRsrc, ctxx);
-
-		final int budget = readBudget(confRsrc, ctx);
-		final int subBudget = readSubBudget(confRsrc, ctx);
+		final int budget = readBudget(confRsrc);
+		final int subBudget = readSubBudget(confRsrc);
 
 		if( budget > 0 && subBudget > 0 ) {
-			return new FrawEngineImpl(fedAccessMgr, qproc, budget, subBudget);
+			return new FrawEngine(fedAccessMgr, qproc, budget, subBudget);
 		}
 
 		return new HeFQUINEngine(fedAccessMgr, qproc);
@@ -119,18 +113,26 @@ public class HeFQUINEngineConfigReader
 		PhysicalPlanPrinter getPhysicalPlanPrinter();
 	}
 
-	public int readBudget( final Resource confRsrc, final Context ctx ) {
+	public int readBudget( final Resource confRsrc ) {
 		final Literal ltrl = ModelUtils.getSingleOptionalLiteralProperty( confRsrc, FrawConstants.budget );
 		// not pretty
 		if ( ltrl == null ) return -1;
 		return ltrl.getInt();
 	}
 
-	public int readSubBudget( final Resource confRsrc, final Context ctx ) {
+	public int readBudget( final Model confModel ) {
+		return readBudget(obtainConfigurationResource(confModel));
+	}
+
+	public int readSubBudget( final Resource confRsrc ) {
 		final Literal ltrl = ModelUtils.getSingleOptionalLiteralProperty( confRsrc, FrawConstants.subBudget );
 		// not pretty
 		if ( ltrl == null ) return -1;
 		return ltrl.getInt();
+	}
+
+	public int readSubBudget( final Model confModel ) {
+		return readSubBudget(obtainConfigurationResource(confModel));
 	}
 
 	// ------------ federation access manager ------------
@@ -181,9 +183,8 @@ public class HeFQUINEngineConfigReader
 		final QueryPlanCompiler compiler = readQueryPlanCompiler(rsrc, ctxx);
 		final ExecutionEngine exec = readExecutionEngine(rsrc, ctxx);
 
-
 		if(compiler instanceof SamplingQueryPlanCompiler)
-			return new SamplingQueryProcessorImpl( planner, (SamplingQueryPlanCompiler) compiler, exec, ctx.getQueryProcContext() );
+			return new SamplingQueryProcessorImpl( planner, (SamplingQueryPlanCompiler) compiler, exec, ctxx.getQueryProcContext() );
 		return new QueryProcessorImpl( planner, compiler, exec, ctxx.getQueryProcContext() );
 	}
 

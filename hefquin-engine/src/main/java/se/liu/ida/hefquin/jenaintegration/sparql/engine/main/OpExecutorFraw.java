@@ -18,17 +18,15 @@ import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.base.query.VariableByBlankNodeSubstitutionException;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
 import se.liu.ida.hefquin.base.query.utils.QueryPatternUtils;
-import se.liu.ida.hefquin.base.utils.Pair;
 import se.liu.ida.hefquin.engine.QueryIterGroupFraw;
+import se.liu.ida.hefquin.engine.QueryProcessingStatsAndExceptions;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcException;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
 import se.liu.ida.hefquin.engine.queryproc.SamplingQueryProcessor;
 import se.liu.ida.hefquin.engine.queryproc.impl.MaterializingQueryResultSinkWithInputBindingImpl;
 import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 
 public class OpExecutorFraw extends OpExecutor
@@ -234,18 +232,18 @@ public class OpExecutorFraw extends OpExecutor
 			}
 
 			final MaterializingQueryResultSinkWithInputBindingImpl sink = new MaterializingQueryResultSinkWithInputBindingImpl(binding);
-			final Pair<QueryProcStats, List<Exception>> statsAndExceptions;
+			final QueryProcessingStatsAndExceptions queryProcessingStatsAndExceptions;
 
 			try {
-				statsAndExceptions = qProc.processQuery( new GenericSPARQLGraphPatternImpl2(opForStage), sink, numberOfWalks );
-				if(Objects.isNull(statsAndExceptions)) return new QueryIterNullIterator(execCxt);
+				queryProcessingStatsAndExceptions = qProc.processQuery( new GenericSPARQLGraphPatternImpl2(opForStage), sink, numberOfWalks );
+				if(Objects.isNull(queryProcessingStatsAndExceptions)) return new QueryIterNullIterator(execCxt);
 			}
 			catch ( final QueryProcException ex ) {
 				throw new QueryExecException("Processing the query operator using HeFQUIN failed.", ex);
 			}
 
-			execCxt.getContext().set( HeFQUINConstants.sysQueryProcStats,      statsAndExceptions.object1.addTimes(execCxt.getContext().get(HeFQUINConstants.sysQueryProcStats)));
-			execCxt.getContext().set( HeFQUINConstants.sysQueryProcExceptions, statsAndExceptions.object2 );
+			execCxt.getContext().set( HeFQUINConstants.sysQProcStatsAndExceptions,
+					queryProcessingStatsAndExceptions );
 
 			return new WrappingQueryIterator( sink.getSolMapsIter() );
 		}

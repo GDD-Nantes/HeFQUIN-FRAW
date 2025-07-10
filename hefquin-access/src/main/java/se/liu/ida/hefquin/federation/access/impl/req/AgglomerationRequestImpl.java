@@ -1,8 +1,8 @@
-package se.liu.ida.hefquin.engine.federation.access.impl.req;
+package se.liu.ida.hefquin.federation.access.impl.req;
 
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
-import se.liu.ida.hefquin.engine.federation.access.AgglomerationRequest;
-import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
+import se.liu.ida.hefquin.federation.access.AgglomerationRequest;
+import se.liu.ida.hefquin.federation.access.DataRetrievalRequest;
 
 import java.util.Set;
 

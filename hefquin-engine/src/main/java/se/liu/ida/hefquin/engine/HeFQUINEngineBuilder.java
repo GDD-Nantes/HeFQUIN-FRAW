@@ -1,24 +1,24 @@
 package se.liu.ida.hefquin.engine;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.apache.jena.query.ARQ;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.sparql.engine.ExecutionContext;
-import org.apache.jena.sparql.engine.main.OpExecutor;
 import org.apache.jena.sparql.engine.main.OpExecutorFactory;
 import org.apache.jena.sparql.engine.main.QC;
-
 import se.liu.ida.hefquin.engine.HeFQUINEngineConfigReader.Context;
 import se.liu.ida.hefquin.engine.queryplan.utils.LogicalPlanPrinter;
 import se.liu.ida.hefquin.engine.queryplan.utils.PhysicalPlanPrinter;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
+import se.liu.ida.hefquin.engine.queryproc.SamplingQueryProcessor;
 import se.liu.ida.hefquin.federation.access.FederationAccessManager;
 import se.liu.ida.hefquin.federation.catalog.FederationCatalog;
 import se.liu.ida.hefquin.federation.catalog.FederationDescriptionReader;
-import se.liu.ida.hefquin.jenaintegration.sparql.engine.main.OpExecutorHeFQUIN;
+import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Builder class that can be used to create a fully-wired instance of
@@ -192,10 +192,23 @@ public class HeFQUINEngineBuilder
 		final FederationAccessManager fedAccessMgr = confReader.readFederationAccessManager(engineConf, ctx);
 		final QueryProcessor qProc = confReader.readQueryProcessor(engineConf, ctx, fedAccessMgr);
 
-		final HeFQUINEngine engine = new HeFQUINEngine(fedAccessMgr, qProc);
+		final HeFQUINEngine engine;
 
+		if( qProc instanceof SamplingQueryProcessor ){
+			Integer budget = confReader.readBudget(engineConf);
+			Integer subBudget = confReader.readSubBudget(engineConf);
+			engine = new FrawEngine(fedAccessMgr, qProc, budget, subBudget);
+		} else {
+			engine = new HeFQUINEngine(fedAccessMgr, qProc);
+		}
 		// integrate the engine into the Jena/ARQ machinery
 		integrateEngineIntoJena(qProc);
+
+		Map<HeFQUINEngine, QueryProcessor> engineToQProc = ARQ.getContext().get(FrawConstants.ENGINE_TO_QPROC);
+
+		// No need to sync here because integrateIntoJena calls are never made in parallel, it's only called once
+		// sequentially for each service during server initialization.
+		engineToQProc.put(engine, qProc);
 
 		return engine;
 	}
@@ -205,14 +218,11 @@ public class HeFQUINEngineBuilder
 	 * engine into the query processing machinery of Jena ARQ.
 	 */
 	protected void integrateEngineIntoJena( final QueryProcessor qProc ) {
-		final OpExecutorFactory factory = new OpExecutorFactory() {
-			@Override
-			public OpExecutor create( final ExecutionContext execCxt ) {
-				return new OpExecutorHeFQUIN(qProc, execCxt);
-			}
-		};
+		final OpExecutorFactory factory = FrawConstants.factory;
 
 		ARQ.init();
+		ARQ.getContext().setIfUndef(FrawConstants.ENGINE_TO_QPROC, new HashMap<>());
+
 		QC.setFactory( ARQ.getContext(), factory );
 	}
 
