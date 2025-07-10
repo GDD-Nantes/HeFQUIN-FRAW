@@ -82,7 +82,7 @@ public class FrawUtils {
 
         for (Iterator<Var> it = binding.vars(); it.hasNext(); ) {
             Var var = it.next();
-            if(!isSpecialVar(var)){
+            if(!isProbaVar(var)){
                 // Processing "normal" variables, aka not probabilities or whatever
                 Node node = binding.get(var);
                 bb.add(var, node);
