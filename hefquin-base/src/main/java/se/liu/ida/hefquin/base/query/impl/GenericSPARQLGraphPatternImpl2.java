@@ -1,10 +1,5 @@
 package se.liu.ida.hefquin.base.query.impl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.jena.atlas.io.IndentedLineBuffer;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -20,7 +15,6 @@ import org.apache.jena.sparql.serializer.FormatterElement;
 import org.apache.jena.sparql.serializer.SerializationContext;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
-
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.query.*;
 import se.liu.ida.hefquin.jenaext.sparql.algebra.OpUtils;
@@ -180,6 +174,16 @@ public class GenericSPARQLGraphPatternImpl2 implements SPARQLGraphPattern
 			tps.add( new TriplePatternImpl(opTriple.getTriple()) );
 			return tps;
 
+		}
+
+		if (op instanceof OpSequence opSequence ) {
+			final Set<TriplePattern> tps = new HashSet<>();
+
+			opSequence.getElements().forEach(subOp -> {
+				tps.addAll(getTPsInPattern(subOp));
+			});
+
+			return tps;
 		}
 
 		throw new UnsupportedOperationException("Getting the triple patterns from arbitrary SPARQL patterns is an open TODO (type of Jena Op in the current case: " + op.getClass().getName() + ").");
