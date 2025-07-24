@@ -2,31 +2,28 @@ PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
 PREFIX ec:     <http://w3id.org/hefquin/engineconf#>
-PREFIX fec:    <http://w3id.org/fraw/engineconf#>
 PREFIX ex:     <http://example.org/>
 
 [] rdf:type ec:HeFQUINEngineConfiguration ;
    ec:fedAccessMgr [
-        ec:javaClassName "se.liu.ida.hefquin.engine.federation.access.impl.FederationAccessManagerWithCache" ;
-        ec:constructorArguments (
-            [ ec:argumentTypeName "se.liu.ida.hefquin.engine.federation.access.FederationAccessManager" ;
-              ec:javaClassName "se.liu.ida.hefquin.engine.federation.access.impl.AsyncFederationAccessManagerImpl" ;
-              ec:constructorArguments ( ec:value:ExecServiceForFedAccess )
-            ]
-            100  # cacheCapacity
-        )
-   ] ;
-   ec:queryProcessor _:b1 ;
-   fec:budget 20 ;
-   fec:subBudget 1 .
+           ec:javaClassName "se.liu.ida.hefquin.federation.access.impl.FederationAccessManagerWithCache" ;
+           ec:constructorArguments (
+               [ ec:argumentTypeName "se.liu.ida.hefquin.federation.access.FederationAccessManager" ;
+                 ec:javaClassName "se.liu.ida.hefquin.federation.access.impl.AsyncFederationAccessManagerImpl" ;
+                 ec:constructorArguments ( ec:value:ExecServiceForFedAccess )
+               ]
+               100  # cacheCapacity
+           )
+      ] ;
+   ec:queryProcessor _:b1 .
 
 _:b1 ec:queryPlanner _:b2 ;
      ec:planCompiler [
-         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.compiler.IteratorBasedSamplingQueryPlanCompilerImpl" ;
+         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.compiler.QueryPlanCompilerForPushBasedExecution" ;
          ec:constructorArguments ( ec:value:QueryProcContext )
      ] ;
      ec:executionEngine [
-         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.execution.FrawExecutionEngineImpl" ;
+         ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.execution.ExecutionEngineImpl" ;
          ec:constructorArguments ( )
      ] .
 
@@ -63,11 +60,11 @@ _:bListOfHeuristics
         #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.RemoveUnnecessaryL2gAndG2l" ]
         #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.PullUpLtgOverUnion" ]
         #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.PullUpLtgOverJoin" ]
-        #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.PushJoinUnderUnionWithRequests" ]
+        [ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.PushJoinUnderUnionWithRequests" ]
         #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.PullUpLtgOverUnion" ]
         #[ ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.RemovePairsOfG2lAndL2g" ]
     ) .
-
+    
 _:bFormulaForSelectivity
     ec:argumentTypeName
         "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.formula.FormulaForComputingSelectivity" ;
@@ -76,12 +73,10 @@ _:bFormulaForSelectivity
         "se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.formula.FmAwareWeightedJoinAndUnboundVariableCount" .
 
 _:bServiceBasedSrcPlanner
-    ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedJOUSourcePlannerImpl" ;
+    ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.FedupBasedSourcePlannerImpl" ;
     ec:constructorArguments ( ec:value:QueryProcContext
                               "summaries/fedshop200-h0"
-                              #"summaries/largerdfbench-h0"
-                              "(e)->\"http://localhost:3030/fedshop200/raw?default-graph-uri=\"+(e)" ) .
-                              #"(e)->\"http://localhost:3331/largerdfbench.jnl/raw?default-graph-uri=\"+(e.replace(\"http://example.com/affymetrix\", \"http://example.org/Affymetrix\").replace(\"http://example.com/chebi\", \"http://example.org/ChEBI\").replace(\"http://example.com/nyt\", \"http://example.org/NYT\").replace(\"http://example.com/geonames\", \"http://example.org/GeoNames\").replace(\"http://example.com/drugbank\", \"http://example.org/DrugBank\").replace(\"http://example.com/LinkedTCGA-M\", \"http://example.org/LinkedTCGA-M\").replace(\"http://example.com/lmdb\", \"http://example.org/LMDB\").replace(\"http://example.com/kegg\", \"http://example.org/KEGG\").replace(\"http://example.com/LinkedTCGA-E\", \"http://example.org/LinkedTCGA-E\").replace(\"http://example.com/LinkedTCGA-A\", \"http://example.org/LinkedTCGA-A\").replace(\"http://example.com/dbpedia\", \"http://example.org/DBPedia-Subset\").replace(\"http://example.com/jamendo\", \"http://example.org/Jamendo\").replace(\"http://example.com/swdf\", \"http://example.org/SWDFood\"))") .
+                              "(e)->\"http://localhost:3030/fedshop200/sparql?default-graph-uri=\"+(e)" ) .
 
 _:bExhaustiveSrcPlanner
     ec:javaClassName "se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ExhaustiveSourcePlannerImpl" ;
@@ -89,7 +84,7 @@ _:bExhaustiveSrcPlanner
 
 _:bArgL2PConverter
     ec:argumentTypeName "se.liu.ida.hefquin.engine.queryplan.utils.LogicalToPhysicalPlanConverter" ;
-    ec:javaClassName    "se.liu.ida.hefquin.engine.queryplan.utils.LogicalToPhysicalSamplingPlanConverterImpl" ;
+    ec:javaClassName    "se.liu.ida.hefquin.engine.queryplan.utils.LogicalToPhysicalPlanConverterImpl" ;
     ec:constructorArguments ( false      # ignorePhysicalOpsForLogicalAddOps
                               false ) .  # ignoreParallelMultiLeftJoin
 _:bNoPhysOptimizer
