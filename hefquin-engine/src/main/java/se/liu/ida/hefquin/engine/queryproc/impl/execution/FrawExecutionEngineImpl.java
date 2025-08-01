@@ -1,19 +1,25 @@
 package se.liu.ida.hefquin.engine.queryproc.impl.execution;
 
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlan;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased.IteratorBasedExecutableSamplingPlanImpl;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionEngine;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryResultSink;
 
-public class FrawExecutionEngineImpl implements ExecutionEngine {
-    // An execution engine designed to execute federated aggregation queries
-    // Queries processed by this engine should be of the shape VALUES SERVICE
+public class FrawExecutionEngineImpl implements ExecutionEngine
+{
+	@Override
+	public ExecutionStats execute( final ExecutablePlan plan, final QueryResultSink resultSink )
+			throws ExecutionException
+	{
+		if(plan instanceof IteratorBasedExecutableSamplingPlanImpl){
+			((IteratorBasedExecutableSamplingPlanImpl) plan).runWithBudget(resultSink);
+		} else {
+			throw new ExecutionException("Unsupported executable plan type: " + plan.getClass().getName());
+		}
 
-    @Override
-    public ExecutionStats execute(ExecutablePlan plan, QueryResultSink resultSink) throws ExecutionException {
-        plan.run(resultSink);
-        return null;
+		return new ExecutionStatsImpl( plan.getStats() );
+	}
 
-    }
 }

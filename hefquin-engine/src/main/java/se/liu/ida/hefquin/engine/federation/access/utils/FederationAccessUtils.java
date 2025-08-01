@@ -6,24 +6,24 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import se.liu.ida.hefquin.base.utils.CompletableFutureUtils;
-import se.liu.ida.hefquin.engine.federation.BRTPFServer;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.Neo4jServer;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
-import se.liu.ida.hefquin.engine.federation.TPFServer;
-import se.liu.ida.hefquin.engine.federation.access.*;
-import se.liu.ida.hefquin.engine.federation.access.impl.req.BRTPFRequestImpl;
-import se.liu.ida.hefquin.engine.federation.access.impl.req.TPFRequestImpl;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRequest;
+import se.liu.ida.hefquin.federation.BRTPFServer;
+import se.liu.ida.hefquin.federation.FederationMember;
+import se.liu.ida.hefquin.federation.Neo4jServer;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
+import se.liu.ida.hefquin.federation.TPFServer;
+import se.liu.ida.hefquin.federation.access.*;
+import se.liu.ida.hefquin.federation.access.impl.req.BRTPFRequestImpl;
+import se.liu.ida.hefquin.federation.access.impl.req.TPFRequestImpl;
 
 public class FederationAccessUtils
 {
-	public static DataRetrievalResponse[] performRequest( final FederationAccessManager fedAccessMgr,
+	public static DataRetrievalResponse<?>[] performRequest( final FederationAccessManager fedAccessMgr,
 	                                                      final LogicalOpRequest<?,?>... reqOps )
 			  throws FederationAccessException
 	{
 		@SuppressWarnings("unchecked")
-		final CompletableFuture<? extends DataRetrievalResponse>[] futures = new CompletableFuture[reqOps.length];
+		final CompletableFuture<? extends DataRetrievalResponse<?>>[] futures = new CompletableFuture[reqOps.length];
 
 		for ( int i = 0; i < reqOps.length; ++i ) {
 			final DataRetrievalRequest req = reqOps[i].getRequest();

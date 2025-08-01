@@ -7,24 +7,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.sparql.core.VarExprList;
+import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementOptional;
 
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl1;
-import se.liu.ida.hefquin.base.query.impl.QueryPatternUtils;
 import se.liu.ida.hefquin.base.query.impl.SPARQLUnionPatternImpl;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
-import se.liu.ida.hefquin.engine.federation.access.SPARQLRequest;
-import se.liu.ida.hefquin.engine.federation.access.impl.req.SPARQLRequestImpl;
-import se.liu.ida.hefquin.engine.federation.access.utils.SPARQLRequestUtils;
+import se.liu.ida.hefquin.base.query.utils.QueryPatternUtils;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlanUtils;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.HeuristicForLogicalOptimization;
+import se.liu.ida.hefquin.federation.FederationMember;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
+import se.liu.ida.hefquin.federation.access.SPARQLRequest;
+import se.liu.ida.hefquin.federation.access.impl.req.SPARQLRequestImpl;
+import se.liu.ida.hefquin.federation.access.utils.SPARQLRequestUtils;
 
 /**
  * Merges subplans that consists of multiple requests to the same federation
@@ -77,128 +79,56 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 
 		// Next, apply the heuristic to the root of the plan if possible.
 		final LogicalOperator rootOp = inputPlan.getRootOperator();
-		if ( rootOp instanceof LogicalOpRequest<?,?> )
+		if ( rootOp instanceof LogicalOpRequest )
 		{
 			// nothing to do here - we are in a leaf node
 		}
-		else if ( rootOp instanceof LogicalOpTPAdd )
+		else if ( rootOp instanceof LogicalOpGPAdd gpAdd )
 		{
 			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
-			if ( childOp instanceof LogicalOpRequest<?,?> ) {
-				final LogicalOpTPAdd tpAdd = (LogicalOpTPAdd) rootOp;
-				final FederationMember fm = tpAdd.getFederationMember();
-				if ( fm.getInterface().supportsBGPRequests() ) {
-					final LogicalOpRequest<?,?> reqOp = (LogicalOpRequest<?,?>) childOp;
-					if ( reqOp.getFederationMember().equals(fm) ) {
-						return mergeGraphPatternIntoSPARQLRequest( tpAdd.getTP(),
-						                                           fm,
-						                                           (SPARQLRequest) reqOp.getRequest() );
-					}
-				}
-			}
-		}
-		else if ( rootOp instanceof LogicalOpBGPAdd )
-		{
-			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
-			if ( childOp instanceof LogicalOpRequest<?,?> ) {
-				final LogicalOpBGPAdd bgpAdd = (LogicalOpBGPAdd) rootOp;
-				final FederationMember fm = bgpAdd.getFederationMember();
-				final LogicalOpRequest<?,?> reqOp = (LogicalOpRequest<?,?>) childOp;
-				if ( reqOp.getFederationMember().equals(fm) ) {
-					return mergeGraphPatternIntoSPARQLRequest( bgpAdd.getBGP(),
-					                                  fm,
-					                                  (SPARQLRequest) reqOp.getRequest() );
-				}
-			}
-		}
-		else if ( rootOp instanceof LogicalOpGPAdd )
-		{
-			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
-			if ( childOp instanceof LogicalOpRequest<?,?> ) {
-				final LogicalOpGPAdd gpAdd = (LogicalOpGPAdd) rootOp;
+			if ( childOp instanceof LogicalOpRequest reqOp ) {
 				final FederationMember fm = gpAdd.getFederationMember();
-				final LogicalOpRequest<?,?> reqOp = (LogicalOpRequest<?,?>) childOp;
-				if ( reqOp.getFederationMember().equals(fm) ) {
-					return mergeGraphPatternIntoSPARQLRequest( gpAdd.getPattern(),
-					                                           fm,
-					                                           (SPARQLRequest) reqOp.getRequest() );
+				if (    fm.getInterface().supportsSPARQLPatternRequests()
+				     && reqOp.getFederationMember().equals(fm) ) {
+					return mergePatternIntoRequest( gpAdd.getPattern(),
+					                                fm,
+					                                (SPARQLRequest) reqOp.getRequest() );
 				}
 			}
 		}
-		else if ( rootOp instanceof LogicalOpTPOptAdd )
+		else if ( rootOp instanceof LogicalOpGPOptAdd gpOptAdd )
 		{
 			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
-			if ( childOp instanceof LogicalOpRequest<?,?> ) {
-				final LogicalOpTPOptAdd tpOptAdd = (LogicalOpTPOptAdd) rootOp;
-				final FederationMember fm = tpOptAdd.getFederationMember();
-				if ( fm.getInterface().supportsSPARQLPatternRequests() ) {
-					final LogicalOpRequest<?,?> reqOp = (LogicalOpRequest<?,?>) childOp;
-					if ( reqOp.getFederationMember().equals(fm) ) {
-						return mergeOptionalPatternsIntoSPARQLRequest( Collections.singletonList(tpOptAdd.getTP()),
-						                                               (SPARQLEndpoint) fm,
-						                                               (SPARQLRequest) reqOp.getRequest() );
-					}
-				}
-			}
-		}
-		else if ( rootOp instanceof LogicalOpBGPOptAdd )
-		{
-			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
-			if ( childOp instanceof LogicalOpRequest<?,?> ) {
-				final LogicalOpBGPOptAdd bgpOptAdd = (LogicalOpBGPOptAdd) rootOp;
-				final FederationMember fm = bgpOptAdd.getFederationMember();
-				if ( fm.getInterface().supportsSPARQLPatternRequests() ) {
-					final LogicalOpRequest<?,?> reqOp = (LogicalOpRequest<?,?>) childOp;
-					if ( reqOp.getFederationMember().equals(fm) ) {
-						return mergeOptionalPatternsIntoSPARQLRequest( Collections.singletonList(bgpOptAdd.getBGP()),
-						                                               (SPARQLEndpoint) fm,
-						                                               (SPARQLRequest) reqOp.getRequest() );
-					}
-				}
-			}
-		}
-		else if ( rootOp instanceof LogicalOpGPOptAdd )
-		{
-			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
-			if ( childOp instanceof LogicalOpRequest<?,?> ) {
-				final LogicalOpGPOptAdd gpOptAdd = (LogicalOpGPOptAdd) rootOp;
+			if ( childOp instanceof LogicalOpRequest reqOp ) {
 				final FederationMember fm = gpOptAdd.getFederationMember();
-				if ( fm.getInterface().supportsSPARQLPatternRequests() ) {
-					final LogicalOpRequest<?,?> reqOp = (LogicalOpRequest<?,?>) childOp;
-					if ( reqOp.getFederationMember().equals(fm) ) {
-						return mergeOptionalPatternsIntoSPARQLRequest( Collections.singletonList(gpOptAdd.getPattern()),
-						                                               (SPARQLEndpoint) fm,
-						                                               (SPARQLRequest) reqOp.getRequest() );
-					}
+				if (    fm.getInterface().supportsSPARQLPatternRequests()
+				     && reqOp.getFederationMember().equals(fm) ) {
+					return mergeOptPatternsIntoRequest( Collections.singletonList(gpOptAdd.getPattern()),
+					                                    (SPARQLEndpoint) fm,
+					                                    (SPARQLRequest) reqOp.getRequest() );
 				}
 			}
 		}
-		else if ( rootOp instanceof LogicalOpFilter )
+		else if ( rootOp instanceof LogicalOpFilter filterOp )
 		{
 			// A filter can be merged into a request operator if that request
 			// is for a SPARQL endpoint.
 			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
-			if ( childOp instanceof LogicalOpRequest<?,?> ) {
-				final LogicalOpRequest<?,?> reqOp = (LogicalOpRequest<?,?>) childOp;
+			if ( childOp instanceof LogicalOpRequest reqOp ) {
 				if ( reqOp.getFederationMember().getInterface().supportsSPARQLPatternRequests() ) {
-					return mergeFilterIntoSPARQLEndpointRequest( (LogicalOpFilter) rootOp,
+					return mergeFilterIntoSPARQLEndpointRequest( filterOp,
 					                                             (SPARQLEndpoint) reqOp.getFederationMember(),
 					                                             (SPARQLRequest) reqOp.getRequest() );
 				}
 			}
 		}
-		else if ( rootOp instanceof LogicalOpBind)
+		else if ( rootOp instanceof LogicalOpBind )
 		{
-			// The BIND clause can be merged into a request operator if that request is for a SPARQL endpoint.
-			final LogicalOperator childOp = rewrittenSubPlans.get(0).getRootOperator();
-			if ( childOp instanceof LogicalOpRequest<?,?> ) {
-				final LogicalOpRequest<?,?> reqOp = (LogicalOpRequest<?,?>) childOp;
-				if ( reqOp.getFederationMember().getInterface().supportsSPARQLPatternRequests() ) {
-					return mergeBindIntoSPARQLEndpointRequest( (LogicalOpBind) rootOp,
-					                                           (SPARQLEndpoint) reqOp.getFederationMember(),
-					                                           (SPARQLRequest) reqOp.getRequest() );
-				}
-			}
+			// nothing to do here - while the BIND clause can be merged into
+			// a request operator if that request is for a SPARQL endpoint,
+			// unlike FILTER, for BIND this only increases the size of the solution
+			// mappings returned from the endpoint. The optimizer should instead
+			// retain the BIND outside the request.
 		}
 		else if (    rootOp instanceof LogicalOpLocalToGlobal
 		          || rootOp instanceof LogicalOpGlobalToLocal )
@@ -212,9 +142,8 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 		{
 			final LogicalOperator childOp1 = rewrittenSubPlans.get(0).getRootOperator();
 			final LogicalOperator childOp2 = rewrittenSubPlans.get(1).getRootOperator();
-			if ( childOp1 instanceof LogicalOpRequest<?,?> && childOp2 instanceof LogicalOpRequest<?,?> ) {
-				final LogicalOpRequest<?,?> reqOp1 = (LogicalOpRequest<?,?>) childOp1;
-				final LogicalOpRequest<?,?> reqOp2 = (LogicalOpRequest<?,?>) childOp2;
+			if (    childOp1 instanceof LogicalOpRequest reqOp1
+			     && childOp2 instanceof LogicalOpRequest reqOp2 ) {
 				final FederationMember fm = reqOp1.getFederationMember();
 				if (    fm.getInterface().supportsSPARQLPatternRequests()
 				     && reqOp2.getFederationMember().equals(fm) ) {
@@ -228,9 +157,8 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 		{
 			final LogicalOperator childOp1 = rewrittenSubPlans.get(0).getRootOperator();
 			final LogicalOperator childOp2 = rewrittenSubPlans.get(1).getRootOperator();
-			if ( childOp1 instanceof LogicalOpRequest<?,?> && childOp2 instanceof LogicalOpRequest<?,?> ) {
-				final LogicalOpRequest<?,?> reqOp1 = (LogicalOpRequest<?,?>) childOp1;
-				final LogicalOpRequest<?,?> reqOp2 = (LogicalOpRequest<?,?>) childOp2;
+			if (    childOp1 instanceof LogicalOpRequest reqOp1
+			     && childOp2 instanceof LogicalOpRequest reqOp2 ) {
 				final FederationMember fm = reqOp1.getFederationMember();
 				if (    fm.getInterface().supportsBGPRequests()
 				     && reqOp2.getFederationMember().equals(fm) ) {
@@ -244,17 +172,16 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 		{
 			final LogicalOperator childOp1 = rewrittenSubPlans.get(0).getRootOperator();
 			final LogicalOperator childOp2 = rewrittenSubPlans.get(1).getRootOperator();
-			if ( childOp1 instanceof LogicalOpRequest<?,?> && childOp2 instanceof LogicalOpRequest<?,?> ) {
-				final LogicalOpRequest<?,?> reqOp1 = (LogicalOpRequest<?,?>) childOp1;
-				final LogicalOpRequest<?,?> reqOp2 = (LogicalOpRequest<?,?>) childOp2;
+			if (    childOp1 instanceof LogicalOpRequest reqOp1
+			     && childOp2 instanceof LogicalOpRequest reqOp2 ) {
 				final FederationMember fm = reqOp1.getFederationMember();
 				if (    fm.getInterface().supportsSPARQLPatternRequests()
 				     && reqOp2.getFederationMember().equals(fm) ) {
 					final SPARQLRequest optRequest = (SPARQLRequest) reqOp1.getRequest(); // the LHS is the
 					final SPARQLGraphPattern optPattern = optRequest.getQueryPattern();   // optional part
-					return mergeOptionalPatternsIntoSPARQLRequest( Collections.singletonList(optPattern),
-					                                               (SPARQLEndpoint) fm,
-					                                               (SPARQLRequest) reqOp2.getRequest() );
+					return mergeOptPatternsIntoRequest( Collections.singletonList(optPattern),
+					                                    (SPARQLEndpoint) fm,
+					                                    (SPARQLRequest) reqOp2.getRequest() );
 				}
 			}
 		}
@@ -327,17 +254,15 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 
 			final Iterator<LogicalPlan> it = rewrittenSubPlans.iterator();
 			final LogicalPlan nonoptSubPlan = it.next();
-			if ( nonoptSubPlan.getRootOperator() instanceof LogicalOpRequest<?,?> ) {
-				final LogicalOpRequest<?,?> nonoptReqOp = (LogicalOpRequest<?,?>) nonoptSubPlan.getRootOperator();
+			if ( nonoptSubPlan.getRootOperator() instanceof LogicalOpRequest nonoptReqOp ) {
 				final FederationMember fm = nonoptReqOp.getFederationMember();
 				if ( fm.getInterface().supportsSPARQLPatternRequests() ) {
 					final List<LogicalPlan> newSubPlans = new ArrayList<>(numberOfSubPlans);
 					final List<SPARQLGraphPattern> optPatterns = new ArrayList<>(numberOfSubPlans);
-					while (it.hasNext() ) {
+					while ( it.hasNext() ) {
 						final LogicalPlan optSubPlan = it.next();
-						if (    optSubPlan.getRootOperator() instanceof LogicalOpRequest<?,?>
-						     && ((LogicalOpRequest<?,?>) optSubPlan.getRootOperator()).getFederationMember().equals(fm) ) {
-							final LogicalOpRequest<?,?> optReqOp = (LogicalOpRequest<?,?>) nonoptSubPlan.getRootOperator();
+						if (    optSubPlan.getRootOperator() instanceof LogicalOpRequest optReqOp
+						     && optReqOp.getFederationMember().equals(fm) ) {
 							final SPARQLRequest optReq = (SPARQLRequest) optReqOp.getRequest();
 							optPatterns.add( optReq.getQueryPattern() );
 						}
@@ -347,7 +272,7 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 
 						if ( ! optPatterns.isEmpty() ) {
 							final SPARQLRequest nonoptReq = (SPARQLRequest) nonoptReqOp.getRequest();
-							return mergeOptionalPatternsIntoSPARQLRequest(optPatterns, (SPARQLEndpoint) fm, nonoptReq);
+							return mergeOptPatternsIntoRequest(optPatterns, (SPARQLEndpoint) fm, nonoptReq);
 						}
 					}
 				}
@@ -372,8 +297,8 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 	public static LogicalPlan mergeFilterIntoSPARQLEndpointRequest( final LogicalOpFilter filterOp,
 	                                                                final SPARQLEndpoint ep,
 	                                                                final SPARQLRequest req ) {
-		final SPARQLGraphPattern mergedPattern = QueryPatternUtils.merge( filterOp.getFilterExpressions(),
-		                                                                  req.getQueryPattern() );
+		final ExprList exprList = filterOp.getFilterExpressions();
+		final SPARQLGraphPattern mergedPattern = req.getQueryPattern().mergeWith(exprList);
 		final SPARQLRequest mergedReq = new SPARQLRequestImpl(mergedPattern);
 		final LogicalOpRequest<?,?> reqOp = new LogicalOpRequest<>(ep, mergedReq);
 		return new LogicalPlanWithNullaryRootImpl(reqOp);
@@ -382,14 +307,14 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 	public static LogicalPlan mergeBindIntoSPARQLEndpointRequest( final LogicalOpBind bindOp,
 	                                                              final SPARQLEndpoint ep,
 	                                                              final SPARQLRequest req ) {
-		final SPARQLGraphPattern mergedPattern = QueryPatternUtils.merge( bindOp.getBindExpressions(),
-		                                                                  req.getQueryPattern() );
+		final VarExprList exprList = bindOp.getBindExpressions();
+		final SPARQLGraphPattern mergedPattern = req.getQueryPattern().mergeWith(exprList);
 		final SPARQLRequest mergedReq = new SPARQLRequestImpl(mergedPattern);
 		final LogicalOpRequest<?,?> reqOp = new LogicalOpRequest<>(ep, mergedReq);
 		return new LogicalPlanWithNullaryRootImpl(reqOp);
 	}
 
-	protected LogicalPlan mergeGraphPatternIntoSPARQLRequest( final SPARQLGraphPattern p,
+	protected LogicalPlan mergePatternIntoRequest( final SPARQLGraphPattern p,
 	                                                          final FederationMember fm,
 	                                                          final SPARQLRequest req ) {
 		final SPARQLRequest mergedReq = SPARQLRequestUtils.merge(req, p);
@@ -420,7 +345,7 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 	                                                  final SPARQLRequest req1,
 	                                                  final SPARQLRequest req2 ) {
 		final SPARQLGraphPattern p1 = req1.getQueryPattern();
-		return mergeGraphPatternIntoSPARQLRequest(p1, fm, req2);
+		return mergePatternIntoRequest(p1, fm, req2);
 	}
 
 	/**
@@ -447,7 +372,7 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 		return plan1;
 	}
 
-	protected LogicalPlan mergeOptionalPatternsIntoSPARQLRequest( final List<SPARQLGraphPattern> optPatterns,
+	protected LogicalPlan mergeOptPatternsIntoRequest( final List<SPARQLGraphPattern> optPatterns,
 	                                                              final SPARQLEndpoint fm,
 	                                                              final SPARQLRequest req ) {
 		assert ! optPatterns.isEmpty();
@@ -489,8 +414,8 @@ public class MergeRequests implements HeuristicForLogicalOptimization
 	                                              final List<LogicalPlan> nonReqSubPlans ) {
 		for ( final LogicalPlan p : subPlans ) {
 			final LogicalOperator rootOp = p.getRootOperator();
-			if ( rootOp instanceof LogicalOpRequest<?,?> ) {
-				final FederationMember fm = ((LogicalOpRequest<?,?>) rootOp).getFederationMember();
+			if ( rootOp instanceof LogicalOpRequest<?,?> reqOp ) {
+				final FederationMember fm = reqOp.getFederationMember();
 				if ( fm.getInterface().supportsBGPRequests() ) {
 					List<LogicalPlan> reqPlansForFM = reqOnlyPlansPerFedMember.get(fm);
 					if ( reqPlansForFM == null ) {

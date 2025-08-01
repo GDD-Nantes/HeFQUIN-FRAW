@@ -1,13 +1,10 @@
 package se.liu.ida.hefquin.engine.wrappers.lpg.conf.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class NodeLabelMappingImpl_AllToLiteralsTest {
 
@@ -26,7 +23,7 @@ public class NodeLabelMappingImpl_AllToLiteralsTest {
 
     @Test
     public void unmapLiteralNodeLabel(){
-        final Node node = NodeFactory.createLiteral("0");
+        final Node node = NodeFactory.createLiteralByValue("0");
         final String resultString = nodeLabelMapping.unmap(node);
         assertNotNull(resultString);
         assertEquals(resultString, "0");
@@ -34,7 +31,7 @@ public class NodeLabelMappingImpl_AllToLiteralsTest {
 
     @Test
     public void nodeLabelIsPossibleResult(){
-        final Node node = NodeFactory.createLiteral("0");
+        final Node node = NodeFactory.createLiteralByValue("0");
         final Node IRINode = NodeFactory.createURI(NSNODELABEL + "0");
         final boolean literalIsPossible = nodeLabelMapping.isPossibleResult(node);
         final boolean IRIIsPossible = nodeLabelMapping.isPossibleResult(IRINode);

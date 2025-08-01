@@ -1,0 +1,16 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+SELECT * WHERE { 
+  	?offer bsbm:product ?localProductXYZ.
+  	?localProductXYZ owl:sameAs bsbm:Product0.
+  	?offer bsbm:vendor ?vendor.
+  	?vendor bsbm:country <http://downlode.org/rdf/iso-3166/countries#US>.
+  	?offer bsbm:deliveryDays ?deliveryDays.
+  	FILTER ( ?deliveryDays <= 3 )
+  	?offer bsbm:price ?price.
+  	?offer bsbm:validTo ?date.
+  	FILTER (?date > "2008-01-01T00:00:00.000Z"^^xsd:dateTime).
+}

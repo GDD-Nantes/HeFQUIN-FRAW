@@ -6,12 +6,11 @@ import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.utils.SolutionMappingUtils;
 import se.liu.ida.hefquin.base.datastructures.SolutionMappingsIndex;
 import se.liu.ida.hefquin.base.datastructures.impl.*;
-import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
+import se.liu.ida.hefquin.base.query.ExpectedVariables;
+import se.liu.ida.hefquin.base.query.utils.ExpectedVariablesUtils;
 import se.liu.ida.hefquin.base.utils.Stats;
-import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultBlock;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecutableOperatorStatsImpl;
-import se.liu.ida.hefquin.engine.queryplan.utils.ExpectedVariablesUtils;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 
 import java.util.*;
@@ -38,6 +37,16 @@ public class ExecOpSymmetricHashJoin extends BinaryExecutableOpBase
 
     protected boolean child1InputComplete = false;
     protected boolean child2InputComplete = false;
+
+    /**
+     * This list is used to collect output solution mappings within each
+     * of the various functions of this implementation. Capturing this
+     * type of intermediate buffer as a member object rather creating
+     * a new version of it over and over again within each function
+     * reduces the number of Java objects that the garbage collector
+     * has to deal with.
+     */
+    final List<SolutionMapping> buffer = new ArrayList<>();
 
     // statistics
     private long numberOfOutputMappingsProduced = 0L;
@@ -84,35 +93,43 @@ public class ExecOpSymmetricHashJoin extends BinaryExecutableOpBase
     }
 
     @Override
-    public int preferredInputBlockSizeFromChild1() {
-        return 1;
-    }
-
-    @Override
-    public int preferredInputBlockSizeFromChild2() {
-        return 1;
-    }
-
-    @Override
     public boolean requiresCompleteChild1InputFirst() {
         return false;
     }
 
     @Override
-    protected void _processBlockFromChild1( final IntermediateResultBlock input, final IntermediateResultElementSink sink, final ExecutionContext execCxt) {
-        for ( final SolutionMapping smL : input.getSolutionMappings() ) {
-            indexForChild1.add(smL);
+    protected void _processInputFromChild1( final SolutionMapping inputSolMap,
+                                            final IntermediateResultElementSink sink,
+                                            final ExecutionContext execCxt ) {
+        buffer.clear();
 
-            final Iterable<SolutionMapping> matchSolMapR = indexForChild2.getJoinPartners(smL);
-            for ( final SolutionMapping smR : matchSolMapR ){
-            	numberOfOutputMappingsProduced++;
-                sink.send(SolutionMappingUtils.merge(smL, smR));
-            }
-        }
+        _processInputSolMap(inputSolMap, indexForChild1, indexForChild2, buffer);
+
+        numberOfOutputMappingsProduced += buffer.size();
+        sink.send(buffer);
+
+        buffer.clear();
     }
 
     @Override
-    protected void _wrapUpForChild1(IntermediateResultElementSink sink, ExecutionContext execCxt) {
+    protected void _processInputFromChild1( final List<SolutionMapping> inputSolMaps,
+                                            final IntermediateResultElementSink sink,
+                                            final ExecutionContext execCxt ) {
+        buffer.clear();
+
+        for ( final SolutionMapping inputSolMap : inputSolMaps ) {
+            _processInputSolMap(inputSolMap, indexForChild1, indexForChild2, buffer);
+        }
+
+        numberOfOutputMappingsProduced += buffer.size();
+        sink.send(buffer);
+
+        buffer.clear();
+    }
+
+    @Override
+    protected void _wrapUpForChild1( final IntermediateResultElementSink sink,
+                                     final ExecutionContext execCxt ) {
         child1InputComplete = true;
 
         if ( child2InputComplete ) {
@@ -121,20 +138,38 @@ public class ExecOpSymmetricHashJoin extends BinaryExecutableOpBase
     }
 
     @Override
-    protected void _processBlockFromChild2(IntermediateResultBlock input, IntermediateResultElementSink sink, ExecutionContext execCxt) {
-        for ( final SolutionMapping smR : input.getSolutionMappings() ) {
-            indexForChild2.add(smR);
+    protected void _processInputFromChild2( final SolutionMapping inputSolMap,
+                                            final IntermediateResultElementSink sink,
+                                            final ExecutionContext execCxt ) {
+        buffer.clear();
 
-            final Iterable<SolutionMapping> matchSolMapL = indexForChild1.getJoinPartners(smR);
-            for ( final SolutionMapping smL : matchSolMapL ){
-            	numberOfOutputMappingsProduced++;
-                sink.send(SolutionMappingUtils.merge(smL, smR));
-            }
-        }
+        _processInputSolMap(inputSolMap, indexForChild2, indexForChild1, buffer);
+
+        numberOfOutputMappingsProduced += buffer.size();
+        sink.send(buffer);
+
+        buffer.clear();
     }
 
     @Override
-    protected void _wrapUpForChild2(IntermediateResultElementSink sink, ExecutionContext execCxt) {
+    protected void _processInputFromChild2( final List<SolutionMapping> inputSolMaps,
+                                            final IntermediateResultElementSink sink,
+                                            final ExecutionContext execCxt ) {
+        buffer.clear();
+
+        for ( final SolutionMapping inputSolMap : inputSolMaps ) {
+            _processInputSolMap(inputSolMap, indexForChild2, indexForChild1, buffer);
+        }
+
+        numberOfOutputMappingsProduced += buffer.size();
+        sink.send(buffer);
+
+        buffer.clear();
+    }
+
+    @Override
+    protected void _wrapUpForChild2( final IntermediateResultElementSink sink,
+                                     final ExecutionContext execCxt ) {
         child2InputComplete = true;
 
         if ( child1InputComplete ) {
@@ -151,6 +186,7 @@ public class ExecOpSymmetricHashJoin extends BinaryExecutableOpBase
         indexForChild1.clear();
         indexForChild2.clear();
     }
+
 	@Override
 	public void resetStats() {
 		super.resetStats();
@@ -163,5 +199,17 @@ public class ExecOpSymmetricHashJoin extends BinaryExecutableOpBase
 		s.put( "numberOfOutputMappingsProduced",  Long.valueOf(numberOfOutputMappingsProduced) );
 		return s;
 	}
+
+    protected static void _processInputSolMap( final SolutionMapping inputSolMap,
+                                               final SolutionMappingsIndex indexForInput,
+                                               final SolutionMappingsIndex indexForProbing,
+                                               final List<SolutionMapping> outputBuffer ) {
+        indexForInput.add(inputSolMap);
+
+        final Iterable<SolutionMapping> matchingSolMaps = indexForProbing.getJoinPartners(inputSolMap);
+        for ( final SolutionMapping matchingSolMap : matchingSolMaps ) {
+            outputBuffer.add( SolutionMappingUtils.merge(inputSolMap, matchingSolMap) );
+        }
+    }
 
 }

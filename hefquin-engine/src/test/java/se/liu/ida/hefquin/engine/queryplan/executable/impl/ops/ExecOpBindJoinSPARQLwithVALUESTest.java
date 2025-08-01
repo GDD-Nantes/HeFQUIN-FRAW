@@ -5,14 +5,11 @@ import java.util.concurrent.ExecutorService;
 import org.apache.jena.graph.Graph;
 import org.junit.Test;
 
+import se.liu.ida.hefquin.base.query.ExpectedVariables;
 import se.liu.ida.hefquin.base.query.TriplePattern;
-import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.engine.queryplan.executable.UnaryExecutableOp;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpTPAdd;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpTPOptAdd;
-import se.liu.ida.hefquin.engine.queryplan.physical.impl.PhysicalOpBindJoinWithVALUES;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
 
 public class ExecOpBindJoinSPARQLwithVALUESTest extends TestsForTPAddAlgorithms<SPARQLEndpoint>
 {
@@ -44,6 +41,16 @@ public class ExecOpBindJoinSPARQLwithVALUESTest extends TestsForTPAddAlgorithms<
 	@Test
 	public void tpWithoutJoinVariable_OuterJoin() throws ExecutionException {
 		_tpWithoutJoinVariable(true);
+	}
+
+	@Test
+	public void tpWithAndWithoutJoinVariable_InnerJoin() throws ExecutionException {
+		_tpWithAndWithoutJoinVariable(false);
+	}
+
+	@Test
+	public void tpWithAndWithoutJoinVariable_OuterJoin() throws ExecutionException {
+		_tpWithAndWithoutJoinVariable(true);
 	}
 
 	@Test
@@ -111,17 +118,13 @@ public class ExecOpBindJoinSPARQLwithVALUESTest extends TestsForTPAddAlgorithms<
 	                                                 final SPARQLEndpoint fm,
 	                                                 final ExpectedVariables expectedVariables,
 	                                                 final boolean useOuterJoinSemantics ) {
-		final PhysicalOpBindJoinWithVALUES pop;
-		if ( useOuterJoinSemantics ) {
-			final LogicalOpTPOptAdd tpAdd = new LogicalOpTPOptAdd(fm, tp);
-			pop = new PhysicalOpBindJoinWithVALUES(tpAdd);
-		}
-		else {
-			final LogicalOpTPAdd tpAdd = new LogicalOpTPAdd(fm, tp);
-			pop = new PhysicalOpBindJoinWithVALUES(tpAdd);
-		}
 
-		return pop.createExecOp(false, expectedVariables);
+		return new ExecOpBindJoinSPARQLwithVALUES( tp,
+		                                           fm,
+		                                           expectedVariables,
+		                                           useOuterJoinSemantics,
+		                                           ExecOpBindJoinSPARQLwithVALUES.DEFAULT_BATCH_SIZE,
+		                                           false );
 	}
 
 }

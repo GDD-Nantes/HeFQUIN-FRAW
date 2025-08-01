@@ -1,19 +1,15 @@
 package se.liu.ida.hefquin.engine.wrappers.lpg.conf.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.junit.Test;
+import se.liu.ida.hefquin.engine.wrappers.lpg.impl.exceptions.UnSupportedNodeLabelException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
-import org.junit.Test;
-
-import se.liu.ida.hefquin.engine.wrappers.lpg.impl.exceptions.UnSupportedNodeLabelException;
+import static org.junit.Assert.*;
 
 public class CompositeNodeLabelMappingImplTest {
 
@@ -56,7 +52,7 @@ public class CompositeNodeLabelMappingImplTest {
         assertNotNull(resultString);
         assertEquals(resultString, "0");
 
-        node = NodeFactory.createLiteral("three");
+        node = NodeFactory.createLiteralByValue("three");
         resultString = nodeLabelMapping.unmap(node);
         assertNotNull(resultString);
         assertEquals(resultString, "3");
@@ -79,7 +75,7 @@ public class CompositeNodeLabelMappingImplTest {
         boolean IRIIsPossible = nodeLabelMapping.isPossibleResult(node);
         assertTrue(IRIIsPossible);
 
-        node = NodeFactory.createLiteral("three");
+        node = NodeFactory.createLiteralByValue("three");
         IRIIsPossible = nodeLabelMapping.isPossibleResult(node);
         assertTrue(IRIIsPossible);
 
@@ -112,7 +108,7 @@ public class CompositeNodeLabelMappingImplTest {
      */
     @Test(expected = UnSupportedNodeLabelException.class)
     public void unmapNodeLabelWithInvalidLiteral(){
-        final Node node = NodeFactory.createLiteral("test");
+        final Node node = NodeFactory.createLiteralByValue("test");
         nodeLabelMapping.unmap(node);
     }
 

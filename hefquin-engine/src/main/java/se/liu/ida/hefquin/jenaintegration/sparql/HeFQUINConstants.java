@@ -1,6 +1,5 @@
 package se.liu.ida.hefquin.jenaintegration.sparql;
 
-import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.util.Symbol;
 
 public class HeFQUINConstants {
@@ -8,8 +7,5 @@ public class HeFQUINConstants {
 
 	public static final Symbol sysEngine                  = Symbol.create(systemVarNS+"engine");
 
-	public static final Symbol sysQueryProcStats          = Symbol.create(systemVarNS+"queryProcStats");
-	public static final Symbol sysQueryProcExceptions     = Symbol.create(systemVarNS+"queryProcExceptions");
-
-	public static final Var MAPPING_PROBABILITY           = Var.alloc("probabilityOfRetrievingRestOfMapping");
+	public static final Symbol sysQProcStatsAndExceptions = Symbol.create(systemVarNS+"queryProcStatsAndExceptions");
 }

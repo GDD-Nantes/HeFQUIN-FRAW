@@ -7,12 +7,13 @@ import java.util.concurrent.CompletableFuture;
 
 import org.apache.jena.sparql.core.Var;
 
+import se.liu.ida.hefquin.base.query.utils.ExpectedVariablesUtils;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalOperatorForLogicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
-import se.liu.ida.hefquin.engine.queryplan.utils.ExpectedVariablesUtils;
 import se.liu.ida.hefquin.engine.queryplan.utils.PhysicalPlanFactory;
+import se.liu.ida.hefquin.engine.queryplan.utils.PhysicalPlanUtils;
 import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.CardinalityEstimation;
 
 public class VarSpecificCardinalityEstimationImpl implements VarSpecificCardinalityEstimation
@@ -70,16 +71,8 @@ public class VarSpecificCardinalityEstimationImpl implements VarSpecificCardinal
 		if ( rootOp instanceof LogicalOpRequest ) {
 			return cardEstimator.initiateCardinalityEstimation(plan);
 		}
-		else if ( rootOp instanceof LogicalOpTPAdd ) {
-			final PhysicalPlan reqTP = PhysicalPlanFactory.extractRequestAsPlan( (LogicalOpTPAdd) rootOp );
-			return _initiateJoinCardinalityEstimation( plan.getSubPlan(0), reqTP, v );
-		}
-		else if ( rootOp instanceof LogicalOpBGPAdd ) {
-			final PhysicalPlan reqBGP = PhysicalPlanFactory.extractRequestAsPlan( (LogicalOpBGPAdd) rootOp );
-			return _initiateJoinCardinalityEstimation( plan.getSubPlan(0), reqBGP, v );
-		}
-		else if ( rootOp instanceof LogicalOpGPAdd ) {
-			final PhysicalPlan reqGP = PhysicalPlanFactory.extractRequestAsPlan( (LogicalOpGPAdd) rootOp );
+		else if ( rootOp instanceof LogicalOpGPAdd gpAdd ) {
+			final PhysicalPlan reqGP = PhysicalPlanFactory.extractRequestAsPlan(gpAdd);
 			return _initiateJoinCardinalityEstimation( plan.getSubPlan(0), reqGP, v );
 		}
 		else if ( rootOp instanceof LogicalOpLocalToGlobal || rootOp instanceof LogicalOpGlobalToLocal ){
@@ -105,7 +98,7 @@ public class VarSpecificCardinalityEstimationImpl implements VarSpecificCardinal
 		final CompletableFuture<Integer> f1 = cardEstimator.initiateCardinalityEstimation(plan1);
 		final CompletableFuture<Integer> f2 = cardEstimator.initiateCardinalityEstimation(plan2);
 
-		final Set<Var> allJoinVars = ExpectedVariablesUtils.intersectionOfAllVariables( plan1, plan2 );
+		final Set<Var> allJoinVars = PhysicalPlanUtils.intersectionOfAllVariables( plan1, plan2 );
 		if ( allJoinVars.contains(v) ) {
 			// Create a CompletableFuture that will complete once
 			// both f1 and f2 have completed and, then, will combine
@@ -136,7 +129,7 @@ public class VarSpecificCardinalityEstimationImpl implements VarSpecificCardinal
 		CompletableFuture<Integer> f = CompletableFuture.completedFuture(0);
 		boolean containVar = false;
 		for ( int i = 0; i < plan.numberOfSubPlans(); i++ ) {
-			final Set<Var> vars = ExpectedVariablesUtils.unionOfAllVariables( plan.getSubPlan(i) );
+			final Set<Var> vars = PhysicalPlanUtils.unionOfAllVariables( plan.getSubPlan(i) );
 			if ( vars.contains(v) ) {
 				final CompletableFuture<Integer> f1 = initiateCardinalityEstimation( plan.getSubPlan(i), v );
 				f = f.thenCombine(f1, (c, c1) -> (c + c1) < 0 ? Integer.MAX_VALUE : (c + c1));

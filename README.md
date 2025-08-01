@@ -1,28 +1,60 @@
+# HeFQUIN-FRAW
+HeFQUIN-FRAW allows to execute random walks across federations of SPARQL endpoints that also support random walks,
+like endpoints running [[RAW x Passage][https://github.com/passage-org/passage]].
+
+HeFQUIN-FRAW is an extension of HeFQUIN. 
+This repository started as a clone of the [[HeFQUIN github repository][https://github.com/LiUSemWeb/HeFQUIN]].
+Below, you can find information regarding the HeFQUIN base engine.
+
 # HeFQUIN
-HeFQUIN is a query federation engine for heterogeneous federations of graph data sources (e.g, federated knowledge graphs) that is currently under development by [the Semantic Web research group at Linköping University](https://www.ida.liu.se/research/semanticweb/).
+HeFQUIN is a **query federation engine for heterogeneous federations of graph data sources (e.g, federated knowledge graphs)** that is currently under development by [the Semantic Web research group at Linköping University](https://www.ida.liu.se/research/semanticweb/).
 
-### Features of HeFQUIN
-* Support for all features of SPARQL 1.1 (where basic graph patterns, group graph patterns (AND), union graph patterns, optional patterns, and filters are supported natively within the HeFQUIN engine, and the other features of SPARQL are supported through integration of the HeFQUIN engine into Apache Jena)
-* So far, support for SPARQL endpoints, TPF, and brTPF
-  * [work on openCypher Property Graphs ongoing](https://github.com/LiUSemWeb/HeFQUIN/tree/main/src/main/java/se/liu/ida/hefquin/engine/wrappers/lpgwrapper)
-  * [work on GraphQL APIs ongoing](https://github.com/LiUSemWeb/HeFQUIN/tree/main/src/main/java/se/liu/ida/hefquin/engine/wrappers/graphqlwrapper)
-* Initial support for vocabulary mappings
-* [Heuristics-based logical query optimizer](https://github.com/LiUSemWeb/HeFQUIN/wiki/Heuristics-Based-Logical-Query-Optimizer)
-* Several different [cost-based physical optimizers](https://github.com/LiUSemWeb/HeFQUIN/wiki/Cost-Based-Physical-Query-Optimizers) (greedy, dynamic programming, simulated annealing, randomized iterative improvement)
-* Relevant [physical operators](https://github.com/LiUSemWeb/HeFQUIN/wiki/Physical-Operators); e.g., hash join, symmetric hash join (SHJ), request-based nested-loops join (NLJ), several variations of bind joins (brTPF-based, UNION-based, FILTER-based, VALUES-based)
-* Two execution models (push-based and pull-based)
-* Features for getting an understanding of the internals of the engine
-  * printing of logical and physical plans
-  * programmatic access to execution statistics on the level of individual operators and data structures, as well as printing of these statistics from the CLI
-* 380+ unit tests
+For detailed information about HeFQUIN, refer to the **Website at [https://liusemweb.github.io/](https://liusemweb.github.io/)**, where you can find
+* a list of the [features of HeFQUIN](https://liusemweb.github.io/HeFQUIN/doc/features.html),
+* a detailed [user documentation](https://liusemweb.github.io/HeFQUIN/doc/index.html),
+* a list of [related research publications](https://liusemweb.github.io/HeFQUIN/research),
+* information [for contributors](https://liusemweb.github.io/HeFQUIN/devdoc),
+  and more.
 
-### Current Limitations
-* HeFQUIN does not yet have a source selection component. All subpatterns of the queries given to HeFQUIN need to be wrapped in SERVICE clauses.
+## Quick Guide
+### Using HeFQUIN-FRAW as a Service
+* **_Starting the service using the command line program_**
+  * Clone the hefquin-fraw repository and checkout the "provenance" branch.
+    ```bash
+      git clone git@github.com:GDD-Nantes/HeFQUIN-FRAW.git
+      cd HeFQUIN-FRAW
+      git pull
+    ```
+    
+  * Generate the JAR file
+    ```bash
+      mvn install -Dmaven.test.skip -f pom.xml
+    ```
 
-### Publications related to HeFQUIN
-* Sijin Cheng and Olaf Hartig: **[FedQPL: A Language for Logical Query Plans over Heterogeneous Federations of RDF Data Sources](https://olafhartig.de/files/ChengHartig_FedQPL_iiWAS2020_Extended.pdf)**. In _Proceedings of the 22nd International Conference on Information Integration and Web-based Applications & Services (iiWAS)_, 2020.
-* Sijin Cheng and Olaf Hartig: **[Source Selection for SPARQL Endpoints: Fit for Heterogeneous Federations of RDF Data Sources?](https://olafhartig.de/files/ChengHartig_QuWeDa2022.pdf)**. In _Proceedings of the 6th Workshop on Storing, Querying and Benchmarking Knowledge Graphs (QuWeDa)_, 2022.
-* Sijin Cheng and Olaf Hartig: **[A Cost Model to Optimize Queries over Heterogeneous Federations of RDF Data Sources](https://olafhartig.de/files/ChengHartig_CostModel_DMKG2023.pdf)**. In _Proceedings of the 1st International Workshop on Data Management for Knowledge Graphs (DMKG)_, 2023.
-  * repo related to the experiments in this paper: [LiUSemWeb/HeFQUIN-DMKG2023-Experiments](https://github.com/LiUSemWeb/HeFQUIN-DMKG2023-Experiments)
-* Sijin Cheng, Sebastian Ferrada, and Olaf Hartig: **[Considering Vocabulary Mappings in Query Plans for Federations of RDF Data Sources](https://olafhartig.de/files/ChengEtAL_VocabMappings_CoopIS2023.pdf)**. In _Proceedings of the 29th International Conference on Cooperative Information Systems (CoopIS)_, 2023.
-  * repo related to the experiments in this paper: [LiUSemWeb/HeFQUIN-VocabMappingsExperiments](https://github.com/LiUSemWeb/HeFQUIN-VocabMappingsExperiments)
+  * Start the server using the hefquin-server binary. 
+    ```bash
+      ./bin/hefquin-server \
+        --port=8080 \
+        --path="" \
+        --federationDescription fedshop200.ttl \
+        --confDescr ExampleEngineConf.ttl \
+        --frawConfDescr f200_UOJ.ttl
+    ```
+    where 
+    * the `--port` argument specifies the port at which the service shall listen and
+    * the `--path` argument specifies the custom URL path serving the different endpoints
+    * the `--federationDescription` argument refers to a file (e.g., `fedshop200.ttl`) that contains an [RDF-based description of your federation](https://liusemweb.github.io/HeFQUIN/doc/federation_description.html).
+    * the `--confDescr` argument refers to a file (e.g., `f200_eval.ttl`) that contains an RDF-based description of the engine used to process queries sent to the SPARQL endpoint.
+    * the `--frawConfDescr` argument refers to a file (e.g., `f200_UOJ.ttl`) that contains an RDF-based description of the engine used to process queries sent to the sampling endpoint.
+  
+    This configuration assumes a federation of 200 endpoints as described in [[FedShop][https://github.com/GDD-Nantes/FedShop]] that all offer to process queries with random walks.
+    The easiest way to set up such a federation is using [[RAW x Passage][https://github.com/passage-org/passage]].
+
+* **_Interacting with the HeFQUIN-FRAW Service_**
+  * After starting up the HeFQUIN-FRAW service, you can first test it test by opening [`http://localhost:8080/`](http://localhost:8080/) in a Web browser (assuming that you have started the service at port 8080 and without specifying a custom path).
+  * You can interact with the service like with a SPARQL endpoint (the endpoint should be exposed at `http://localhost:8080/sparql`). For instance, by using the command-line tool [`curl`](https://curl.se/), you may execute the following command to issue the query in a file called `ExampleQuery.rq`.
+    ```bash
+    curl -X POST http://localhost:8080/sparql --data-binary @query.sparql -H 'Content-Type: application/sparql-query'
+    ```
+  * Our [documentation page about interacting with a HeFQUIN service](https://liusemweb.github.io/HeFQUIN/doc/hefquin_service.html) provides more details.
+  * Moreover, you can read more about the [queries and query features that you can use](https://liusemweb.github.io/HeFQUIN/doc/queries.html).

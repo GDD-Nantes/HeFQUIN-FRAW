@@ -1,0 +1,109 @@
+package se.liu.ida.hefquin.engine.queryproc.impl;
+
+import se.liu.ida.hefquin.base.query.Query;
+import se.liu.ida.hefquin.base.utils.Pair;
+import se.liu.ida.hefquin.base.utils.StatsPrinter;
+import se.liu.ida.hefquin.engine.QueryProcessingStatsAndExceptions;
+import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlan;
+import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
+import se.liu.ida.hefquin.engine.queryproc.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Simple implementation of {@link QueryProcessor}.
+ */
+public class SamplingQueryProcessorImpl implements SamplingQueryProcessor
+{
+	protected final QueryPlanner planner;
+	protected final SamplingQueryPlanCompiler planCompiler;
+	protected final ExecutionEngine execEngine;
+	protected final QueryProcContext ctxt;
+
+	public SamplingQueryProcessorImpl(final QueryPlanner planner,
+                                      final SamplingQueryPlanCompiler planCompiler,
+                                      final ExecutionEngine execEngine,
+                                      final QueryProcContext ctxt ) {
+		assert planner != null;
+		assert planCompiler != null;
+		assert execEngine != null;
+		assert ctxt != null;
+
+		this.planner = planner;
+		this.planCompiler = planCompiler;
+		this.execEngine = execEngine;
+		this.ctxt = ctxt;
+	}
+
+
+	@Override
+	public QueryProcessingStatsAndExceptions processQuery(Query query, QueryResultSink resultSink) throws QueryProcException {
+		throw new UnsupportedOperationException("Can't process query without a budget");
+	}
+
+	@Override
+	public QueryPlanner getPlanner() { return planner; }
+
+	@Override
+	public QueryPlanCompiler getPlanCompiler() { return planCompiler; }
+
+	@Override
+	public ExecutionEngine getExecutionEngine() { return execEngine; }
+
+	@Override
+	public void shutdown() {
+		// TODO :
+	}
+
+	@Override
+	public QueryProcessingStatsAndExceptions processQuery( final Query query, final QueryResultSink resultSink, int numberOfWalks )
+			throws QueryProcException
+	{
+		boolean skipExecution = ctxt.skipExecution();
+		final long t1 = System.currentTimeMillis();
+		final Pair<PhysicalPlan, QueryPlanningStats> qepAndStats = planner.createPlan(query);
+
+		skipExecution = Objects.isNull(qepAndStats.object1);
+
+		final long t2 = System.currentTimeMillis();
+
+		final long t3, t4;
+		final ExecutablePlan prg;
+		final ExecutionStats execStats;
+		final List<Exception> exceptionsCaughtDuringExecution;
+
+		if ( skipExecution ) {
+			t3 = System.currentTimeMillis();
+			t4 = System.currentTimeMillis();
+			prg = null;
+			execStats = null;
+			exceptionsCaughtDuringExecution = Collections.emptyList();
+		}
+		else {
+			prg = planCompiler.compile( qepAndStats.object1, numberOfWalks );
+
+			t3 = System.currentTimeMillis();
+			execStats = execEngine.execute(prg, resultSink);
+
+			t4 = System.currentTimeMillis();
+			exceptionsCaughtDuringExecution = prg.getExceptionsCaughtDuringExecution();
+		}
+
+		final QueryProcessingStatsAndExceptions queryProcessingStatsAndExceptions = new QueryProcessingStatsAndExceptionsImpl(
+				t4-t1,
+				t2-t1,
+				t3-t2,
+				t4-t3,
+				qepAndStats.object2,
+				execStats,
+				exceptionsCaughtDuringExecution );
+
+		if ( ctxt.isExperimentRun() ) {
+			StatsPrinter.print( queryProcessingStatsAndExceptions, System.out, true );
+		}
+
+		return queryProcessingStatsAndExceptions;
+	}
+}

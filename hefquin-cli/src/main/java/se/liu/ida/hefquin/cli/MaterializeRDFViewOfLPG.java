@@ -3,7 +3,6 @@ package se.liu.ida.hefquin.cli;
 import arq.cmdline.CmdARQ;
 import arq.cmdline.ModLangOutput;
 import arq.cmdline.ModTime;
-
 import org.apache.jena.atlas.RuntimeIOException;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
@@ -18,26 +17,17 @@ import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFWriter;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.graph.GraphFactory;
-
-import se.liu.ida.hefquin.cli.modules.ModNeo4jEndpoint;
 import se.liu.ida.hefquin.cli.modules.ModLPG2RDFConfiguration;
+import se.liu.ida.hefquin.cli.modules.ModNeo4jEndpoint;
 import se.liu.ida.hefquin.engine.wrappers.lpg.conf.LPG2RDFConfiguration;
 import se.liu.ida.hefquin.engine.wrappers.lpg.conn.Neo4jConnectionFactory;
 import se.liu.ida.hefquin.engine.wrappers.lpg.conn.Neo4jConnectionFactory.Neo4jConnection;
 import se.liu.ida.hefquin.engine.wrappers.lpg.data.PropertyMap;
 import se.liu.ida.hefquin.engine.wrappers.lpg.data.TableRecord;
 import se.liu.ida.hefquin.engine.wrappers.lpg.data.Value;
-import se.liu.ida.hefquin.engine.wrappers.lpg.data.impl.ArrayValue;
-import se.liu.ida.hefquin.engine.wrappers.lpg.data.impl.LPGEdgeValue;
-import se.liu.ida.hefquin.engine.wrappers.lpg.data.impl.LPGNode;
-import se.liu.ida.hefquin.engine.wrappers.lpg.data.impl.LPGNodeValue;
-import se.liu.ida.hefquin.engine.wrappers.lpg.data.impl.LiteralValue;
+import se.liu.ida.hefquin.engine.wrappers.lpg.data.impl.*;
 import se.liu.ida.hefquin.engine.wrappers.lpg.query.CypherQuery;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.AliasedExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.AllLabelsExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.CypherVar;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.TypeExpression;
-import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.VariableIDExpression;
+import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.expression.*;
 import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.match.EdgeMatchClause;
 import se.liu.ida.hefquin.engine.wrappers.lpg.query.impl.match.NodeMatchClause;
 import se.liu.ida.hefquin.engine.wrappers.lpg.utils.CypherQueryBuilder;
@@ -339,7 +329,7 @@ public class MaterializeRDFViewOfLPG extends CmdARQ
 			final RDFDatatype dt = TypeMapper.getInstance().getTypeByValue( lpv.getValue() );
 			final Node lit;
 			if ( dt == null )
-				lit = NodeFactory.createLiteral( lpv.toString() );
+				lit = NodeFactory.createLiteralString( lpv.toString() );
 			else
 				lit = NodeFactory.createLiteralByValue( lpv.getValue(), dt );
 

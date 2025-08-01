@@ -1,20 +1,17 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Test;
-
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutableOperatorStats;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.BaseForExecOps;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class ResultElementIterWithNullaryExecOpTest
 {
@@ -67,8 +64,8 @@ public class ResultElementIterWithNullaryExecOpTest
 
 	protected static ResultElementIterator createIteratorForTests( SolutionMapping... elements ) {
 		return new ResultElementIterWithNullaryExecOp(
-						new NullaryExecutableOpForTest(elements),
-						TestUtils.createExecContextForTests() );
+				new NullaryExecutableOpForTest(elements),
+				TestUtils.createExecContextForTests() );
 	}
 
 	protected static class NullaryExecutableOpForTest extends BaseForExecOps implements NullaryExecutableOp
@@ -87,12 +84,10 @@ public class ResultElementIterWithNullaryExecOpTest
 
 		@Override
 		public void execute( final IntermediateResultElementSink sink,
-		                     final ExecutionContext execCxt )
+							 final ExecutionContext execCxt )
 		{
 			if ( list != null ) {
-				for ( final SolutionMapping sm : list ) {
-					sink.send(sm);
-				}
+				sink.send(list);
 			}
 		}
 

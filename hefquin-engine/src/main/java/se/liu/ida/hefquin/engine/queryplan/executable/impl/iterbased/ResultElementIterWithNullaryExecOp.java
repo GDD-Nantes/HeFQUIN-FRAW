@@ -9,7 +9,7 @@ public class ResultElementIterWithNullaryExecOp extends ResultElementIterBase
 	protected final MyOpRunnerThread opRunnerThread;
 
 	public ResultElementIterWithNullaryExecOp( final NullaryExecutableOp op,
-	                                           final ExecutionContext execCxt )
+											   final ExecutionContext execCxt )
 	{
 		super(execCxt);
 
@@ -49,5 +49,5 @@ public class ResultElementIterWithNullaryExecOp extends ResultElementIterBase
 		}
 
 	} // end of class OpRunnerThread
-	
+
 }

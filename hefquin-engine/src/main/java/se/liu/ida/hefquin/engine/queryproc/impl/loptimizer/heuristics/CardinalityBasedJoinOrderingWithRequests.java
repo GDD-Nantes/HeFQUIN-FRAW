@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import se.liu.ida.hefquin.engine.federation.access.CardinalityResponse;
-import se.liu.ida.hefquin.engine.federation.access.FederationAccessException;
 import se.liu.ida.hefquin.engine.federation.access.utils.FederationAccessUtils;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
+import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpBind;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpFilter;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpLocalToGlobal;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpMultiwayUnion;
@@ -16,6 +15,9 @@ import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRequest;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpUnion;
 import se.liu.ida.hefquin.engine.queryproc.LogicalOptimizationException;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
+import se.liu.ida.hefquin.federation.access.CardinalityResponse;
+import se.liu.ida.hefquin.federation.access.FederationAccessException;
+import se.liu.ida.hefquin.federation.access.UnsupportedOperationDueToRetrievalError;
 
 /**
  * This class is an implementation of {@link CardinalityBasedJoinOrderingBase}
@@ -92,7 +94,7 @@ public class CardinalityBasedJoinOrderingWithRequests extends CardinalityBasedJo
 				// and, thus, there is only one cardinality response to be
 				// considered, simply use the cardinality of that cardinality
 				// response for the result.
-				result[i] = resps[respsCounter++].getCardinality();
+				result[i] = computeEffectiveCardinality( resps[respsCounter++] );
 			}
 			else {
 				// Otherwise, aggregate the cardinalities of the cardinality
@@ -107,7 +109,7 @@ public class CardinalityBasedJoinOrderingWithRequests extends CardinalityBasedJo
 						continue;
 					}
 
-					final int c = resps[respsCounter++].getCardinality();
+					final int c = computeEffectiveCardinality( resps[respsCounter++] );
 					aggregatedCardinality += (c == Integer.MAX_VALUE) ? Integer.MAX_VALUE : c;
 					if ( aggregatedCardinality < 0 ) aggregatedCardinality = Integer.MAX_VALUE;
 				}
@@ -153,15 +155,15 @@ public class CardinalityBasedJoinOrderingWithRequests extends CardinalityBasedJo
 	protected List<LogicalOpRequest<?,?>> extractAllRequestOps( final LogicalPlan plan ) {
 		final LogicalOperator rootOp = plan.getRootOperator();
 
-		if ( rootOp instanceof LogicalOpRequest ) {
-			return Arrays.asList( (LogicalOpRequest<?,?>) rootOp );
+		if ( rootOp instanceof LogicalOpRequest reqOp ) {
+			return Arrays.asList(reqOp);
 		}
 		else if ( rootOp instanceof LogicalOpFilter )
 		{
 			final LogicalPlan subplan = plan.getSubPlan(0);
 			final LogicalOperator subrootOp = subplan.getRootOperator();
-			if ( subrootOp instanceof LogicalOpRequest ) {
-				return Arrays.asList( (LogicalOpRequest<?,?>) subrootOp );
+			if ( subrootOp instanceof LogicalOpRequest subReqOp ) {
+				return Arrays.asList(subReqOp);
 			}
 			if ( subrootOp instanceof LogicalOpLocalToGlobal ) {
 				return extractAllRequestOps(subplan);
@@ -170,12 +172,16 @@ public class CardinalityBasedJoinOrderingWithRequests extends CardinalityBasedJo
 				throw new IllegalArgumentException("Unsupported type of subplan under filter (" + subrootOp.getClass().getName() + ")");
 			}
 		}
+		else if ( rootOp instanceof LogicalOpBind )
+		{
+			return extractAllRequestOps( plan.getSubPlan(0) );
+		}
 		else if ( rootOp instanceof LogicalOpLocalToGlobal )
 		{
 			final LogicalPlan subplan = plan.getSubPlan(0);
 			final LogicalOperator subrootOp = subplan.getRootOperator();
-			if ( subrootOp instanceof LogicalOpRequest ) {
-				return Arrays.asList( (LogicalOpRequest<?,?>) subrootOp );
+			if ( subrootOp instanceof LogicalOpRequest subReqOp ) {
+				return Arrays.asList(subReqOp);
 			}
 			if ( subrootOp instanceof LogicalOpFilter ) {
 				return extractAllRequestOps(subplan);
@@ -199,4 +205,22 @@ public class CardinalityBasedJoinOrderingWithRequests extends CardinalityBasedJo
 		}
 	}
 
+	/**
+	 * TODO: Fallback behavior? Returning Integer.MAX_VALUE for now
+	 *
+	 * Computes the cardinality from the given {@link CardinalityResponse}.
+	 *
+	 * If retrieving the cardinality fails due to an {@link UnsupportedOperationDueToRetrievalError}, this method
+	 * returns {@link Integer#MAX_VALUE} as a fallback.
+	 *
+	 * @param resp the cardinality response to extract the cardinality from
+	 * @return the cardinality, or {@code Integer.MAX_VALUE} if retrieval is unsupported
+	 */
+	private int computeEffectiveCardinality( final CardinalityResponse resp ) {
+		try {
+			return resp.getCardinality();
+		} catch ( UnsupportedOperationDueToRetrievalError e ) {
+			return Integer.MAX_VALUE;
+		}
+	}
 }

@@ -3,10 +3,10 @@ package se.liu.ida.hefquin.engine.queryproc.impl.loptimizer.heuristics.utils;
 import org.apache.jena.graph.Node;
 
 import se.liu.ida.hefquin.base.query.TriplePattern;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
 import se.liu.ida.hefquin.engine.queryplan.utils.LogicalOpUtils;
+import se.liu.ida.hefquin.federation.FederationMember;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
 
 import java.util.*;
@@ -47,9 +47,9 @@ public class QueryAnalyzer {
     protected Set<TriplePattern> extractTPsAndRecordFms( final LogicalPlan plan ) {
         final LogicalOperator lop = plan.getRootOperator();
 
-        if( lop instanceof LogicalOpRequest) {
-            fms.add( ((LogicalOpRequest<?, ?>) lop).getFederationMember() );
-            return LogicalOpUtils.getTriplePatternsOfReq( (LogicalOpRequest<?, ?>) lop);
+        if ( lop instanceof LogicalOpRequest reqOp ) {
+            fms.add( reqOp.getFederationMember() );
+            return LogicalOpUtils.getTriplePatternsOfReq(reqOp);
         }
         else if ( lop instanceof LogicalOpMultiwayUnion || lop instanceof LogicalOpUnion ) {
             final int numOfSubPlans = plan.numberOfSubPlans();
@@ -58,10 +58,12 @@ public class QueryAnalyzer {
             for ( int i = 0; i < numOfSubPlans; i++ ) {
                 final LogicalOperator subLop = plan.getSubPlan(i).getRootOperator();
 
-                if ( subLop instanceof LogicalOpRequest ) {
-                    fms.add( ((LogicalOpRequest<?, ?>) subLop).getFederationMember() );
-                    final Set<TriplePattern> currentTPs = LogicalOpUtils.getTriplePatternsOfReq( (LogicalOpRequest<?, ?>) subLop);
-                    if( !currentTPs.isEmpty() && previousTPs != null && !currentTPs.equals( previousTPs) ) {
+                if ( subLop instanceof LogicalOpRequest subReqOp ) {
+                    fms.add( subReqOp.getFederationMember() );
+                    final Set<TriplePattern> currentTPs = LogicalOpUtils.getTriplePatternsOfReq(subReqOp);
+                    if(    ! currentTPs.isEmpty()
+                        && previousTPs != null
+                        && ! currentTPs.equals(previousTPs) ) {
                         throw new IllegalArgumentException("UNION is not added as a result of source selection");
                     }
                     previousTPs = currentTPs;
@@ -72,6 +74,9 @@ public class QueryAnalyzer {
             return previousTPs;
         }
         else if( lop instanceof LogicalOpFilter ) {
+            return extractTPsAndRecordFms( plan.getSubPlan(0) );
+        }
+        else if( lop instanceof LogicalOpBind ) {
             return extractTPsAndRecordFms( plan.getSubPlan(0) );
         }
         else

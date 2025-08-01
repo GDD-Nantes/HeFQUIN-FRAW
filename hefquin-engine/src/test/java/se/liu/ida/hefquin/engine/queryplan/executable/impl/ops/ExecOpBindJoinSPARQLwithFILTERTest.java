@@ -5,11 +5,11 @@ import java.util.concurrent.ExecutorService;
 import org.apache.jena.graph.Graph;
 import org.junit.Test;
 
+import se.liu.ida.hefquin.base.query.ExpectedVariables;
 import se.liu.ida.hefquin.base.query.TriplePattern;
-import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.engine.queryplan.executable.UnaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
 
 public class ExecOpBindJoinSPARQLwithFILTERTest extends TestsForTPAddAlgorithms<SPARQLEndpoint>
 {
@@ -17,6 +17,7 @@ public class ExecOpBindJoinSPARQLwithFILTERTest extends TestsForTPAddAlgorithms<
 	public void tpWithJoinOnObject_InnerJoin() throws ExecutionException {
 		_tpWithJoinOnObject(false);
 	}
+
 	@Test
 	public void tpWithJoinOnObject_OuterJoin() throws ExecutionException {
 		_tpWithJoinOnObject(true);
@@ -40,6 +41,16 @@ public class ExecOpBindJoinSPARQLwithFILTERTest extends TestsForTPAddAlgorithms<
 	@Test
 	public void tpWithoutJoinVariable_OuterJoin() throws ExecutionException {
 		_tpWithoutJoinVariable(true);
+	}
+
+	@Test
+	public void tpWithAndWithoutJoinVariable_InnerJoin() throws ExecutionException {
+		_tpWithAndWithoutJoinVariable(false);
+	}
+
+	@Test
+	public void tpWithAndWithoutJoinVariable_OuterJoin() throws ExecutionException {
+		_tpWithAndWithoutJoinVariable(true);
 	}
 
 	@Test
@@ -82,6 +93,16 @@ public class ExecOpBindJoinSPARQLwithFILTERTest extends TestsForTPAddAlgorithms<
 		_tpWithIllegalBNodeJoin(true);
 	}
 
+	@Test
+	public void tpWithSpuriousDuplicates_InnerJoin() throws ExecutionException {
+		_tpWithSpuriousDuplicates(false);
+	}
+
+	@Test
+	public void tpWithSpuriousDuplicates_OuterJoin() throws ExecutionException {
+		_tpWithSpuriousDuplicates(true);
+	}
+
 
 	@Override
 	protected SPARQLEndpoint createFedMemberForTest(Graph dataForMember) {
@@ -98,7 +119,12 @@ public class ExecOpBindJoinSPARQLwithFILTERTest extends TestsForTPAddAlgorithms<
 	                                                 final SPARQLEndpoint fm,
 	                                                 final ExpectedVariables expectedVariables,
 	                                                 final boolean useOuterJoinSemantics ) {
-		return new ExecOpBindJoinSPARQLwithFILTER(tp, fm, useOuterJoinSemantics, false);
+		return new ExecOpBindJoinSPARQLwithFILTER( tp,
+		                                           fm,
+		                                           expectedVariables,
+		                                           useOuterJoinSemantics,
+		                                           ExecOpBindJoinSPARQLwithFILTER.DEFAULT_BATCH_SIZE,
+		                                           false );
 	}
 
 }

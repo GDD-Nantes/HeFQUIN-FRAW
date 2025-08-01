@@ -1,41 +1,30 @@
 package se.liu.ida.hefquin.engine;
 
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.rdf.model.*;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.vocabulary.RDF;
+import se.liu.ida.hefquin.engine.queryplan.utils.LogicalPlanPrinter;
+import se.liu.ida.hefquin.engine.queryplan.utils.PhysicalPlanPrinter;
+import se.liu.ida.hefquin.engine.queryproc.*;
+import se.liu.ida.hefquin.engine.queryproc.impl.ExecutionContextImpl;
+import se.liu.ida.hefquin.engine.queryproc.impl.QueryProcessorImpl;
+import se.liu.ida.hefquin.engine.queryproc.impl.SamplingQueryProcessorImpl;
+import se.liu.ida.hefquin.engine.queryproc.impl.planning.QueryPlannerImpl;
+import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.CostModel;
+import se.liu.ida.hefquin.federation.access.FederationAccessManager;
+import se.liu.ida.hefquin.federation.catalog.FederationCatalog;
+import se.liu.ida.hefquin.jenaext.ModelUtils;
+import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
+import se.liu.ida.hefquin.vocabulary.ECVocab;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-
-import org.apache.jena.datatypes.RDFDatatype;
-import org.apache.jena.datatypes.xsd.XSDDatatype;
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.RDFList;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.ResIterator;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.vocabulary.RDF;
-
-import se.liu.ida.hefquin.engine.federation.access.FederationAccessManager;
-import se.liu.ida.hefquin.engine.federation.catalog.FederationCatalog;
-import se.liu.ida.hefquin.engine.queryplan.utils.LogicalPlanPrinter;
-import se.liu.ida.hefquin.engine.queryplan.utils.PhysicalPlanPrinter;
-import se.liu.ida.hefquin.engine.queryproc.ExecutionEngine;
-import se.liu.ida.hefquin.engine.queryproc.LogicalOptimizer;
-import se.liu.ida.hefquin.engine.queryproc.PhysicalOptimizer;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanCompiler;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanner;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
-import se.liu.ida.hefquin.engine.queryproc.SourcePlanner;
-import se.liu.ida.hefquin.engine.queryproc.impl.ExecutionContextImpl;
-import se.liu.ida.hefquin.engine.queryproc.impl.QueryProcessorImpl;
-import se.liu.ida.hefquin.engine.queryproc.impl.planning.QueryPlannerImpl;
-import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.CostModel;
-import se.liu.ida.hefquin.engine.vocabulary.ECVocab;
-import se.liu.ida.hefquin.jenaext.ModelUtils;
 
 /**
  * Reads an RDF description of a configuration for the HeFQUIN engine and
@@ -73,28 +62,38 @@ public class HeFQUINEngineConfigReader
 	 * model describes only one such configuration.
 	 */
 	public HeFQUINEngine read( final Model m, final Context ctx ) {
+		final Resource confRsrc = obtainConfigurationResource(m);
+		return read(confRsrc, ctx);
+	}
+
+	public Resource obtainConfigurationResource( final Model m ) {
 		final ResIterator itConfigs = m.listResourcesWithProperty(RDF.type, ECVocab.HeFQUINEngineConfiguration);
 
 		if ( ! itConfigs.hasNext() ) {
 			throw new IllegalArgumentException("The given RDF description does not contain a HeFQUINEngineConfiguration.");
 		}
 
-		final Resource confRsrc = itConfigs.next();
+		final Resource r = itConfigs.next();
 
 		if ( itConfigs.hasNext() ) {
 			throw new IllegalArgumentException("The given RDF description contains more than one HeFQUINEngineConfiguration.");
 		}
 
-		return read(confRsrc, ctx);
+		return r;
 	}
 
 	public HeFQUINEngine read( final Resource confRsrc, final Context ctx ) {
 		final FederationAccessManager fedAccessMgr = readFederationAccessManager(confRsrc, ctx);
+		final QueryProcessor qproc = readQueryProcessor(confRsrc, ctx, fedAccessMgr);
 
-		final ExtendedContext ctxx = new ExtendedContextImpl2(ctx, fedAccessMgr);
-		final QueryProcessor qproc = readQueryProcessor(confRsrc, ctxx);
+		final int budget = readBudget(confRsrc);
+		final int subBudget = readSubBudget(confRsrc);
 
-		return new HeFQUINEngineImpl(fedAccessMgr, qproc);
+		if( budget > 0 && subBudget > 0 ) {
+			return new FrawEngine(fedAccessMgr, qproc, budget, subBudget);
+		}
+
+		return new HeFQUINEngine(fedAccessMgr, qproc);
 	}
 
 	public interface Context {
@@ -114,15 +113,39 @@ public class HeFQUINEngineConfigReader
 		PhysicalPlanPrinter getPhysicalPlanPrinter();
 	}
 
+	public int readBudget( final Resource confRsrc ) {
+		final Literal ltrl = ModelUtils.getSingleOptionalLiteralProperty( confRsrc, FrawConstants.budget );
+		// not pretty
+		if ( ltrl == null ) return -1;
+		return ltrl.getInt();
+	}
+
+	public int readBudget( final Model confModel ) {
+		return readBudget(obtainConfigurationResource(confModel));
+	}
+
+	public int readSubBudget( final Resource confRsrc ) {
+		final Literal ltrl = ModelUtils.getSingleOptionalLiteralProperty( confRsrc, FrawConstants.subBudget );
+		// not pretty
+		if ( ltrl == null ) return -1;
+		return ltrl.getInt();
+	}
+
+	public int readSubBudget( final Model confModel ) {
+		return readSubBudget(obtainConfigurationResource(confModel));
+	}
 
 	// ------------ federation access manager ------------
+
+	public FederationAccessManager readFederationAccessManager( final Model m,
+	                                                            final Context ctx ) {
+		final Resource confRsrc = obtainConfigurationResource(m);
+		return readFederationAccessManager(confRsrc, ctx);
+	}
 
 	public FederationAccessManager readFederationAccessManager( final Resource confRsrc,
 	                                                            final Context ctx ) {
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( confRsrc, ECVocab.fedAccessMgr );
-
-		if ( rsrc.equals(ECVocab.DefaultFederationAccessManager) )
-			return createDefaultFederationAccessManager(ctx);
 
 		final ExtendedContext ctxx = new ExtendedContextImpl1(ctx);
 
@@ -137,25 +160,32 @@ public class HeFQUINEngineConfigReader
 		return (FederationAccessManager) i;
 	}
 
-	public FederationAccessManager createDefaultFederationAccessManager( final Context ctx ) {
-		return HeFQUINEngineDefaultComponents.createDefaultFederationAccessManager( ctx.getExecutorServiceForFederationAccess() );
-	}
-
-
 	// ------------ query processor ------------
 
+	public QueryProcessor readQueryProcessor( final Model m,
+	                                          final Context ctx,
+	                                          final FederationAccessManager fedAccessMgr ) {
+		final Resource confRsrc = obtainConfigurationResource(m);
+		return readQueryProcessor(confRsrc, ctx, fedAccessMgr);
+	}
+
 	public QueryProcessor readQueryProcessor( final Resource confRsrc,
-	                                          final ExtendedContext ctx ) {
+	                                          final Context ctx,
+	                                          final FederationAccessManager fedAccessMgr ) {
+		final ExtendedContext ctxx = new ExtendedContextImpl2(ctx, fedAccessMgr);
+
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( confRsrc, ECVocab.queryProcessor );
 
-		final CostModel cm = readCostModel(rsrc, ctx);
-		ctx.complete(cm);
+		final CostModel cm = readCostModel(rsrc, ctxx);
+		ctxx.complete(cm);
 
-		final QueryPlanner planner = readQueryPlanner(rsrc, ctx);
-		final QueryPlanCompiler compiler = readQueryPlanCompiler(rsrc, ctx);
-		final ExecutionEngine exec = readExecutionEngine(rsrc, ctx);
+		final QueryPlanner planner = readQueryPlanner(rsrc, ctxx);
+		final QueryPlanCompiler compiler = readQueryPlanCompiler(rsrc, ctxx);
+		final ExecutionEngine exec = readExecutionEngine(rsrc, ctxx);
 
-		return new QueryProcessorImpl( planner, compiler, exec, ctx.getQueryProcContext() );
+		if(compiler instanceof SamplingQueryPlanCompiler)
+			return new SamplingQueryProcessorImpl( planner, (SamplingQueryPlanCompiler) compiler, exec, ctxx.getQueryProcContext() );
+		return new QueryProcessorImpl( planner, compiler, exec, ctxx.getQueryProcContext() );
 	}
 
 	public CostModel readCostModel( final Resource qprocRsrc, final ExtendedContext ctx ) {
@@ -163,9 +193,6 @@ public class HeFQUINEngineConfigReader
 
 		if ( rsrc == null )
 			return null;
-
-		if ( rsrc.equals(ECVocab.DefaultCostModel) )
-			return createDefaultCostModel(ctx);
 
 		final Object i;
 		try {
@@ -195,9 +222,6 @@ public class HeFQUINEngineConfigReader
 	public SourcePlanner readSourcePlanner( final Resource qplRsrc, final ExtendedContext ctx ) {
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( qplRsrc, ECVocab.sourcePlanner );
 
-		if ( rsrc.equals(ECVocab.DefaultSourcePlanner) )
-			return createDefaultSourcePlanner(ctx);
-
 		final Object i;
 		try {
 			i = instantiate(rsrc, ctx);
@@ -211,9 +235,6 @@ public class HeFQUINEngineConfigReader
 
 	public LogicalOptimizer readLogicalOptimizer( final Resource qplRsrc, final ExtendedContext ctx ) {
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( qplRsrc, ECVocab.logicalOptimizer );
-
-		if ( rsrc.equals(ECVocab.DefaultLogicalOptimizer) )
-			return createDefaultLogicalOptimizer(ctx);
 
 		final Object i;
 		try {
@@ -229,9 +250,6 @@ public class HeFQUINEngineConfigReader
 	public PhysicalOptimizer readPhysicalOptimizer( final Resource qplRsrc, final ExtendedContext ctx ) {
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( qplRsrc, ECVocab.physicalOptimizer );
 
-		if ( rsrc.equals(ECVocab.DefaultPhysicalOptimizer) )
-			return HeFQUINEngineDefaultComponents.createDefaultPhysicalOptimizer();
-
 		final Object i;
 		try {
 			i = instantiate(rsrc, ctx);
@@ -245,9 +263,6 @@ public class HeFQUINEngineConfigReader
 
 	public QueryPlanCompiler readQueryPlanCompiler( final Resource qprocRsrc, final ExtendedContext ctx ) {
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( qprocRsrc, ECVocab.planCompiler );
-
-		if ( rsrc.equals(ECVocab.DefaultPlanCompiler) )
-			return createDefaultPlanCompiler(ctx);
 
 		final Object i;
 		try {
@@ -263,9 +278,6 @@ public class HeFQUINEngineConfigReader
 	public ExecutionEngine readExecutionEngine( final Resource qprocRsrc, final ExtendedContext ctx ) {
 		final Resource rsrc = ModelUtils.getSingleMandatoryResourceProperty( qprocRsrc, ECVocab.executionEngine );
 
-		if ( rsrc.equals(ECVocab.DefaultExecutionEngine) )
-			return HeFQUINEngineDefaultComponents.createDefaultExecutionEngine();
-
 		final Object i;
 		try {
 			i = instantiate(rsrc, ctx);
@@ -276,23 +288,6 @@ public class HeFQUINEngineConfigReader
 
 		return (ExecutionEngine) i;
 	}
-
-	public CostModel createDefaultCostModel( final ExtendedContext ctx ) {
-		return HeFQUINEngineDefaultComponents.createDefaultCostModel( ctx.getQueryProcContext() );
-	}
-
-	public SourcePlanner createDefaultSourcePlanner( final ExtendedContext ctx ) {
-		return HeFQUINEngineDefaultComponents.createDefaultSourcePlanner( ctx.getQueryProcContext() );
-	}
-
-	public LogicalOptimizer createDefaultLogicalOptimizer( final ExtendedContext ctx ) {
-		return HeFQUINEngineDefaultComponents.createDefaultLogicalOptimizer( ctx.getQueryProcContext() );
-	}
-
-	public QueryPlanCompiler createDefaultPlanCompiler( final ExtendedContext ctx ) {
-		return HeFQUINEngineDefaultComponents.createDefaultPlanCompiler( ctx.getQueryProcContext() );
-	}
-
 
 	// ------------ helper functions ------------
 

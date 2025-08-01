@@ -5,7 +5,6 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
-
 import se.liu.ida.hefquin.engine.wrappers.lpg.Record2SolutionMappingTranslator;
 import se.liu.ida.hefquin.engine.wrappers.lpg.conf.LPG2RDFConfiguration;
 import se.liu.ida.hefquin.engine.wrappers.lpg.data.RecordEntry;
@@ -74,14 +73,14 @@ public class Record2SolutionMappingTranslatorImpl implements Record2SolutionMapp
                 if (index == 0) {
                     builder.add(var, conf.getIRIForPropertyName(current.getValue().toString()));
                 } else if (index == 1) {
-                    builder.add(var, NodeFactory.createLiteral(current.getValue().toString()));
+                    builder.add(var, NodeFactory.createLiteralString(current.getValue().toString()));
                 } else {
                     throw new IllegalArgumentException("Invalid Return Statement");
                 }
             } else if (expression instanceof FirstLabelExpression) {
                 builder.add(var, conf.getRDFTermForNodeLabel(current.getValue().toString()));
             } else if (expression instanceof PropertyAccessExpression) {
-                builder.add(var, NodeFactory.createLiteral(current.getValue().toString()));
+                builder.add(var, NodeFactory.createLiteralString(current.getValue().toString()));
             } else if (expression instanceof LiteralExpression) {
                 builder.add(var, conf.getLabelPredicate());
             } else {

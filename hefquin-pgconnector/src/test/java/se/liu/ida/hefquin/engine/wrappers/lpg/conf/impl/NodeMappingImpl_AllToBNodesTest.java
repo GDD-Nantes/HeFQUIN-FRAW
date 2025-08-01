@@ -1,15 +1,11 @@
 package se.liu.ida.hefquin.engine.wrappers.lpg.conf.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.junit.Test;
-
 import se.liu.ida.hefquin.engine.wrappers.lpg.data.impl.LPGNode;
+
+import static org.junit.Assert.*;
 
 public class NodeMappingImpl_AllToBNodesTest {
     protected final String NSNODE = "https://example.org/node/";
@@ -21,7 +17,7 @@ public class NodeMappingImpl_AllToBNodesTest {
         final Node resultNode = nodeMapping.map(node);
         assertNotNull(resultNode);
         assertTrue(resultNode.isBlank());
-        assertEquals(resultNode.getBlankNodeId().toString(), "0");
+        assertEquals(resultNode.getBlankNodeLabel(), "0");
     }
 
     @Test

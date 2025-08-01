@@ -1,0 +1,28 @@
+package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
+
+import se.liu.ida.hefquin.base.query.ExpectedVariables;
+import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
+import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
+import se.liu.ida.hefquin.federation.access.impl.req.SPARQLRequestImpl;
+
+/**
+ * A base class for all variations of the bind join algorithm that use
+ * some form of SPARQL requests.
+ */
+public abstract class BaseForExecOpFrawBindJoinSPARQL extends BaseForExecOpFrawBindJoinWithRequestOps<SPARQLGraphPattern, SPARQLEndpoint>
+{
+	public BaseForExecOpFrawBindJoinSPARQL( final SPARQLGraphPattern p,
+										final SPARQLEndpoint fm,
+										final ExpectedVariables inputVars,
+										final boolean useOuterJoinSemantics,
+										final int batchSize,
+										final boolean collectExceptions ) {
+		super(p, p.getAllMentionedVariables(), fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions);
+	}
+
+	@Override
+	protected NullaryExecutableOp createExecutableReqOpForAll() {
+		return new ExecOpFrawRequest( new SPARQLRequestImpl(query), fm, false );
+	}
+}

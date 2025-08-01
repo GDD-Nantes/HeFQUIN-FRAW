@@ -1,8 +1,5 @@
 package se.liu.ida.hefquin.jenaintegration.sparql.engine.main;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.jena.query.QueryExecException;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVisitorBase;
@@ -14,15 +11,15 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIter;
 import org.apache.jena.sparql.engine.iterator.QueryIterRepeatApply;
 import org.apache.jena.sparql.engine.main.OpExecutor;
-
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
-import se.liu.ida.hefquin.base.utils.Pair;
+import se.liu.ida.hefquin.engine.QueryProcessingStatsAndExceptions;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcException;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcStats;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
 import se.liu.ida.hefquin.engine.queryproc.impl.MaterializingQueryResultSinkImpl;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
+
+import java.util.Iterator;
 
 public class OpExecutorHeFQUIN extends OpExecutor
 {
@@ -166,17 +163,18 @@ public class OpExecutorHeFQUIN extends OpExecutor
 			}
 
 			final MaterializingQueryResultSinkImpl sink = new MaterializingQueryResultSinkImpl();
-			final Pair<QueryProcStats, List<Exception>> statsAndExceptions;
+			final QueryProcessingStatsAndExceptions statsAndExceptions;
 
 			try {
 				statsAndExceptions = qProc.processQuery( new GenericSPARQLGraphPatternImpl2(opForStage), sink );
+
 			}
 			catch ( final QueryProcException ex ) {
 				throw new QueryExecException("Processing the query operator using HeFQUIN failed.", ex);
 			}
 
-			execCxt.getContext().set( HeFQUINConstants.sysQueryProcStats,      statsAndExceptions.object1 );
-			execCxt.getContext().set( HeFQUINConstants.sysQueryProcExceptions, statsAndExceptions.object2 );
+			execCxt.getContext().set( HeFQUINConstants.sysQProcStatsAndExceptions,
+			                          statsAndExceptions );
 
 			return new WrappingQueryIterator( sink.getSolMapsIter() );
 		}

@@ -2,7 +2,6 @@ package se.liu.ida.hefquin.engine.wrappers.lpg.conf.impl;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
-
 import se.liu.ida.hefquin.engine.wrappers.lpg.impl.exceptions.UnSupportedNodeLabelException;
 
 public class NodeLabelMappingImpl_SingleMatchToLiteral implements NodeLabelMapping {
@@ -12,7 +11,7 @@ public class NodeLabelMappingImpl_SingleMatchToLiteral implements NodeLabelMappi
 
     public NodeLabelMappingImpl_SingleMatchToLiteral(final String label, final String literal){
         this.label=label;
-        this.node = NodeFactory.createLiteral(literal);
+        this.node = NodeFactory.createLiteralByValue(literal);
     }
 
     @Override

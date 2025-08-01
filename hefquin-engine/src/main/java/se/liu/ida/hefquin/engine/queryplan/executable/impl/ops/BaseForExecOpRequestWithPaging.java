@@ -1,13 +1,13 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
 
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.access.DataRetrievalRequest;
-import se.liu.ida.hefquin.engine.federation.access.DataRetrievalResponse;
-import se.liu.ida.hefquin.engine.federation.access.FederationAccessException;
-import se.liu.ida.hefquin.engine.federation.access.FederationAccessManager;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecOpExecutionException;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
+import se.liu.ida.hefquin.federation.FederationMember;
+import se.liu.ida.hefquin.federation.access.DataRetrievalRequest;
+import se.liu.ida.hefquin.federation.access.DataRetrievalResponse;
+import se.liu.ida.hefquin.federation.access.FederationAccessException;
+import se.liu.ida.hefquin.federation.access.FederationAccessManager;
 
 /**
  * Base class for implementations of request operators with requests
@@ -17,7 +17,7 @@ public abstract class BaseForExecOpRequestWithPaging<
                                   ReqType extends DataRetrievalRequest,
                                   MemberType extends FederationMember,
                                   PageReqType extends DataRetrievalRequest,
-                                  PageRespType extends DataRetrievalResponse>
+                                  PageRespType extends DataRetrievalResponse<?>>
                 extends BaseForExecOpRequest<ReqType,MemberType>
 {
 	public BaseForExecOpRequestWithPaging( final ReqType req, final MemberType fm, final boolean collectExceptions ) {

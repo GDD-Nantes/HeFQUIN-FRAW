@@ -1,26 +1,13 @@
 package se.liu.ida.hefquin.engine.queryproc.impl.srcsel;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.*;
 import org.apache.jena.sparql.core.BasicPattern;
-
 import se.liu.ida.hefquin.base.query.BGP;
 import se.liu.ida.hefquin.base.query.TriplePattern;
+import se.liu.ida.hefquin.base.query.impl.BGPImpl;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl2;
-import se.liu.ida.hefquin.base.query.impl.QueryPatternUtils;
 import se.liu.ida.hefquin.base.utils.Pair;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
-import se.liu.ida.hefquin.engine.federation.SPARQLEndpoint;
-import se.liu.ida.hefquin.engine.federation.access.BGPRequest;
-import se.liu.ida.hefquin.engine.federation.access.SPARQLRequest;
-import se.liu.ida.hefquin.engine.federation.access.TriplePatternRequest;
-import se.liu.ida.hefquin.engine.federation.access.impl.req.BGPRequestImpl;
-import se.liu.ida.hefquin.engine.federation.access.impl.req.SPARQLRequestImpl;
-import se.liu.ida.hefquin.engine.federation.access.impl.req.TriplePatternRequestImpl;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.*;
@@ -28,6 +15,19 @@ import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanner;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanningException;
 import se.liu.ida.hefquin.engine.queryproc.SourcePlanningStats;
+import se.liu.ida.hefquin.federation.FederationMember;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
+import se.liu.ida.hefquin.federation.access.BGPRequest;
+import se.liu.ida.hefquin.federation.access.SPARQLRequest;
+import se.liu.ida.hefquin.federation.access.TriplePatternRequest;
+import se.liu.ida.hefquin.federation.access.impl.req.BGPRequestImpl;
+import se.liu.ida.hefquin.federation.access.impl.req.SPARQLRequestImpl;
+import se.liu.ida.hefquin.federation.access.impl.req.TriplePatternRequestImpl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This implementation of {@link SourcePlanner} does not actually perform
@@ -118,10 +118,43 @@ public class ServiceClauseBasedSourcePlannerImpl extends SourcePlannerBase
 		return mergeIntoMultiwayLeftJoin(leftSubPlan, rightSubPlan);
 	}
 
+//	protected LogicalPlan createPlanForUnion( final OpUnion jenaOp ) {
+//
+//		final LogicalPlan leftSubPlan = createPlan( jenaOp.getLeft() );
+//		final LogicalPlan rightSubPlan = createPlan( jenaOp.getRight() );
+//		return mergeIntoMultiwayUnion(leftSubPlan,rightSubPlan);
+//	}
+
 	protected LogicalPlan createPlanForUnion( final OpUnion jenaOp ) {
-		final LogicalPlan leftSubPlan = createPlan( jenaOp.getLeft() );
-		final LogicalPlan rightSubPlan = createPlan( jenaOp.getRight() );
-		return mergeIntoMultiwayUnion(leftSubPlan,rightSubPlan);
+		// Instead of creating then merging a quadrillion unions, we flatten the root union, and merge them into a mulitway union
+		List<Op> children = getNestedOpUnionChildren(jenaOp);
+		List<LogicalPlan> subPlansFlattened = children.stream().map(this::createPlan).collect(Collectors.toList());
+
+		if( subPlansFlattened.size() == 2 )
+			return new LogicalPlanWithBinaryRootImpl( LogicalOpUnion.getInstance(),
+					subPlansFlattened.get(0),
+					subPlansFlattened.get(1) );
+
+		return new LogicalPlanWithNaryRootImpl( LogicalOpMultiwayUnion.getInstance(),
+				subPlansFlattened );
+	}
+
+	private List<Op> getNestedOpUnionChildren( final OpUnion jenaOp ) {
+		List<Op> children = new ArrayList<>();
+
+		if(jenaOp.getLeft() instanceof OpUnion) {
+			children.addAll(getNestedOpUnionChildren((OpUnion) jenaOp.getLeft()));
+		} else {
+			children.add(jenaOp.getLeft());
+		}
+
+		if(jenaOp.getRight() instanceof OpUnion) {
+			children.addAll(getNestedOpUnionChildren((OpUnion) jenaOp.getRight()));
+		} else {
+			children.add(jenaOp.getRight());
+		}
+
+		return children;
 	}
 
 	protected LogicalPlan createPlanForFilter( final OpFilter jenaOp ) {
@@ -227,7 +260,7 @@ public class ServiceClauseBasedSourcePlannerImpl extends SourcePlannerBase
 	}
 
 	protected LogicalPlan createPlanForBGP( final BasicPattern pattern, final FederationMember fm ) {
-		return createPlanForBGP( QueryPatternUtils.createBGP(pattern), fm );
+		return createPlanForBGP( new BGPImpl(pattern), fm );
 	}
 
 	protected LogicalPlan createPlanForBGP( final BGP bgp, final FederationMember fm ) {
@@ -323,7 +356,7 @@ public class ServiceClauseBasedSourcePlannerImpl extends SourcePlannerBase
 		final List<LogicalPlan> subPlansFlattened = new ArrayList<>();
 
 		for ( int i = 0; i < subPlans.length; ++i ) {
-			if ( subPlans[i].getRootOperator() instanceof LogicalOpMultiwayUnion ) {
+			if ( subPlans[i].getRootOperator() instanceof LogicalOpUnion || subPlans[i].getRootOperator() instanceof LogicalOpMultiwayUnion ) {
 				for ( int j = 0; j < subPlans[i].numberOfSubPlans(); ++j ) {
 					subPlansFlattened.add( subPlans[i].getSubPlan(j) );
 				}
@@ -332,6 +365,11 @@ public class ServiceClauseBasedSourcePlannerImpl extends SourcePlannerBase
 				subPlansFlattened.add( subPlans[i] );
 			}
 		}
+
+		if( subPlansFlattened.size() == 2 )
+			return new LogicalPlanWithBinaryRootImpl( LogicalOpUnion.getInstance(),
+					subPlansFlattened.get(0),
+					subPlansFlattened.get(1) );
 
 		return new LogicalPlanWithNaryRootImpl( LogicalOpMultiwayUnion.getInstance(),
 		                                        subPlansFlattened );

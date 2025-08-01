@@ -1,0 +1,121 @@
+package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
+
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.expr.*;
+import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementFilter;
+import org.apache.jena.sparql.syntax.ElementGroup;
+import org.apache.jena.sparql.syntax.ElementUnion;
+import se.liu.ida.hefquin.base.query.ExpectedVariables;
+import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
+import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl1;
+import se.liu.ida.hefquin.base.query.utils.QueryPatternUtils;
+import se.liu.ida.hefquin.engine.queryplan.executable.ExecOpExecutionException;
+import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
+import se.liu.ida.hefquin.federation.access.SPARQLRequest;
+import se.liu.ida.hefquin.federation.access.impl.req.SPARQLRequestImpl;
+
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Implementation of (a batching version of) the bind join algorithm
+ * that uses UNION clauses with FILTERs inside.
+ *
+ * For more details about the actual implementation of the algorithm, and its
+ * extra capabilities, refer to {@link BaseForExecOpBindJoinWithRequestOps}.
+ */
+public class ExecOpFrawBindJoinSPARQLwithUNION extends BaseForExecOpFrawBindJoinSPARQL
+{
+	public final static int DEFAULT_BATCH_SIZE = BaseForExecOpBindJoinWithRequestOps.DEFAULT_BATCH_SIZE;
+
+	protected final Element pattern;
+
+	/**
+	 * @param query - the graph pattern to be evaluated (in a bind-join
+	 *          manner) at the federation member given as 'fm'
+	 *
+	 * @param fm - the federation member targeted by this operator
+	 *
+	 * @param inputVars - the variables to be expected in the solution
+	 *          mappings that will be pushed as input to this operator
+	 *
+	 * @param useOuterJoinSemantics - <code>true</code> if the 'query' is to
+	 *          be evaluated under outer-join semantics; <code>false</code>
+	 *          for inner-join semantics
+	 *
+	 * @param batchSize - the number of solution mappings to be included in
+	 *          each bind-join request; this value must not be smaller than
+	 *          {@link #minimumRequestBlockSize}; as a default value for this
+	 *          parameter, use {@link #DEFAULT_BATCH_SIZE}
+	 *
+	 * @param collectExceptions - <code>true</code> if this operator has to
+	 *          collect exceptions (which is handled entirely by one of the
+	 *          super classes); <code>false</code> if the operator should
+	 *          immediately throw every {@link ExecOpExecutionException}
+	 */
+	public ExecOpFrawBindJoinSPARQLwithUNION( final SPARQLGraphPattern query,
+										  final SPARQLEndpoint fm,
+										  final ExpectedVariables inputVars,
+										  final boolean useOuterJoinSemantics,
+										  final int batchSize,
+										  final boolean collectExceptions ) {
+		super(query, fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions);
+
+		pattern = QueryPatternUtils.convertToJenaElement(query);
+	}
+
+	@Override
+	protected NullaryExecutableOp createExecutableReqOp( final Set<Binding> solMaps ) {
+		final Element elmt = createUnion(solMaps);
+		final SPARQLGraphPattern pattern = new GenericSPARQLGraphPatternImpl1(elmt);
+		final SPARQLRequest request = new SPARQLRequestImpl(pattern);
+		return new ExecOpFrawRequest(request, fm, false);
+	}
+
+	protected Element createUnion( final Iterable<Binding> solMaps ) {
+		final Set<Expr> conjunctions = new HashSet<>();
+		for ( final Binding sm : solMaps ) {
+			Expr conjunction = null;
+			for ( final Var v : varsInQuery ) {
+				if ( sm.contains(v) ) {
+					final NodeValue nv = NodeValue.makeNode( sm.get(v) );
+					final Expr expr = new E_Equals( new ExprVar(v), nv );
+
+					if ( conjunction == null )
+						conjunction = expr;
+					else
+						conjunction = new E_LogicalAnd(conjunction, expr);
+				}
+			}
+
+			assert conjunction != null;
+
+			conjunctions.add(conjunction);
+		}
+
+		if ( conjunctions.size() == 1 ) {
+			final Expr conjunction = conjunctions.iterator().next();
+
+			final ElementGroup group = new ElementGroup();
+			group.addElement( pattern );
+			group.addElement( new ElementFilter(conjunction) );
+
+			return group;
+		}
+
+		final ElementUnion union = new ElementUnion();
+		for ( final Expr conjunction : conjunctions ) {
+			final ElementGroup group = new ElementGroup();
+			group.addElement( pattern );
+			group.addElement( new ElementFilter(conjunction) );
+
+			union.addElement(group);
+		}
+
+		return union;
+	}
+
+}

@@ -1,14 +1,14 @@
 package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 
-import se.liu.ida.hefquin.base.queryplan.ExpectedVariables;
-import se.liu.ida.hefquin.engine.federation.BRTPFServer;
-import se.liu.ida.hefquin.engine.federation.FederationMember;
+import se.liu.ida.hefquin.base.query.ExpectedVariables;
+import se.liu.ida.hefquin.base.query.TriplePattern;
 import se.liu.ida.hefquin.engine.queryplan.executable.UnaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpBindJoinBRTPF;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpBGPAdd;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpTPAdd;
-import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpTPOptAdd;
+import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpGPAdd;
+import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpGPOptAdd;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
+import se.liu.ida.hefquin.federation.BRTPFServer;
+import se.liu.ida.hefquin.federation.FederationMember;
 
 /**
  * A physical operator that implements (a batching version of) the bind
@@ -35,76 +35,66 @@ import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
  */
 public class PhysicalOpBindJoin extends BaseForPhysicalOpSingleInputJoin
 {
-    public PhysicalOpBindJoin( final LogicalOpTPAdd lop ) {
-        super(lop);
-    }
+	public PhysicalOpBindJoin( final LogicalOpGPAdd lop ) {
+		super(lop);
 
-    public PhysicalOpBindJoin( final LogicalOpTPOptAdd lop ) {
-        super(lop);
-    }
+		if ( ! lop.containsTriplePatternOnly() )
+			throw new IllegalArgumentException();
+	}
 
-    // not supported at the moment
-    //public PhysicalOpBindJoin( final LogicalOpBGPAdd lop ) {
-    //    super(lop);
-    //}
-    //
-    //public PhysicalOpBindJoin( final LogicalOpBGPOptAdd lop ) {
-    //    super(lop);
-    //}
+	public PhysicalOpBindJoin( final LogicalOpGPOptAdd lop ) {
+		super(lop);
+
+		if ( ! lop.containsTriplePatternOnly() )
+			throw new IllegalArgumentException();
+	}
 
 	@Override
 	public boolean equals( final Object o ) {
 		return o instanceof PhysicalOpBindJoin && ((PhysicalOpBindJoin) o).lop.equals(lop);
 	}
 
-    @Override
-    public UnaryExecutableOp createExecOp( final boolean collectExceptions,
-                                           final ExpectedVariables ... inputVars )
-    {
-        if ( lop instanceof LogicalOpTPAdd ) {
-            final LogicalOpTPAdd tpAdd = (LogicalOpTPAdd) lop;
-            final FederationMember fm = tpAdd.getFederationMember();
-            final boolean useOuterJoinSemantics = false;
+	@Override
+	public UnaryExecutableOp createExecOp( final boolean collectExceptions,
+	                                       final ExpectedVariables ... inputVars )
+	{
+		final TriplePattern tp;
+		final FederationMember fm;
+		final boolean useOuterJoinSemantics;
 
-            if ( fm instanceof BRTPFServer )
-                return new ExecOpBindJoinBRTPF( tpAdd.getTP(), (BRTPFServer) fm, useOuterJoinSemantics, collectExceptions );
-            else
-                throw new IllegalArgumentException("Unsupported type of federation member: " + fm.getClass().getName() );
+		if ( lop instanceof LogicalOpGPAdd gpAdd && gpAdd.containsTriplePatternOnly() ) {
+			tp = gpAdd.getTP();
+			fm = gpAdd.getFederationMember();
+			useOuterJoinSemantics = false;
+		}
+		else if ( lop instanceof LogicalOpGPOptAdd gpAdd && gpAdd.containsTriplePatternOnly() ) {
+			tp = gpAdd.getTP();
+			fm = gpAdd.getFederationMember();
+			useOuterJoinSemantics = true;
+		}
+		else {
+			throw new IllegalArgumentException("Unsupported type of operator: " + lop.getClass().getName() );
+		}
 
-        }
-        else if ( lop instanceof LogicalOpTPOptAdd ) {
-            final LogicalOpTPOptAdd tpAdd = (LogicalOpTPOptAdd) lop;
-            final FederationMember fm = tpAdd.getFederationMember();
-            final boolean useOuterJoinSemantics = true;
+		if ( fm instanceof BRTPFServer brtpf )
+			return new ExecOpBindJoinBRTPF( tp,
+			                                brtpf,
+			                                inputVars[0],
+			                                useOuterJoinSemantics,
+			                                ExecOpBindJoinBRTPF.DEFAULT_BATCH_SIZE,
+			                                collectExceptions );
+		else
+			throw new IllegalArgumentException("Unsupported type of federation member: " + fm.getClass().getName() );
+	}
 
-            if ( fm instanceof BRTPFServer )
-                return new ExecOpBindJoinBRTPF( tpAdd.getTP(), (BRTPFServer) fm, useOuterJoinSemantics, collectExceptions );
-            else
-                throw new IllegalArgumentException("Unsupported type of federation member: " + fm.getClass().getName() );
+	@Override
+	public void visit( final PhysicalPlanVisitor visitor ) {
+		visitor.visit(this);
+	}
 
-        }
-        else if ( lop instanceof LogicalOpBGPAdd ) {
-            final LogicalOpBGPAdd bgpAdd = (LogicalOpBGPAdd) lop;
-            final FederationMember fm = bgpAdd.getFederationMember();
-
-            //if ( fm instanceof SPARQLEndpoint )
-            //	return new ExecOpBindJoinSPARQL( bgpAdd.getBGP(), (SPARQLEndpoint) fm );
-            //else
-            throw new IllegalArgumentException("Unsupported type of federation member: " + fm.getClass().getName() );
-        }
-        else
-            throw new IllegalArgumentException("Unsupported type of operator: " + lop.getClass().getName() );
-    }
-
-    @Override
-    public void visit(final PhysicalPlanVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public String toString() {
-
-        return "> bindJoin" + lop.toString();
-    }
+	@Override
+	public String toString() {
+		return "> bindJoin" + lop.toString();
+	}
 
 }

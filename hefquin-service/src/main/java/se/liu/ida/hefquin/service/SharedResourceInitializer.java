@@ -1,0 +1,62 @@
+package se.liu.ida.hefquin.service;
+
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import org.apache.jena.atlas.web.TypedInputStream;
+import org.apache.jena.riot.system.stream.StreamManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import se.liu.ida.hefquin.engine.HeFQUINEngine;
+import se.liu.ida.hefquin.engine.HeFQUINEngineBuilder;
+
+import java.io.IOException;
+
+public class SharedResourceInitializer implements ServletContextListener
+{
+	private static Logger logger = LoggerFactory.getLogger( SharedResourceInitializer.class );
+
+	@Override
+	public void contextInitialized( ServletContextEvent servletContextEvent ) {
+		final String confDescr = System.getProperty( "hefquin.configuration", "DefaultEngineConf.ttl" );
+		final String frawConfDescr = System.getProperty( "fraw.configuration", "DefaultEngineConf.ttl" );
+		final String fedCat = System.getProperty( "hefquin.federation", "DefaultFedConf.ttl" );
+
+		logger.info( "--- Initialize engine ---" );
+		logger.info( "hefquin.configuration: {}", confDescr );
+		logger.info( "fraw.configuration: {}", frawConfDescr );
+		logger.info( "hefquin.federation:    {}", fedCat );
+
+		check( confDescr );
+		check( frawConfDescr );
+		check( fedCat );
+
+		final HeFQUINEngine engine = new HeFQUINEngineBuilder()
+			.withFederationCatalog(fedCat)
+			.withEngineConfiguration(confDescr)
+			.build();
+
+		final HeFQUINEngine frawEngine = new HeFQUINEngineBuilder()
+				.withFederationCatalog(fedCat)
+				.withEngineConfiguration(frawConfDescr)
+				.build();
+
+		servletContextEvent.getServletContext().setAttribute("engine", engine);
+		servletContextEvent.getServletContext().setAttribute("frawEngine", frawEngine);
+	}
+
+	/**
+	 * Checks whether the given file or URI is accessible.
+	 *
+	 * @param filenameOrURI path or URI to check
+	 * @throws RuntimeException if the resource is not accessible
+	 */
+	private void check( final String filenameOrURI ) {
+		try ( TypedInputStream in = StreamManager.get().open( filenameOrURI ) ) {
+			if ( in == null ) {
+				throw new IOException( "Resource not found or cannot be opened: " + filenameOrURI );
+			}
+		} catch ( IOException e ) {
+			throw new RuntimeException( "Failed to access: " + filenameOrURI, e );
+		}
+	}
+}

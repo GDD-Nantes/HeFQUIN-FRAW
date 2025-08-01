@@ -1,13 +1,5 @@
 package se.liu.ida.hefquin.engine.queryproc.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Iterator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -18,38 +10,36 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.query.Query;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl1;
 import se.liu.ida.hefquin.engine.EngineTestBase;
-import se.liu.ida.hefquin.engine.HeFQUINEngineDefaultComponents;
-import se.liu.ida.hefquin.engine.federation.BRTPFServer;
-import se.liu.ida.hefquin.engine.federation.TPFServer;
-import se.liu.ida.hefquin.engine.federation.access.BRTPFRequest;
-import se.liu.ida.hefquin.engine.federation.access.FederationAccessManager;
-import se.liu.ida.hefquin.engine.federation.access.TPFRequest;
-import se.liu.ida.hefquin.engine.federation.access.TPFResponse;
-import se.liu.ida.hefquin.engine.federation.access.impl.BlockingFederationAccessManagerImpl;
-import se.liu.ida.hefquin.engine.federation.access.impl.reqproc.*;
-import se.liu.ida.hefquin.engine.federation.catalog.FederationCatalog;
-import se.liu.ida.hefquin.engine.federation.catalog.impl.FederationCatalogImpl;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.utils.LogicalToPhysicalPlanConverter;
-import se.liu.ida.hefquin.engine.queryproc.ExecutionEngine;
-import se.liu.ida.hefquin.engine.queryproc.LogicalOptimizer;
-import se.liu.ida.hefquin.engine.queryproc.PhysicalOptimizer;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanCompiler;
-import se.liu.ida.hefquin.engine.queryproc.QueryPlanner;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcContext;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcException;
-import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
-import se.liu.ida.hefquin.engine.queryproc.SourcePlanner;
-import se.liu.ida.hefquin.engine.queryproc.impl.compiler.*;
+import se.liu.ida.hefquin.engine.queryplan.utils.LogicalToPhysicalPlanConverterImpl;
+import se.liu.ida.hefquin.engine.queryproc.*;
+import se.liu.ida.hefquin.engine.queryproc.impl.compiler.QueryPlanCompilerForPushBasedExecution;
 import se.liu.ida.hefquin.engine.queryproc.impl.execution.ExecutionEngineImpl;
 import se.liu.ida.hefquin.engine.queryproc.impl.planning.QueryPlannerImpl;
 import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.PhysicalOptimizerWithoutOptimization;
 import se.liu.ida.hefquin.engine.queryproc.impl.srcsel.ServiceClauseBasedSourcePlannerImpl;
+import se.liu.ida.hefquin.federation.BRTPFServer;
+import se.liu.ida.hefquin.federation.TPFServer;
+import se.liu.ida.hefquin.federation.access.BRTPFRequest;
+import se.liu.ida.hefquin.federation.access.FederationAccessManager;
+import se.liu.ida.hefquin.federation.access.TPFRequest;
+import se.liu.ida.hefquin.federation.access.TPFResponse;
+import se.liu.ida.hefquin.federation.access.impl.BlockingFederationAccessManagerImpl;
+import se.liu.ida.hefquin.federation.access.impl.reqproc.*;
+import se.liu.ida.hefquin.federation.catalog.FederationCatalog;
+import se.liu.ida.hefquin.federation.catalog.impl.FederationCatalogImpl;
+
+import java.util.Iterator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.*;
 
 public class QueryProcessorImplTest extends EngineTestBase
 {
@@ -354,8 +344,8 @@ public class QueryProcessorImplTest extends EngineTestBase
 	protected Iterator<SolutionMapping> processQuery( final String queryString,
 	                                                  final FederationCatalog fedCat,
 	                                                  final FederationAccessManager fedAccessMgr ) throws QueryProcException {
-		final ExecutorService execServiceForPlanTasks = HeFQUINEngineDefaultComponents.createExecutorServiceForPlanTasks();
-		final LogicalToPhysicalPlanConverter l2pConverter = HeFQUINEngineDefaultComponents.createDefaultLogicalToPhysicalPlanConverter();
+		final ExecutorService execServiceForPlanTasks = Executors.newFixedThreadPool(10);
+		final LogicalToPhysicalPlanConverter l2pConverter = new LogicalToPhysicalPlanConverterImpl(false, false);
 
 		final QueryProcContext ctxt = new QueryProcContext() {
 			@Override public FederationCatalog getFederationCatalog() { return fedCat; }
@@ -379,10 +369,11 @@ public class QueryProcessorImplTest extends EngineTestBase
 		final QueryPlanCompiler planCompiler = new
 				//IteratorBasedQueryPlanCompilerImpl(ctxt);
 				//PullBasedQueryPlanCompilerImpl(ctxt);
-				PushBasedQueryPlanCompilerImpl(ctxt);
+				QueryPlanCompilerForPushBasedExecution(ctxt);
 		final ExecutionEngine execEngine = new ExecutionEngineImpl();
 		final QueryProcessor qProc = new QueryProcessorImpl(planner, planCompiler, execEngine, ctxt);
 		final MaterializingQueryResultSinkImpl resultSink = new MaterializingQueryResultSinkImpl();
+		// Doesn't work with group bys, because of the getQueryPattern call
 		final Query query = new GenericSPARQLGraphPatternImpl1( QueryFactory.create(queryString).getQueryPattern() );
 
 		qProc.processQuery(query, resultSink);
@@ -398,5 +389,4 @@ System.err.println("Terminating the thread pool was interrupted." );
 
 		return resultSink.getSolMapsIter();
 	}
-
 }
