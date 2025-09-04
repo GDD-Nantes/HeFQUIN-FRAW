@@ -1,9 +1,9 @@
 # HeFQUIN-FRAW
 HeFQUIN-FRAW allows to execute random walks across federations of SPARQL endpoints that also support random walks,
-like endpoints running [[RAW x Passage][https://github.com/passage-org/passage]].
+like endpoints running [RAW x Passage](https://github.com/passage-org/passage).
 
-HeFQUIN-FRAW is an extension of HeFQUIN. 
-This repository started as a clone of the [[HeFQUIN github repository][https://github.com/LiUSemWeb/HeFQUIN]].
+HeFQUIN-FRAW is an extension of HeFQUIN.
+This repository started as a clone of the [HeFQUIN github repository](https://github.com/LiUSemWeb/HeFQUIN).
 Below, you can find information regarding the HeFQUIN base engine.
 
 # HeFQUIN
@@ -25,13 +25,13 @@ For detailed information about HeFQUIN, refer to the **Website at [https://liuse
       cd HeFQUIN-FRAW
       git pull
     ```
-    
+
   * Generate the JAR file
     ```bash
       mvn install -Dmaven.test.skip -f pom.xml
     ```
 
-  * Start the server using the hefquin-server binary. 
+  * Start the server using the hefquin-server binary.
     ```bash
       ./bin/hefquin-server \
         --port=8080 \
@@ -40,15 +40,15 @@ For detailed information about HeFQUIN, refer to the **Website at [https://liuse
         --confDescr ExampleEngineConf.ttl \
         --frawConfDescr f200_UOJ.ttl
     ```
-    where 
+    where
     * the `--port` argument specifies the port at which the service shall listen and
     * the `--path` argument specifies the custom URL path serving the different endpoints
     * the `--federationDescription` argument refers to a file (e.g., `fedshop200.ttl`) that contains an [RDF-based description of your federation](https://liusemweb.github.io/HeFQUIN/doc/federation_description.html).
     * the `--confDescr` argument refers to a file (e.g., `f200_eval.ttl`) that contains an RDF-based description of the engine used to process queries sent to the SPARQL endpoint.
     * the `--frawConfDescr` argument refers to a file (e.g., `f200_UOJ.ttl`) that contains an RDF-based description of the engine used to process queries sent to the sampling endpoint.
-  
-    This configuration assumes a federation of 200 endpoints as described in [[FedShop][https://github.com/GDD-Nantes/FedShop]] that all offer to process queries with random walks.
-    The easiest way to set up such a federation is using [[RAW x Passage][https://github.com/passage-org/passage]].
+
+    This configuration assumes a federation of 200 endpoints as described in [FedShop](https://github.com/GDD-Nantes/FedShop) that all offer to process queries with random walks.
+    The easiest way to set up such a federation is using [RAW x Passage](https://github.com/passage-org/passage).
 
 * **_Interacting with the HeFQUIN-FRAW Service_**
   * After starting up the HeFQUIN-FRAW service, you can first test it test by opening [`http://localhost:8080/`](http://localhost:8080/) in a Web browser (assuming that you have started the service at port 8080 and without specifying a custom path).
