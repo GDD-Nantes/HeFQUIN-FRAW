@@ -17,6 +17,9 @@ For detailed information about HeFQUIN, refer to the **Website at [https://liuse
   and more.
 
 ## Quick Guide
+This version of HeFQUIN-FRAW relies on [FedUP](https://github.com/GDD-Nantes/fedup) for the source selection step.
+You need to install FedUP beforehand.
+***
 ### Using HeFQUIN-FRAW as a Service
 * **_Starting the service using the command line program_**
   * Clone the hefquin-fraw repository and checkout the "provenance" branch.
