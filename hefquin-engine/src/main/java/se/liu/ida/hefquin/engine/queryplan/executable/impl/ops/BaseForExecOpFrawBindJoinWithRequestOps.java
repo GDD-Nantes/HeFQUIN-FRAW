@@ -172,7 +172,7 @@ public abstract class BaseForExecOpFrawBindJoinWithRequestOps<QueryType extends 
 		protected void _send( final SolutionMapping smFromRequest ) {
 			for ( final SolutionMapping smFromInput : inputSolutionMappings ) {
 				if ( FrawUtils.compatible(smFromInput, smFromRequest) ) {
-					solMapsForOutput.add( FrawUtils.merge(smFromInput,smFromRequest) );
+					solMapsForOutput.add( FrawUtils.merge(smFromInput,smFromRequest, useOuterJoinSemantics) );
 				}
 			}
 		}
@@ -192,7 +192,7 @@ public abstract class BaseForExecOpFrawBindJoinWithRequestOps<QueryType extends 
 		public void _send( final SolutionMapping smFromRequest ) {
 			for ( final SolutionMapping smFromInput : inputSolutionMappings ) {
 				if ( FrawUtils.compatible(smFromInput, smFromRequest) ) {
-					solMapsForOutput.add( FrawUtils.merge(smFromInput,smFromRequest) );
+					solMapsForOutput.add( FrawUtils.merge(smFromInput,smFromRequest,useOuterJoinSemantics) );
 					inputSolutionMappingsWithJoinPartners.add(smFromInput);
 				}
 			}

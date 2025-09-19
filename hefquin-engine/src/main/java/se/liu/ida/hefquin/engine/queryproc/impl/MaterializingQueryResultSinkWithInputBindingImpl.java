@@ -23,7 +23,7 @@ public class MaterializingQueryResultSinkWithInputBindingImpl extends Materializ
 
         if(inputSolutionMapping != null && !inputSolutionMapping.asJenaBinding().isEmpty()){
             if(FrawUtils.compatible(element, inputSolutionMapping)) {
-                merged = FrawUtils.merge(inputSolutionMapping, element);
+                merged = FrawUtils.merge(inputSolutionMapping, element, false);
             }else {
                 System.out.println("Warning: the input solution mapping is not compatible with the input solution mapping");
             }

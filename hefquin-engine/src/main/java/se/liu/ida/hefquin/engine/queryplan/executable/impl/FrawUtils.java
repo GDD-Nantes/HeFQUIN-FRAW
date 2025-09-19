@@ -35,14 +35,14 @@ public class FrawUtils {
         return true;
     }
 
-    public static SolutionMapping merge( final SolutionMapping m1, final SolutionMapping m2 ) {
+    public static SolutionMapping merge( final SolutionMapping m1, final SolutionMapping m2, final boolean useOuterJoinSemantic ) {
         final Binding b1 = m1.asJenaBinding();
         final Binding b2 = m2.asJenaBinding();
 
-        return new SolutionMappingImpl( merge(b1,b2) );
+        return new SolutionMappingImpl( merge(b1,b2,useOuterJoinSemantic) );
     }
 
-    public static Binding merge(Binding bind1, Binding bind2) {
+    public static Binding merge(Binding bind1, Binding bind2,  final boolean useOuterJoinSemantic ) {
         // Create binding from LHS
         BindingBuilder builder = Binding.builder(bind1);
         Iterator<Var> vIter = bind2.vars();
@@ -58,8 +58,23 @@ public class FrawUtils {
                 Node n2 = bind2.get(v);
                 if(v.equals(MAPPING_PROBABILITY)){
                     if(!computedProba){
-                        builder.add(v,
-                                NodeFactory.createLiteralDT(String.valueOf(Double.valueOf(String.valueOf(n1.getLiteralValue())) * Double.valueOf(String.valueOf(n2.getLiteralValue()))), XSDDatatype.XSDdouble));
+                        Double leftProba = Double.valueOf(String.valueOf(n1.getLiteralValue()));
+                        Double rightProba = Double.valueOf(String.valueOf(n2.getLiteralValue()));
+
+                        if(rightProba == 0 && useOuterJoinSemantic) {
+                            // if we're using outer join semantics AND the probability of the optional part is 0
+                            // we should leave only the left probability for the mapping
+                            builder.add(v,
+                                    NodeFactory.createLiteralDT(String.valueOf(leftProba),
+                                            XSDDatatype.XSDdouble));
+                        } else {
+                            // otherwise we can go on with multiplication of probability of the left branch
+                            // and the right branch
+                            builder.add(v,
+                                    NodeFactory.createLiteralDT(String.valueOf(leftProba * rightProba),
+                                    XSDDatatype.XSDdouble));
+                        }
+
                     } else {
                         System.out.println("Tried to compute probability of joined binding twice! This shouldn't happen");
                     }

@@ -59,7 +59,7 @@ public class LogicalToPhysicalSamplingOpConverter
 	public static UnaryPhysicalOp convert( final LogicalOpGPAdd lop ) {
 		final FederationMember fm = lop.getFederationMember();
 
-		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
+		if ( fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
 
 		else throw new UnsupportedOperationException("Unsupported type of federation member: " + fm.getClass().getName() + ".");
 	}
@@ -67,7 +67,7 @@ public class LogicalToPhysicalSamplingOpConverter
 	public static UnaryPhysicalOp convert( final LogicalOpGPOptAdd lop ) {
 		final FederationMember fm = lop.getFederationMember();
 
-		if (      fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
+		if ( fm instanceof SPARQLEndpoint ) return new PhysicalOpFrawBindJoinWithVALUESorFILTER(lop);
 
 		else throw new UnsupportedOperationException("Unsupported type of federation member: " + fm.getClass().getName() + ".");
 	}

@@ -81,6 +81,12 @@ public class SamplingPhysicalPlanFactory extends PhysicalPlanFactory
 		return createPlan(pop, subplan);
 	}
 
+	public static PhysicalPlan createPlanWithBindJoinVALUES( final LogicalOpGPOptAdd lop,
+															 final PhysicalPlan subplan ) {
+		final UnaryPhysicalOp pop = new PhysicalOpFrawBindJoinWithVALUES(lop);
+		return createPlan(pop, subplan);
+	}
+
 	/**
 	 * Creates a plan with a VALUES-based bind join that can switch to FILTER-based bind join as root operator.
 	 */

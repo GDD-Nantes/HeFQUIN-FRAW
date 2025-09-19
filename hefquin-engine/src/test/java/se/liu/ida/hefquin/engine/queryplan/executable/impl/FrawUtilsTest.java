@@ -57,7 +57,7 @@ public class FrawUtilsTest {
 
         Node expected = createProbaNode(0.4);
 
-        Assert.assertEquals(expected, FrawUtils.merge(s1, s2).asJenaBinding().get(MAPPING_PROBABILITY));
+        Assert.assertEquals(expected, FrawUtils.merge(s1, s2, false).asJenaBinding().get(MAPPING_PROBABILITY));
     }
 
     @Test
@@ -67,7 +67,26 @@ public class FrawUtilsTest {
 
         Node expected = createProbaNode(0.0);
 
-        Assert.assertEquals(expected, FrawUtils.merge(s1, s2).asJenaBinding().get(MAPPING_PROBABILITY));
+        Assert.assertEquals(expected, FrawUtils.merge(s1, s2, false).asJenaBinding().get(MAPPING_PROBABILITY));
+    }
+
+    @Test
+    public void testMergeWithDifferentProbabilitiesAndOuterJoinSemantics(){
+        SolutionMapping s1 = buildSolutionMappingWithProbabilityAndValue(0.5, "value");
+        SolutionMapping s2 = buildSolutionMappingWithProbabilityAndValue(0.8, "value");
+
+        Node expected = createProbaNode(0.4);
+
+        Assert.assertEquals(expected, FrawUtils.merge(s1, s2, true).asJenaBinding().get(MAPPING_PROBABILITY));
+    }
+
+    @Test
+    public void testMergeWithDifferentProbabilitiesWhenZeroAndOuterJoinSemantics(){
+        SolutionMapping s1 = buildSolutionMappingWithProbabilityAndValue(0.5, "value");
+        SolutionMapping s2 = buildSolutionMappingWithProbabilityAndValue(0.0, "value");
+
+        Node expected = createProbaNode(0.5);
+        Assert.assertEquals(expected, FrawUtils.merge(s1, s2, true).asJenaBinding().get(MAPPING_PROBABILITY));
     }
 
     @Test
