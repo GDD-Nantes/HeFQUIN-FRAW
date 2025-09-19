@@ -38,10 +38,10 @@ You need to install FedUP beforehand.
     ```bash
       ./bin/hefquin-server \
         --port=8080 \
-        --path="" \
-        --federationDescription fedshop200.ttl \
+        --path="/fedshop200" \
+        --federationDescription config/fedshop200.ttl \
         --confDescr ExampleEngineConf.ttl \
-        --frawConfDescr f200_UOJ.ttl
+        --frawConfDescr config/f200_UOJ.ttl
     ```
     where
     * the `--port` argument specifies the port at which the service shall listen and
