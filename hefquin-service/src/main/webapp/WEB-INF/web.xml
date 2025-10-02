@@ -56,7 +56,7 @@
         </init-param>
         <init-param>
             <param-name>allowedHeaders</param-name>
-            <param-value>X-Requested-With,Content-Type,Accept,Origin</param-value>
+            <param-value>X-Requested-With,Content-Type,Accept,Origin,budget</param-value>
         </init-param>
     </filter>
     <filter-mapping>
