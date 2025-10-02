@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
+import se.liu.ida.hefquin.engine.queryplan.base.impl.BaseForQueryPlan;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlan;
 import se.liu.ida.hefquin.engine.queryplan.logical.LogicalPlanWithNaryRoot;
 import se.liu.ida.hefquin.engine.queryplan.logical.NaryLogicalOp;
 
-public class LogicalPlanWithNaryRootImpl implements LogicalPlanWithNaryRoot
+public class LogicalPlanWithNaryRootImpl extends BaseForQueryPlan
+                                         implements LogicalPlanWithNaryRoot
 {
 	private final NaryLogicalOp rootOp;
 	private final List<LogicalPlan> subPlans;

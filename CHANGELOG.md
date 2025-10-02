@@ -7,9 +7,15 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [unreleased]
 
 ### Added
-- nothing yet
+- Basis for proper management of query-planning-related information ([#455](https://github.com/LiUSemWeb/HeFQUIN/pull/455), [#456](https://github.com/LiUSemWeb/HeFQUIN/pull/456), [#461](https://github.com/LiUSemWeb/HeFQUIN/pull/461)).
+- Extending the text-based plan printers to include information about expected variables at each level of the plan ([#457](https://github.com/LiUSemWeb/HeFQUIN/pull/457)).
+- Adding the bound join algorithm from the FedX paper ([#458](https://github.com/LiUSemWeb/HeFQUIN/pull/458)).
+- Adding basic printing of executable plans ([#473](https://github.com/LiUSemWeb/HeFQUIN/pull/473)).
 ### Changed
 - Merging the logical operators tpAdd, bgpAdd, and gpAdd into just one: gpAdd; likewise for tpOptAdd, bgpOptAdd, and gpOptAdd ([#454](https://github.com/LiUSemWeb/HeFQUIN/pull/454)).
+- Removing the old StatsPrinter in favor of the new JSON-based one ([#460](https://github.com/LiUSemWeb/HeFQUIN/pull/460)).
+- Changing the cardinality-based join ordering heuristic to avoid cardinality requests for plans without joins ([#465](https://github.com/LiUSemWeb/HeFQUIN/pull/465)).
+- Removing the "GreedyBasedReordering" heuristic from the default sequence of heuristics of the logical optimizer ([#467](https://github.com/LiUSemWeb/HeFQUIN/pull/467)).
 
 
 ## [0.0.6] - 2025-06-30

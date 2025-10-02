@@ -29,11 +29,11 @@ public class ModServer extends ModBase
 		cmdLine.add( argPort, "--port", "Server port (default: 8080)" );
 		cmdLine.add( argPath, "--path", "Server path (default: \"\")" );
 		cmdLine.add( argConfDescr, "--confDescr",
-				"File with an RDF description of the configuration (default: DefaultEngineConf.ttl)" );
+				"File with an RDF description of the configuration (default: DefaultConfDescr.ttl)" );
 		cmdLine.add( argFrawConfDescr, "--frawConfDescr",
-				"File with an RDF description of the configuration for the federated random walk engine (default: DefaultEngineConf.ttl, aka if no configuration is given, /raw works like a classic sparql endpoint)" );
+				"File with an RDF description of the configuration for the federated random walk engine (default: config/DefaultConfDescr.ttl, aka if no configuration is given, /raw works like a classic sparql endpoint)" );
 		cmdLine.add( argFedDescr, "--federationDescription",
-				"File with an RDF description of the federation (default: DefaultFederation.ttl)" );
+				"File with an RDF description of the federation (default: config/DefaultFedConf.ttl)" );
 	}
 
 	@Override
@@ -51,17 +51,17 @@ public class ModServer extends ModBase
 		if ( cmdLine.contains( argConfDescr ) ) {
 			confDescr = cmdLine.getValue( argConfDescr );
 		} else {
-			confDescr = "DefaultEngineConf.ttl";
+			confDescr = "config/DefaultConfDescr.ttl";
 		}
 		if ( cmdLine.contains( argFrawConfDescr ) ) {
 			frawConfDescr = cmdLine.getValue( argFrawConfDescr );
 		} else {
-			frawConfDescr = "DefaultEngineConf.ttl";
+			frawConfDescr = "config/DefaultConfDescr.ttl";
 		}
 		if ( cmdLine.contains( argFedDescr ) ) {
 			fedDescr = cmdLine.getValue( argFedDescr );
 		} else {
-			fedDescr = "DefaultFedConf.ttl";
+			fedDescr = "config/DefaultFedConf.ttl";
 		}
 	}
 

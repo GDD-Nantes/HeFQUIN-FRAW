@@ -1,5 +1,10 @@
 package se.liu.ida.hefquin.base.query.impl;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.jena.atlas.io.IndentedLineBuffer;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -9,14 +14,20 @@ import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.algebra.op.*;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.serializer.FormatterElement;
 import org.apache.jena.sparql.serializer.SerializationContext;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
+
 import se.liu.ida.hefquin.base.data.SolutionMapping;
-import se.liu.ida.hefquin.base.query.*;
+import se.liu.ida.hefquin.base.query.ExpectedVariables;
+import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
+import se.liu.ida.hefquin.base.query.SPARQLGroupPattern;
+import se.liu.ida.hefquin.base.query.TriplePattern;
+import se.liu.ida.hefquin.base.query.VariableByBlankNodeSubstitutionException;
 import se.liu.ida.hefquin.jenaext.sparql.algebra.OpUtils;
 
 import java.util.HashMap;
@@ -122,11 +133,11 @@ public class GenericSPARQLGraphPatternImpl2 implements SPARQLGraphPattern
 	}
 
 	@Override
-	public SPARQLGraphPattern applySolMapToGraphPattern( final SolutionMapping sm )
+	public SPARQLGraphPattern applySolMapToGraphPattern( final Binding sm )
 			throws VariableByBlankNodeSubstitutionException
 	{
 		final Map<Var, Node> map = new HashMap<>();
-		sm.asJenaBinding().forEach( (v,n) -> map.put(v,n) );
+		sm.forEach( (v,n) -> map.put(v,n) );
 		final NodeTransform t = new NodeTransformSubst(map);
 
 		final Op opNew = NodeTransformLib.transform(t, jenaPatternOp);

@@ -1,10 +1,19 @@
 package se.liu.ida.hefquin.engine;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.vocabulary.RDF;
+
+import se.liu.ida.hefquin.engine.queryplan.utils.ExecutablePlanPrinter;
 import se.liu.ida.hefquin.engine.queryplan.utils.LogicalPlanPrinter;
 import se.liu.ida.hefquin.engine.queryplan.utils.PhysicalPlanPrinter;
 import se.liu.ida.hefquin.engine.queryproc.*;
@@ -111,6 +120,9 @@ public class HeFQUINEngineConfigReader
 
 		/** may be <code>null</code> if physical plan printing is not requested by the user */
 		PhysicalPlanPrinter getPhysicalPlanPrinter();
+
+		/** may be <code>null</code> if executable plan printing is not requested by the user */
+		ExecutablePlanPrinter getExecutablePlanPrinter();
 	}
 
 	public int readBudget( final Resource confRsrc ) {
@@ -216,7 +228,8 @@ public class HeFQUINEngineConfigReader
 		return new QueryPlannerImpl( spl, lopt, popt,
 		                             ctx.getSourceAssignmentPrinter(),
 		                             ctx.getLogicalPlanPrinter(),
-		                             ctx.getPhysicalPlanPrinter() );
+		                             ctx.getPhysicalPlanPrinter(),
+		                             ctx.getExecutablePlanPrinter() );
 	}
 
 	public SourcePlanner readSourcePlanner( final Resource qplRsrc, final ExtendedContext ctx ) {
@@ -485,6 +498,9 @@ public class HeFQUINEngineConfigReader
 
 		@Override
 		public PhysicalPlanPrinter getPhysicalPlanPrinter() { return ctx.getPhysicalPlanPrinter(); }
+
+		@Override
+		public ExecutablePlanPrinter getExecutablePlanPrinter() { return ctx.getExecutablePlanPrinter(); }
 	}
 
 	protected class ExtendedContextImpl2 implements ExtendedContext {
@@ -550,6 +566,9 @@ public class HeFQUINEngineConfigReader
 
 		@Override
 		public PhysicalPlanPrinter getPhysicalPlanPrinter() { return ctx.getPhysicalPlanPrinter(); }
+
+		@Override
+		public ExecutablePlanPrinter getExecutablePlanPrinter() { return ctx.getExecutablePlanPrinter(); }
 	}
 
 	protected QueryProcContext createQueryProcContext( final Context ctx,

@@ -9,8 +9,10 @@ import org.apache.jena.sparql.core.Var;
 
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
 import se.liu.ida.hefquin.base.query.utils.ExpectedVariablesUtils;
+import se.liu.ida.hefquin.engine.queryplan.base.impl.BaseForQueryPlanOperator;
 import se.liu.ida.hefquin.engine.queryplan.executable.UnaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpParallelMultiwayLeftJoin;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRequest;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalOperator;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
@@ -30,7 +32,8 @@ import se.liu.ida.hefquin.engine.queryplan.physical.UnaryPhysicalOp;
  * The actual algorithm of this operator is implemented
  * in the {@link ExecOpParallelMultiwayLeftJoin} class.
  */
-public class PhysicalOpParallelMultiLeftJoin extends BaseForPhysicalOps implements UnaryPhysicalOp
+public class PhysicalOpParallelMultiLeftJoin extends BaseForQueryPlanOperator
+                                             implements UnaryPhysicalOp
 {
 	/**
 	 * Checks whether a {@link LogicalOpMultiwayLeftJoin} with the given list
@@ -39,17 +42,16 @@ public class PhysicalOpParallelMultiLeftJoin extends BaseForPhysicalOps implemen
 	 * the optional parts of that multi-left-join. If not, this method returns
 	 * <code>null</code>.
 	 */
-	public static List<LogicalOpRequest<?,?>> checkApplicability( final List<PhysicalPlan> children )
+	public static List<LogicalOpRequest<?,?>> checkApplicability( final PhysicalPlan[] children )
 	{
-		final List<LogicalOpRequest<?,?>> optionalParts = new ArrayList<>( children.size()-1 );
-		final List<ExpectedVariables> expVarsOfOptionalParts = new ArrayList<>( children.size()-1 );
+		final List<LogicalOpRequest<?,?>> optionalParts = new ArrayList<>( children.length - 1 );
+		final List<ExpectedVariables> expVarsOfOptionalParts = new ArrayList<>( children.length - 1 );
 
-		final Iterator<PhysicalPlan> it = children.iterator();
-		final PhysicalPlan firstChildPlan = it.next(); // the non-optional part
+		final PhysicalPlan firstChildPlan = children[0]; // the non-optional part
 
 		// condition 1: every non-optional part is just a request operator
-		while ( it.hasNext() ) {
-			final PhysicalOperator childRootOp = it.next().getRootOperator();
+		for ( int i = 1; i < children.length; i++ ) {
+			final PhysicalOperator childRootOp = children[i].getRootOperator();
 			final LogicalOpRequest<?,?> reqOp;
 			if ( childRootOp instanceof PhysicalOpRequest<?,?> ) {
 				reqOp = ((PhysicalOpRequest<?,?>) childRootOp).getLogicalOperator();
@@ -127,10 +129,11 @@ public class PhysicalOpParallelMultiLeftJoin extends BaseForPhysicalOps implemen
 
 	@Override
 	public UnaryExecutableOp createExecOp( final boolean collectExceptions,
+	                                       final QueryPlanningInfo qpInfo,
 	                                       final ExpectedVariables... inputVars ) {
 		assert inputVars.length == 1;
 
-		return new ExecOpParallelMultiwayLeftJoin( collectExceptions, inputVars[0], optionalParts );
+		return new ExecOpParallelMultiwayLeftJoin( collectExceptions, qpInfo, inputVars[0], optionalParts );
 	}
 
 	@Override

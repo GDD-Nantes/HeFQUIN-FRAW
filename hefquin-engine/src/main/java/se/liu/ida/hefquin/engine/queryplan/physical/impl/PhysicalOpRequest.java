@@ -1,8 +1,13 @@
 package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
+import se.liu.ida.hefquin.engine.queryplan.base.impl.BaseForQueryPlanOperator;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.*;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpRequestBRTPF;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpRequestSPARQL;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpRequestTPFatBRTPFServer;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpRequestTPFatTPFServer;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRequest;
 import se.liu.ida.hefquin.engine.queryplan.physical.NullaryPhysicalOpForLogicalOp;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
@@ -26,8 +31,9 @@ import java.util.Objects;
  * <li>{@link ExecOpRequestSPARQL}</li>
  * </ul>
  */
-public class PhysicalOpRequest<ReqType extends se.liu.ida.hefquin.federation.access.DataRetrievalRequest, MemberType extends FederationMember>
-                       extends BaseForPhysicalOps implements NullaryPhysicalOpForLogicalOp
+public class PhysicalOpRequest<ReqType extends DataRetrievalRequest, MemberType extends FederationMember> 
+                       extends BaseForQueryPlanOperator
+                       implements NullaryPhysicalOpForLogicalOp
 {
 	protected final LogicalOpRequest<ReqType,MemberType> lop;
 
@@ -53,20 +59,24 @@ public class PhysicalOpRequest<ReqType extends se.liu.ida.hefquin.federation.acc
 
 	@Override
 	public NullaryExecutableOp createExecOp( final boolean collectExceptions,
-	                                         final ExpectedVariables ... inputVars ) {
+	                                         final QueryPlanningInfo qpInfo,
+		                                     final ExpectedVariables ... inputVars ) {
 		final ReqType req = lop.getRequest();
 		final MemberType fm = lop.getFederationMember();
 		if( fm instanceof FederationMemberAgglomeration && req instanceof SPARQLRequest ){
 			return new ExecOpFrawRequest((SPARQLRequest) req, (FederationMemberAgglomeration) fm, collectExceptions);
 		}
-		else if ( fm instanceof TPFServer && req instanceof TriplePatternRequest ) {
-			return new ExecOpRequestTPFatTPFServer( (TriplePatternRequest) req, (TPFServer) fm, collectExceptions );
+		else if ( fm instanceof TPFServer tpf && req instanceof TriplePatternRequest tpreq ) {
+			return new ExecOpRequestTPFatTPFServer(tpreq, tpf, collectExceptions, qpInfo);
 		}
-		else if ( fm instanceof BRTPFServer && req instanceof TriplePatternRequest ) {
-			return new ExecOpRequestTPFatBRTPFServer( (TriplePatternRequest) req, (BRTPFServer) fm, collectExceptions );
+		else if ( fm instanceof BRTPFServer brtpf && req instanceof TriplePatternRequest tpreq ) {
+			return new ExecOpRequestTPFatBRTPFServer(tpreq, brtpf, collectExceptions, qpInfo);
 		}
 		else if ( fm instanceof SPARQLEndpoint && req instanceof SPARQLRequest ) {
 			return new ExecOpRequestSPARQL( (SPARQLRequest) req, (SPARQLEndpoint) fm, collectExceptions );
+        }
+        else if ( fm instanceof BRTPFServer brtpf && req instanceof BindingsRestrictedTriplePatternRequest brtpreq ) {
+			return new ExecOpRequestBRTPF(brtpreq, brtpf, collectExceptions, qpInfo);
 		}
 		else
 			throw new IllegalArgumentException("Unsupported combination of federation member (type: " + fm.getClass().getName() + ") and request type (" + req.getClass().getName() + ")");

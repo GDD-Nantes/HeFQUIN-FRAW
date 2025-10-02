@@ -6,6 +6,9 @@ import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.riot.system.stream.StreamManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 import se.liu.ida.hefquin.engine.HeFQUINEngine;
 import se.liu.ida.hefquin.engine.HeFQUINEngineBuilder;
 
@@ -17,9 +20,9 @@ public class SharedResourceInitializer implements ServletContextListener
 
 	@Override
 	public void contextInitialized( ServletContextEvent servletContextEvent ) {
-		final String confDescr = System.getProperty( "hefquin.configuration", "DefaultEngineConf.ttl" );
-		final String frawConfDescr = System.getProperty( "fraw.configuration", "DefaultEngineConf.ttl" );
-		final String fedCat = System.getProperty( "hefquin.federation", "DefaultFedConf.ttl" );
+		final String confDescr = System.getProperty( "hefquin.configuration", "config/DefaultConfDescr.ttl" );
+		final String frawConfDescr = System.getProperty( "fraw.configuration", "config/DefaultConfDescr.ttl" );
+		final String fedCat = System.getProperty( "hefquin.federation", "config/DefaultFedConf.ttl" );
 
 		logger.info( "--- Initialize engine ---" );
 		logger.info( "hefquin.configuration: {}", confDescr );

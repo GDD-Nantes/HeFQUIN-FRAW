@@ -49,6 +49,8 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 		final String indentLevelStringForOpDetail = getIndentLevelStringForDetail(planNumber, planLevel, numberOfSiblings, plan.numberOfSubPlans(), indentLevelString);
 		opPrinter.setIndentLevelStringForOpDetail(indentLevelStringForOpDetail);
 
+		opPrinter.setExpectedVariables( plan.getExpectedVariables() );
+		opPrinter.setQueryPlanningInfo( plan.getQueryPlanningInfo() );
 		plan.getRootOperator().visit(opPrinter);
 
 		for ( int i = 0; i < plan.numberOfSubPlans(); ++i ) {
@@ -76,6 +78,9 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 				out.append( System.lineSeparator() );
 			}
 
+			printExpectedVariables( indentLevelStringForOpDetail + singleBase );
+			printQueryPlanningInfo( indentLevelStringForOpDetail + singleBase );
+
 			out.append( indentLevelStringForOpDetail + singleBase );
 			out.append( System.lineSeparator() );
 		}
@@ -89,6 +94,9 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 			                  indentLevelStringForOpDetail + singleBase,
 			                  out );
 
+			printExpectedVariables( indentLevelStringForOpDetail + singleBase );
+			printQueryPlanningInfo( indentLevelStringForOpDetail + singleBase );
+
 			out.append( indentLevelStringForOpDetail + singleBase );
 			out.append( System.lineSeparator() );
 		}
@@ -100,6 +108,9 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 			out.append( indentLevelStringForOpDetail + singleBase + "  - vocab.mapping (" + op.getVocabularyMapping().hashCode() +  ") " );
 			out.append( System.lineSeparator() );
 
+			printExpectedVariables( indentLevelStringForOpDetail + singleBase );
+			printQueryPlanningInfo( indentLevelStringForOpDetail + singleBase );
+
 			out.append( indentLevelStringForOpDetail + singleBase );
 			out.append( System.lineSeparator() );
 		}
@@ -110,6 +121,10 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 			out.append( System.lineSeparator() );
 			printFederationMember( op.getFederationMember(), indentLevelStringForOpDetail + singleBase, out );
 			printSPARQLGraphPattern( op.getPattern(), indentLevelStringForOpDetail + singleBase );
+
+			printExpectedVariables( indentLevelStringForOpDetail + singleBase );
+			printQueryPlanningInfo( indentLevelStringForOpDetail + singleBase );
+
 			out.append( indentLevelStringForOpDetail + singleBase );
 			out.append( System.lineSeparator() );
 		}
@@ -120,6 +135,10 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 			out.append( System.lineSeparator() );
 			printFederationMember( op.getFederationMember(), indentLevelStringForOpDetail + singleBase, out );
 			printSPARQLGraphPattern( op.getPattern(), indentLevelStringForOpDetail + singleBase );
+
+			printExpectedVariables( indentLevelStringForOpDetail + singleBase );
+			printQueryPlanningInfo( indentLevelStringForOpDetail + singleBase );
+
 			out.append( indentLevelStringForOpDetail + singleBase );
 			out.append( System.lineSeparator() );
 		}
@@ -128,6 +147,9 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 		public void visit( final LogicalOpJoin op ) {
 			printLogicalOperatorBase( op, indentLevelString, out, np );
 			out.append( System.lineSeparator() );
+
+			printExpectedVariables( indentLevelStringForOpDetail + singleBase );
+			printQueryPlanningInfo( indentLevelStringForOpDetail + singleBase );
 		}
 
 		@Override
@@ -136,6 +158,9 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 			out.append( System.lineSeparator() );
 			out.append( indentLevelStringForOpDetail + singleBase + "  - vocab.mapping (" + op.getVocabularyMapping().hashCode() +  ") " );
 			out.append( System.lineSeparator() );
+
+			printExpectedVariables( indentLevelStringForOpDetail + singleBase );
+			printQueryPlanningInfo( indentLevelStringForOpDetail + singleBase );
 
 			out.append( indentLevelStringForOpDetail + singleBase );
 			out.append( System.lineSeparator() );
@@ -146,6 +171,9 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 			printLogicalOperatorBase( op, indentLevelString, out, np );
 			out.append( System.lineSeparator() );
 
+			printExpectedVariables( indentLevelStringForOpDetail + singleBase );
+			printQueryPlanningInfo( indentLevelStringForOpDetail + singleBase );
+
 			out.append( indentLevelStringForOpDetail + singleBase );
 			out.append( System.lineSeparator() );
 		}
@@ -155,6 +183,9 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 			printLogicalOperatorBase( op, indentLevelString, out, np );
 			out.append( System.lineSeparator() );
 
+			printExpectedVariables( indentLevelStringForOpDetail + singleBase );
+			printQueryPlanningInfo( indentLevelStringForOpDetail + singleBase );
+
 			out.append( indentLevelStringForOpDetail + singleBase );
 			out.append( System.lineSeparator() );
 		}
@@ -163,6 +194,9 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 		public void visit( final LogicalOpMultiwayUnion op ) {
 			printLogicalOperatorBase( op, indentLevelString, out, np );
 			out.append( System.lineSeparator() );
+
+			printExpectedVariables( indentLevelStringForOpDetail + singleBase );
+			printQueryPlanningInfo( indentLevelStringForOpDetail + singleBase );
 
 			out.append( indentLevelStringForOpDetail + singleBase );
 			out.append( System.lineSeparator() );
@@ -183,6 +217,9 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 				out.append( System.lineSeparator() );
 			}
 
+			printExpectedVariables( indentLevelStringForOpDetail );
+			printQueryPlanningInfo( indentLevelStringForOpDetail );
+
 			out.append( indentLevelStringForOpDetail );
 			out.append( System.lineSeparator() );
 		}
@@ -191,11 +228,17 @@ public class TextBasedLogicalPlanPrinterImpl extends BaseForTextBasedPlanPrinter
 		public void visit( final LogicalOpRightJoin op ) {
 			printLogicalOperatorBase( op, indentLevelString, out, np );
 			out.append( System.lineSeparator() );
+
+			printExpectedVariables( indentLevelStringForOpDetail + singleBase );
+			printQueryPlanningInfo( indentLevelStringForOpDetail + singleBase );
 		}
 
 		@Override
 		public void visit( final LogicalOpUnion op ) {
 			printLogicalOperatorBase( op, indentLevelString, out, np );
+
+			printExpectedVariables( indentLevelStringForOpDetail + singleBase );
+			printQueryPlanningInfo( indentLevelStringForOpDetail + singleBase );
 		}
 	}
 

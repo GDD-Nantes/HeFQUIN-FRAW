@@ -3,9 +3,10 @@ package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 import java.util.Objects;
 
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
+import se.liu.ida.hefquin.engine.queryplan.base.impl.BaseForQueryPlanOperator;
 import se.liu.ida.hefquin.engine.queryplan.executable.BinaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpHashRJoin;
-import se.liu.ida.hefquin.engine.queryplan.logical.BinaryLogicalOp;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRightJoin;
 import se.liu.ida.hefquin.engine.queryplan.physical.BinaryPhysicalOpForLogicalOp;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
@@ -26,7 +27,7 @@ import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
  * The actual algorithm of this operator is implemented in the
  * {@link ExecOpHashRJoin} class.
  */
-public class PhysicalOpHashRJoin extends BaseForPhysicalOps
+public class PhysicalOpHashRJoin extends BaseForQueryPlanOperator
                                  implements BinaryPhysicalOpForLogicalOp
 {
 	protected final LogicalOpRightJoin lop;
@@ -37,21 +38,17 @@ public class PhysicalOpHashRJoin extends BaseForPhysicalOps
 	}
 
 	@Override
-	public BinaryLogicalOp getLogicalOperator() {
+	public LogicalOpRightJoin getLogicalOperator() {
 		return lop;
 	}
 
 	@Override
-	public ExpectedVariables getExpectedVariables( final ExpectedVariables... inputVars ) {
-		return lop.getExpectedVariables(inputVars);
-	}
-
-	@Override
 	public BinaryExecutableOp createExecOp( final boolean collectExceptions,
+	                                        final QueryPlanningInfo qpInfo,
 	                                        final ExpectedVariables ... inputVars ) {
 		assert inputVars.length == 2;
 
-		return new ExecOpHashRJoin( inputVars[0], inputVars[1], collectExceptions );
+		return new ExecOpHashRJoin( inputVars[0], inputVars[1], collectExceptions, qpInfo );
 	}
 
 	@Override
