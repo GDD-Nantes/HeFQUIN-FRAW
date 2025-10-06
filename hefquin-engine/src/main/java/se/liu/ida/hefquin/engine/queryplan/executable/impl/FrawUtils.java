@@ -122,7 +122,9 @@ public class FrawUtils {
         BindingBuilder bb = BindingBuilder.create(binding);
 
         for (Var var : variablesFromFM) {
-            bb.add(Var.alloc(VAR_PROVENANCE_PREFIX + var.getVarName()), NodeFactory.createLiteralDT(federationMember.getInterface().toString(), XSDDatatype.XSDstring));
+            String rawProvenance = federationMember.getInterface().toString();
+            String provenance = rawProvenance.replace("SPARQL endpoint at ", "");
+            bb.add(Var.alloc(VAR_PROVENANCE_PREFIX + var.getVarName()), NodeFactory.createLiteralDT(provenance, XSDDatatype.XSDstring));
         }
 
         return bb.build();
