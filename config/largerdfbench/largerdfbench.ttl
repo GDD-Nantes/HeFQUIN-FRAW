@@ -81,7 +81,7 @@ ex:sparqlSWDFood
                      fd:endpointAddress <http://localhost:3030/largerdfbench/sparql?default-graph-uri=http://example.org/SWDFood> ] .
 
 
-ex:sparqlempty
+ex:sparqlEmpty
       a            fd:FederationMember ;
       fd:interface [ a                  fd:SPARQLEndpointInterface ;
                      fd:endpointAddress <http://localhost:3030/largerdfbench/sparql?default-graph-uri=http://www.empty.fr/> ] .
@@ -165,7 +165,7 @@ ex:rawSWDFood
                      fd:endpointAddress <http://localhost:3030/largerdfbench/raw?default-graph-uri=http://example.org/SWDFood> ] .
 
 
-ex:rawempty
+ex:rawEmpty
       a            fd:FederationMember ;
       fd:interface [ a                  fd:SPARQLEndpointInterface ;
                      fd:endpointAddress <http://localhost:3030/largerdfbench/raw?default-graph-uri=http://www.empty.fr/> ] .

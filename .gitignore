@@ -64,7 +64,7 @@ hefquin-vocabs/.settings/
 
 .DS_Store
 
-config/fedshop200.ttl
+config/fedshop/fedshop200.ttl
 config/SamplingConf.ttl
 summaries/*
 plan.txt

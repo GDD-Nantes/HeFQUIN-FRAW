@@ -39,16 +39,16 @@ You need to install FedUP beforehand.
       ./bin/hefquin-server \
         --port=8080 \
         --path="/fedshop200" \
-        --federationDescription config/fedshop200.ttl \
+        --federationDescription config/fedshop/fedshop200.ttl \
         --confDescr ExampleEngineConf.ttl \
-        --frawConfDescr config/f200_UOJ.ttl
+        --frawConfDescr config/fedshop/sample_fedshop200_UOJ.ttl
     ```
     where
     * the `--port` argument specifies the port at which the service shall listen and
     * the `--path` argument specifies the custom URL path serving the different endpoints
     * the `--federationDescription` argument refers to a file (e.g., `fedshop200.ttl`) that contains an [RDF-based description of your federation](https://liusemweb.github.io/HeFQUIN/doc/federation_description.html).
-    * the `--confDescr` argument refers to a file (e.g., `f200_eval.ttl`) that contains an RDF-based description of the engine used to process queries sent to the SPARQL endpoint.
-    * the `--frawConfDescr` argument refers to a file (e.g., `f200_UOJ.ttl`) that contains an RDF-based description of the engine used to process queries sent to the sampling endpoint.
+    * the `--confDescr` argument refers to a file (e.g., `eval_fedshop200.ttl`) that contains an RDF-based description of the engine used to process queries sent to the SPARQL endpoint.
+    * the `--frawConfDescr` argument refers to a file (e.g., `sample_fedshop200_UOJ.ttl`) that contains an RDF-based description of the engine used to process queries sent to the sampling endpoint.
 
     This configuration assumes a federation of 200 endpoints as described in [FedShop](https://github.com/GDD-Nantes/FedShop) that all offer to process queries with random walks.
     The easiest way to set up such a federation is using [RAW x Passage](https://github.com/passage-org/passage).
