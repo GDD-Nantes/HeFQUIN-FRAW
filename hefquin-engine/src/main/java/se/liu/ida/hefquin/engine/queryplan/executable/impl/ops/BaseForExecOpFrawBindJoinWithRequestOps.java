@@ -8,6 +8,7 @@ import se.liu.ida.hefquin.base.query.Query;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecOpExecutionException;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.federation.FederationMember;
 
@@ -76,8 +77,9 @@ public abstract class BaseForExecOpFrawBindJoinWithRequestOps<QueryType extends 
 												final ExpectedVariables inputVars,
 												final boolean useOuterJoinSemantics,
 												final int batchSize,
-												final boolean collectExceptions ) {
-		super(query, varsInQuery, fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions);
+												final boolean collectExceptions,
+												final QueryPlanningInfo qpInfo ) {
+		super(query, varsInQuery, fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions, qpInfo);
 	}
 
 	/**

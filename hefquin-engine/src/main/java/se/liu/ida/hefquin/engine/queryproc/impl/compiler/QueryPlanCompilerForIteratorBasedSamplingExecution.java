@@ -3,6 +3,7 @@ package se.liu.ida.hefquin.engine.queryproc.impl.compiler;
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
 import se.liu.ida.hefquin.engine.queryplan.executable.*;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased.*;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.engine.queryproc.QueryCompilationException;
@@ -12,9 +13,9 @@ import se.liu.ida.hefquin.engine.queryproc.SamplingQueryPlanCompiler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompilerBase implements SamplingQueryPlanCompiler
+public class QueryPlanCompilerForIteratorBasedSamplingExecution extends QueryPlanCompilerBase implements SamplingQueryPlanCompiler
 {
-	public IteratorBasedSamplingQueryPlanCompilerImpl(final QueryProcContext ctxt) {
+	public QueryPlanCompilerForIteratorBasedSamplingExecution(final QueryProcContext ctxt) {
 		super(ctxt);
 	}
 
@@ -39,9 +40,15 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 	                                         final ExecutionContext execCxt,
 											 final List<SamplingResultElementIterWithNullaryExecOp> leaves)
 	{
+		final QueryPlanningInfo qpInfo;
+		if ( qep.hasQueryPlanningInfo() )
+			qpInfo = qep.getQueryPlanningInfo();
+		else
+			qpInfo = null;
+
 		if ( qep.numberOfSubPlans() == 0 )
 		{
-			final NullaryExecutableOp execOp = (NullaryExecutableOp) qep.getRootOperator().createExecOp(true);
+			final NullaryExecutableOp execOp = (NullaryExecutableOp) qep.getRootOperator().createExecOp(true, qpInfo);
 			SamplingResultElementIterWithNullaryExecOp sreiwneo =  new SamplingResultElementIterWithNullaryExecOp(execOp, execCxt);
 			leaves.add(sreiwneo);
 			return sreiwneo;
@@ -50,7 +57,7 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 		{
 			final PhysicalPlan subPlan = qep.getSubPlan(0);
 
-			final UnaryExecutableOp execOp = (UnaryExecutableOp) qep.getRootOperator().createExecOp( true, subPlan.getExpectedVariables() );
+			final UnaryExecutableOp execOp = (UnaryExecutableOp) qep.getRootOperator().createExecOp( true, qpInfo, subPlan.getExpectedVariables() );
 
 			final ResultElementIterator elmtIterSubPlan = compile(subPlan, execCxt, leaves);
 			return new SamplingResultElementIterWithUnaryExecOp(execOp, elmtIterSubPlan, execCxt);
@@ -62,6 +69,7 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 
 			final BinaryExecutableOp execOp = (BinaryExecutableOp) qep.getRootOperator().createExecOp(
 					true,
+					qpInfo,
 					subPlan1.getExpectedVariables(),
 					subPlan2.getExpectedVariables() );
 
@@ -82,6 +90,7 @@ public class IteratorBasedSamplingQueryPlanCompilerImpl extends QueryPlanCompile
 
 			final NaryExecutableOp execOp = (NaryExecutableOp) qep.getRootOperator().createExecOp(
 					true,
+					qpInfo,
 					expectedVariables);
 
 			for (int i = 0; i < qep.numberOfSubPlans(); ++i) {

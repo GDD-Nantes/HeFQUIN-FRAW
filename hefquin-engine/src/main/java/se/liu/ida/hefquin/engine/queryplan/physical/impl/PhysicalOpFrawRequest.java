@@ -4,6 +4,7 @@ import se.liu.ida.hefquin.base.data.VocabularyMapping;
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpFrawRequest;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRequest;
 import se.liu.ida.hefquin.engine.queryplan.physical.NullaryPhysicalOpForLogicalOp;
 import se.liu.ida.hefquin.federation.*;
@@ -66,6 +67,7 @@ public class PhysicalOpFrawRequest
 
     @Override
     public NullaryExecutableOp createExecOp(final boolean collectExceptions,
+                                            final QueryPlanningInfo qpInfo,
                                             final ExpectedVariables... inputVars ) {
         final DataRetrievalRequest req = lop.getRequest();
         final FederationMemberAgglomeration fm =  lop.getFederationMember();
@@ -79,8 +81,7 @@ public class PhysicalOpFrawRequest
                 && ! (fm instanceof FederationMemberAgglomeration && req instanceof SPARQLRequest)) {
             throw new IllegalArgumentException("Unsupported combination of federation member (type: " + fm.getClass().getName() + ") and request type (" + req.getClass().getName() + ")");
         }
-        else {
-            return new ExecOpFrawRequest(req, fm, collectExceptions);
-        }
+
+        return new ExecOpFrawRequest(req, fm, collectExceptions, null);
     }
 }

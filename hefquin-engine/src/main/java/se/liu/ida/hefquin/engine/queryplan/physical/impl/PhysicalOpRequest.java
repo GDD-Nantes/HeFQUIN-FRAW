@@ -3,15 +3,14 @@ package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
 import se.liu.ida.hefquin.engine.queryplan.base.impl.BaseForQueryPlanOperator;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpRequestBRTPF;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpRequestSPARQL;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpRequestTPFatBRTPFServer;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpRequestTPFatTPFServer;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.*;
 import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpRequest;
 import se.liu.ida.hefquin.engine.queryplan.physical.NullaryPhysicalOpForLogicalOp;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
 import se.liu.ida.hefquin.federation.*;
+import se.liu.ida.hefquin.federation.access.BindingsRestrictedTriplePatternRequest;
+import se.liu.ida.hefquin.federation.access.DataRetrievalRequest;
 import se.liu.ida.hefquin.federation.access.SPARQLRequest;
 import se.liu.ida.hefquin.federation.access.TriplePatternRequest;
 
@@ -31,7 +30,7 @@ import java.util.Objects;
  * <li>{@link ExecOpRequestSPARQL}</li>
  * </ul>
  */
-public class PhysicalOpRequest<ReqType extends DataRetrievalRequest, MemberType extends FederationMember> 
+public class PhysicalOpRequest<ReqType extends DataRetrievalRequest, MemberType extends FederationMember>
                        extends BaseForQueryPlanOperator
                        implements NullaryPhysicalOpForLogicalOp
 {
@@ -64,7 +63,7 @@ public class PhysicalOpRequest<ReqType extends DataRetrievalRequest, MemberType 
 		final ReqType req = lop.getRequest();
 		final MemberType fm = lop.getFederationMember();
 		if( fm instanceof FederationMemberAgglomeration && req instanceof SPARQLRequest ){
-			return new ExecOpFrawRequest((SPARQLRequest) req, (FederationMemberAgglomeration) fm, collectExceptions);
+			return new ExecOpFrawRequest((SPARQLRequest) req, (FederationMemberAgglomeration) fm, collectExceptions, qpInfo);
 		}
 		else if ( fm instanceof TPFServer tpf && req instanceof TriplePatternRequest tpreq ) {
 			return new ExecOpRequestTPFatTPFServer(tpreq, tpf, collectExceptions, qpInfo);
@@ -73,9 +72,9 @@ public class PhysicalOpRequest<ReqType extends DataRetrievalRequest, MemberType 
 			return new ExecOpRequestTPFatBRTPFServer(tpreq, brtpf, collectExceptions, qpInfo);
 		}
 		else if ( fm instanceof SPARQLEndpoint && req instanceof SPARQLRequest ) {
-			return new ExecOpRequestSPARQL( (SPARQLRequest) req, (SPARQLEndpoint) fm, collectExceptions );
-        }
-        else if ( fm instanceof BRTPFServer brtpf && req instanceof BindingsRestrictedTriplePatternRequest brtpreq ) {
+			return new ExecOpRequestSPARQL((SPARQLRequest) req, (SPARQLEndpoint) fm, collectExceptions, qpInfo);
+		}
+		else if ( fm instanceof BRTPFServer brtpf && req instanceof BindingsRestrictedTriplePatternRequest brtpreq ) {
 			return new ExecOpRequestBRTPF(brtpreq, brtpf, collectExceptions, qpInfo);
 		}
 		else

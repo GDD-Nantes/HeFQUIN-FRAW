@@ -14,12 +14,15 @@ import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl1;
 import se.liu.ida.hefquin.base.query.utils.QueryPatternUtils;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecOpExecutionException;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.federation.access.SPARQLRequest;
 import se.liu.ida.hefquin.federation.access.impl.req.SPARQLRequestImpl;
 
 import java.util.Iterator;
 import java.util.Set;
+
+import static se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpBindJoinSPARQLwithFILTER.createFilterExpression;
 
 /**
  * Implementation of (a batching version of) the bind join algorithm that
@@ -58,13 +61,14 @@ public class ExecOpFrawBindJoinSPARQLwithFILTER extends BaseForExecOpFrawBindJoi
 	 *          super classes); <code>false</code> if the operator should
 	 *          immediately throw every {@link ExecOpExecutionException}
 	 */
-	public ExecOpFrawBindJoinSPARQLwithFILTER( final SPARQLGraphPattern query,
-										   final SPARQLEndpoint fm,
-										   final ExpectedVariables inputVars,
-										   final boolean useOuterJoinSemantics,
-										   final int batchSize,
-										   final boolean collectExceptions ) {
-		super(query, fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions);
+	public ExecOpFrawBindJoinSPARQLwithFILTER(final SPARQLGraphPattern query,
+											  final SPARQLEndpoint fm,
+											  final ExpectedVariables inputVars,
+											  final boolean useOuterJoinSemantics,
+											  final int batchSize,
+											  final boolean collectExceptions,
+											  final QueryPlanningInfo qpInfo) {
+		super(query, fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions, qpInfo);
 
 		pattern = QueryPatternUtils.convertToJenaElement(query);
 	}
@@ -80,45 +84,8 @@ public class ExecOpFrawBindJoinSPARQLwithFILTER extends BaseForExecOpFrawBindJoi
 	public static NullaryExecutableOp createExecutableReqOp( final Set<Binding> solMaps,
 															 final Element pattern,
 															 final SPARQLEndpoint fm ) {
-		final Expr expr = createFilterExpression(solMaps);
 
-		final ElementGroup group = new ElementGroup();
-		group.addElement( pattern );
-		group.addElement( new ElementFilter(expr) );
-
-		final SPARQLGraphPattern patternForReq = new GenericSPARQLGraphPatternImpl1(group);
-		final SPARQLRequest request = new SPARQLRequestImpl(patternForReq);
-		return new ExecOpFrawRequest(request, fm, false);
+		ExecOpRequestSPARQL execOpRequestSPARQL = (ExecOpRequestSPARQL) ExecOpBindJoinSPARQLwithFILTER.createExecutableReqOp(solMaps, pattern, fm);
+		return new ExecOpFrawRequest(execOpRequestSPARQL);
 	}
-
-	public static Expr createFilterExpression( final Iterable<Binding> solMaps ) {
-		Expr disjunction = null;
-		for ( final Binding sm : solMaps ) {
-			Expr conjunction = null;
-			final Iterator<Var> vars = sm.vars();
-			while ( vars.hasNext() ) {
-				final Var v = vars.next();
-				final Node n = sm.get(v);
-				final Expr expr = new E_Equals( new ExprVar(v),
-						new NodeValueNode(n) );
-
-				if ( conjunction == null )
-					conjunction = expr;
-				else
-					conjunction = new E_LogicalAnd(conjunction, expr);
-			}
-
-			assert conjunction != null;
-
-			if ( disjunction == null )
-				disjunction = conjunction;
-			else
-				disjunction = new E_LogicalOr(disjunction, conjunction);
-		}
-
-		assert disjunction != null;
-
-		return disjunction;
-	}
-
 }

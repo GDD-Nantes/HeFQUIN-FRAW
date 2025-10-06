@@ -11,6 +11,7 @@ import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl1;
 import se.liu.ida.hefquin.base.query.utils.QueryPatternUtils;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecOpExecutionException;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.federation.access.SPARQLRequest;
 import se.liu.ida.hefquin.federation.access.impl.req.SPARQLRequestImpl;
@@ -62,8 +63,9 @@ public class ExecOpFrawBindJoinSPARQLwithVALUES extends BaseForExecOpFrawBindJoi
 										   final ExpectedVariables inputVars,
 										   final boolean useOuterJoinSemantics,
 										   final int batchSize,
-										   final boolean collectExceptions ) {
-		super(query, fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions);
+										   final boolean collectExceptions,
+										   final QueryPlanningInfo qpInfo ) {
+		super(query, fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions, qpInfo);
 
 		pattern = QueryPatternUtils.convertToJenaElement(query);
 	}
@@ -76,33 +78,8 @@ public class ExecOpFrawBindJoinSPARQLwithVALUES extends BaseForExecOpFrawBindJoi
 	public static NullaryExecutableOp createExecutableReqOp( final Set<Binding> solMaps,
 															 final Element pattern,
 															 final SPARQLEndpoint fm ) {
-		// Create the VALUES clause.
-		final Element valuesClause = createValuesClause(solMaps);
 
-		// Combine the VALUES clause with the graph pattern of this operator.
-		final ElementGroup group = new ElementGroup();
-		group.addElement( valuesClause );
-		group.addElement( pattern );
-
-		// Create the request operator using the combined pattern.
-		final SPARQLGraphPattern patternForReq = new GenericSPARQLGraphPatternImpl1(group);
-		final SPARQLRequest request = new SPARQLRequestImpl(patternForReq);
-		return new ExecOpFrawRequest(request, fm, false);
+		ExecOpRequestSPARQL execOpRequestSPARQL = (ExecOpRequestSPARQL) ExecOpBindJoinSPARQLwithVALUES.createExecutableReqOp(solMaps, pattern, fm);
+		return new ExecOpFrawRequest(execOpRequestSPARQL);
 	}
-
-	public static Element createValuesClause( final Set<Binding> solMaps ) {
-		// Collect the variables bound by the given solution mappings
-		// (which are guaranteed to be all join variables).
-		final Set<Var> joinVars = new HashSet<>();
-		for ( final Binding b : solMaps ) {
-			final Iterator<Var> it = b.vars();
-			while ( it.hasNext() ) {
-				joinVars.add( it.next() );
-			}
-		}
-
-		// Create the VALUES clause.
-		return new ElementData( new ArrayList<>(joinVars), new ArrayList<>(solMaps) );
-	}
-
 }

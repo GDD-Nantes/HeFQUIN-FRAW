@@ -14,6 +14,7 @@ import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 
 public class FrawEngine extends HeFQUINEngine
 {
@@ -78,10 +79,15 @@ public class FrawEngine extends HeFQUINEngine
 
 		final QueryProcessingStatsAndExceptions stats = qe.getContext().get(HeFQUINConstants.sysQProcStatsAndExceptions);
 
-		if ( ex == null )
+		if ( ex == null ) {
 			return stats;
-		else
+		}
+		else if ( stats == null ) {
+			return new QueryProcessingStatsAndExceptionsImpl( -1L, -1L, -1L, -1L, null, null, Arrays.asList(ex) );
+		}
+		else {
 			return new QueryProcessingStatsAndExceptionsImpl(stats, ex);
+		}
 	}
 
 	public Integer getBudget() {

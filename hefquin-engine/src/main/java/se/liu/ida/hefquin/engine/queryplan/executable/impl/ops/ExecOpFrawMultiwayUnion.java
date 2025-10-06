@@ -6,14 +6,15 @@ import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.CollectingIntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 
 import java.util.List;
 
 public class ExecOpFrawMultiwayUnion extends ExecOpMultiwayUnion{
 
-    public ExecOpFrawMultiwayUnion(int numberOfChildren, boolean collectExceptions) {
-        super(numberOfChildren, collectExceptions);
+    public ExecOpFrawMultiwayUnion(int numberOfChildren, boolean collectExceptions, QueryPlanningInfo qpInfo) {
+        super(numberOfChildren, collectExceptions, qpInfo);
     }
 
     @Override

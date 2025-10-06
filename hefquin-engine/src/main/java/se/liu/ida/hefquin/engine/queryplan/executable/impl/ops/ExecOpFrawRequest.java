@@ -8,6 +8,7 @@ import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
 import se.liu.ida.hefquin.base.data.utils.SolutionMappingUtils;
 import se.liu.ida.hefquin.engine.federation.access.utils.FederationAccessUtils;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.federation.FederationMember;
 import se.liu.ida.hefquin.federation.FederationMemberAgglomeration;
 import se.liu.ida.hefquin.federation.SPARQLEndpoint;
@@ -18,14 +19,37 @@ import java.util.*;
 
 import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.random;
 
+/**
+ * ExecOpFrawRequest is the request operator used for federated sampling.
+ * This op request has two purposes:
+ * - Allow for a request operator to have multiple sources to choose from randomly everytime
+ *  it is called. This is a simplification of a union of request operators that all have the same query
+ *  and are evaluated on different endpoints.
+ *  - Compute and update the provenance and probabilities of mappings it retrieves.
+ *
+ *
+ *  TODO : cache wip; exec op are reinstantiated all the time throughout execution (in bind joins) so cache il always
+ *  TODO : thrown away. Look at what's already in HeFQUIN ?
+ */
 public class ExecOpFrawRequest extends BaseForExecOpSolMapsRequest<DataRetrievalRequest, FederationMember>{
 
     final List<FederationMember> endpoints;
     final Map<FederationMember, Queue<SolMapsResponse>> endpoint2Cache = new HashMap<>();
 
 
-    public ExecOpFrawRequest(DataRetrievalRequest req, SPARQLEndpoint fm, boolean collectExceptions) {
-        super(req, fm, collectExceptions);
+    public ExecOpFrawRequest(DataRetrievalRequest req, SPARQLEndpoint fm, boolean collectExceptions, QueryPlanningInfo qpInfo) {
+        super(req, fm, collectExceptions, qpInfo);
+
+        if(fm instanceof FederationMemberAgglomeration){
+            this.endpoints = ((FederationMemberAgglomeration) fm).getInterface().getMembers();
+        }
+        else{
+            this.endpoints = List.of(fm);
+        }
+    }
+
+    public ExecOpFrawRequest(ExecOpRequestSPARQL execOpRequestSPARQL) {
+        super (execOpRequestSPARQL.req, execOpRequestSPARQL.fm, execOpRequestSPARQL.collectExceptions, execOpRequestSPARQL.qpInfo);
 
         if(fm instanceof FederationMemberAgglomeration){
             this.endpoints = ((FederationMemberAgglomeration) fm).getInterface().getMembers();

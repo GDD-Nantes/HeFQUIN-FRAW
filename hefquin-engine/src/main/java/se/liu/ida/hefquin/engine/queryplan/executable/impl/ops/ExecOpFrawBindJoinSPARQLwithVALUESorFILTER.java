@@ -9,6 +9,7 @@ import se.liu.ida.hefquin.engine.queryplan.executable.ExecOpExecutionException;
 import se.liu.ida.hefquin.engine.queryplan.executable.IntermediateResultElementSink;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ExecutableOperatorStatsImpl;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionContext;
 import se.liu.ida.hefquin.federation.SPARQLEndpoint;
 
@@ -72,8 +73,9 @@ public class ExecOpFrawBindJoinSPARQLwithVALUESorFILTER extends BaseForExecOpFra
 													  final ExpectedVariables inputVars,
 													  final boolean useOuterJoinSemantics,
 													  final int batchSize,
-													  final boolean collectExceptions ) {
-		super(query, fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions);
+													  final boolean collectExceptions,
+													  final QueryPlanningInfo qpInfo ) {
+		super(query, fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions, qpInfo);
 
 		pattern = QueryPatternUtils.convertToJenaElement(query);
 	}

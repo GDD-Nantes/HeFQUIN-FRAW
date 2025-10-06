@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  * This source planner assumes that the given queries do not contain
  * any SERVICE clauses.
  */
+@Deprecated // Unfinished, should not be used
 public class TriplePatternAwareSourcePlannerImpl extends ExhaustiveSourcePlannerImpl
 {
 	private ASKParallel askVisitor;
@@ -49,9 +50,6 @@ public class TriplePatternAwareSourcePlannerImpl extends ExhaustiveSourcePlanner
 						.map(fm -> ((SPARQLEndpoint) fm).getInterface().getURL())
 						.collect(Collectors.toSet()),
 				t -> true);
-
-
-
 	}
 
 	protected LogicalPlan createPlanForBGP( final OpBGP bgpOp ) {

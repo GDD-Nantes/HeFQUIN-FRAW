@@ -13,6 +13,7 @@ import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl1;
 import se.liu.ida.hefquin.base.query.utils.QueryPatternUtils;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecOpExecutionException;
 import se.liu.ida.hefquin.engine.queryplan.executable.NullaryExecutableOp;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.federation.access.SPARQLRequest;
 import se.liu.ida.hefquin.federation.access.impl.req.SPARQLRequestImpl;
@@ -56,13 +57,14 @@ public class ExecOpFrawBindJoinSPARQLwithUNION extends BaseForExecOpFrawBindJoin
 	 *          super classes); <code>false</code> if the operator should
 	 *          immediately throw every {@link ExecOpExecutionException}
 	 */
-	public ExecOpFrawBindJoinSPARQLwithUNION( final SPARQLGraphPattern query,
-										  final SPARQLEndpoint fm,
-										  final ExpectedVariables inputVars,
-										  final boolean useOuterJoinSemantics,
-										  final int batchSize,
-										  final boolean collectExceptions ) {
-		super(query, fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions);
+	public ExecOpFrawBindJoinSPARQLwithUNION(final SPARQLGraphPattern query,
+											 final SPARQLEndpoint fm,
+											 final ExpectedVariables inputVars,
+											 final boolean useOuterJoinSemantics,
+											 final int batchSize,
+											 final boolean collectExceptions,
+											 final QueryPlanningInfo qpInfo) {
+		super(query, fm, inputVars, useOuterJoinSemantics, batchSize, collectExceptions, qpInfo);
 
 		pattern = QueryPatternUtils.convertToJenaElement(query);
 	}
@@ -72,7 +74,7 @@ public class ExecOpFrawBindJoinSPARQLwithUNION extends BaseForExecOpFrawBindJoin
 		final Element elmt = createUnion(solMaps);
 		final SPARQLGraphPattern pattern = new GenericSPARQLGraphPatternImpl1(elmt);
 		final SPARQLRequest request = new SPARQLRequestImpl(pattern);
-		return new ExecOpFrawRequest(request, fm, false);
+		return new ExecOpFrawRequest(request, fm, false, null);
 	}
 
 	protected Element createUnion( final Iterable<Binding> solMaps ) {

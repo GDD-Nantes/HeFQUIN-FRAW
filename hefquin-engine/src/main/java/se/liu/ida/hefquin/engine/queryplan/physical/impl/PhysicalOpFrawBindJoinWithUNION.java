@@ -1,6 +1,11 @@
 package se.liu.ida.hefquin.engine.queryplan.physical.impl;
 
+import se.liu.ida.hefquin.base.query.ExpectedVariables;
+import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
+import se.liu.ida.hefquin.engine.queryplan.executable.UnaryExecutableOp;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpBindJoinSPARQLwithUNION;
+import se.liu.ida.hefquin.engine.queryplan.executable.impl.ops.ExecOpFrawBindJoinSPARQLwithUNION;
+import se.liu.ida.hefquin.engine.queryplan.info.QueryPlanningInfo;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpGPAdd;
 import se.liu.ida.hefquin.engine.queryplan.logical.impl.LogicalOpGPOptAdd;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlanVisitor;
@@ -41,6 +46,22 @@ public class PhysicalOpFrawBindJoinWithUNION extends PhysicalOpBindJoinWithUNION
 	public boolean equals( final Object o ) {
 		return o instanceof PhysicalOpFrawBindJoinWithUNION
 				&& ((PhysicalOpFrawBindJoinWithUNION) o).lop.equals(lop);
+	}
+
+	@Override
+	public UnaryExecutableOp createExecOp(final SPARQLGraphPattern pattern,
+										  final SPARQLEndpoint sparqlEndpoint,
+										  final boolean useOuterJoinSemantics,
+										  final boolean collectExceptions,
+										  final QueryPlanningInfo qpInfo,
+										  final ExpectedVariables... inputVars ) {
+		return new ExecOpFrawBindJoinSPARQLwithUNION( pattern,
+				sparqlEndpoint,
+				inputVars[0],
+				useOuterJoinSemantics,
+				ExecOpBindJoinSPARQLwithUNION.DEFAULT_BATCH_SIZE,
+				collectExceptions,
+				qpInfo );
 	}
 
 	@Override
