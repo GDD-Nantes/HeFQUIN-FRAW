@@ -3,7 +3,7 @@ package se.liu.ida.hefquin.engine.queryproc.impl;
 import org.apache.jena.sparql.engine.binding.Binding;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
-import se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils;
+import se.liu.ida.hefquin.engine.FrawUtils;
 
 public class MaterializingQueryResultSinkWithInputBindingImpl extends MaterializingQueryResultSinkImpl {
     private SolutionMapping inputSolutionMapping;

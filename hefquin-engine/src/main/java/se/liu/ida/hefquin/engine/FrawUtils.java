@@ -1,4 +1,4 @@
-package se.liu.ida.hefquin.engine.queryplan.executable.impl;
+package se.liu.ida.hefquin.engine;
 
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
@@ -14,14 +14,12 @@ import se.liu.ida.hefquin.base.data.utils.Budget;
 import se.liu.ida.hefquin.federation.FederationMember;
 import se.liu.ida.hefquin.federation.SPARQLEndpoint;
 import se.liu.ida.hefquin.federation.access.*;
+import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
 
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
-import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.MAPPING_PROBABILITY;
-import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.VAR_PROVENANCE_PREFIX;
 
 public class FrawUtils {
 
@@ -33,7 +31,7 @@ public class FrawUtils {
         while ( it.hasNext() ) {
             final Var v = it.next();
             // TODO : make it look nicer
-            if ( b2.contains(v) && ! b2.get(v).sameValueAs(b1.get(v)) && !v.equals(MAPPING_PROBABILITY))
+            if ( b2.contains(v) && ! b2.get(v).sameValueAs(b1.get(v)) && !v.equals(FrawConstants.MAPPING_PROBABILITY))
                 return false;
         }
 
@@ -61,7 +59,7 @@ public class FrawUtils {
                 // Checking!
                 Node n1 = bind1.get(v);
                 Node n2 = bind2.get(v);
-                if(v.equals(MAPPING_PROBABILITY)){
+                if(v.equals(FrawConstants.MAPPING_PROBABILITY)){
                     if(!computedProba){
                         Double leftProba = Double.valueOf(String.valueOf(n1.getLiteralValue()));
                         Double rightProba = Double.valueOf(String.valueOf(n2.getLiteralValue()));
@@ -87,7 +85,7 @@ public class FrawUtils {
                     // and we only iterate over binding2 to build the joined binding, but we still check just in case.
                     computedProba = true;
                 }
-                if ( !n1.equals(n2) && !v.equals(MAPPING_PROBABILITY))
+                if ( !n1.equals(n2) && !v.equals(FrawConstants.MAPPING_PROBABILITY))
                     Log.warn(BindingLib.class, "merge: Mismatch : " + n1 + " != " + n2);
             }
         }
@@ -106,10 +104,10 @@ public class FrawUtils {
                 // Processing "normal" variables, aka not probabilities or whatever
                 Node node = binding.get(var);
                 bb.add(var, node);
-            }else if(isProbaVar(var) && !bb.contains(MAPPING_PROBABILITY)) {
+            }else if(isProbaVar(var) && !bb.contains(FrawConstants.MAPPING_PROBABILITY)) {
                 // Processing global mapping probability
-                Double newProbability = Double.valueOf(String.valueOf(binding.get(MAPPING_PROBABILITY).getLiteralValue())) / Double.valueOf(numberOfChildren);
-                bb.add(MAPPING_PROBABILITY, NodeFactory.createLiteralDT(String.valueOf(newProbability), XSDDatatype.XSDdouble));
+                Double newProbability = Double.valueOf(String.valueOf(binding.get(FrawConstants.MAPPING_PROBABILITY).getLiteralValue())) / Double.valueOf(numberOfChildren);
+                bb.add(FrawConstants.MAPPING_PROBABILITY, NodeFactory.createLiteralDT(String.valueOf(newProbability), XSDDatatype.XSDdouble));
             }
             // We never copy union objects since we always create a new one right after this
         }
@@ -129,18 +127,18 @@ public class FrawUtils {
         for (Var var : variablesFromFM) {
             String rawProvenance = federationMember.getInterface().toString();
             String provenance = rawProvenance.replace("SPARQL endpoint at ", "");
-            bb.add(Var.alloc(VAR_PROVENANCE_PREFIX + var.getVarName()), NodeFactory.createLiteralDT(provenance, XSDDatatype.XSDstring));
+            bb.add(Var.alloc(FrawConstants.VAR_PROVENANCE_PREFIX + var.getVarName()), NodeFactory.createLiteralDT(provenance, XSDDatatype.XSDstring));
         }
 
         return bb.build();
     }
 
     public static boolean isProbaVar(Var v) {
-        return v.equals(MAPPING_PROBABILITY);
+        return v.equals(FrawConstants.MAPPING_PROBABILITY);
     }
 
     public static boolean isProvenanceVar(Var var){
-        return var.getVarName().contains(VAR_PROVENANCE_PREFIX);
+        return var.getVarName().contains(FrawConstants.VAR_PROVENANCE_PREFIX);
     }
 
     public static boolean isSpecialVar(Var v){
