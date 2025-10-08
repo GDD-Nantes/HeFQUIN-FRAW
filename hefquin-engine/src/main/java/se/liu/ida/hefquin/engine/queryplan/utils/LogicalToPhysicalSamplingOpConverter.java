@@ -41,7 +41,7 @@ public class LogicalToPhysicalSamplingOpConverter
 		if(lop.getFederationMember() instanceof SPARQLEndpoint){
 			return PhysicalOpFrawRequest.instantiate(Map.of(lop.getFederationMember(), lop.getRequest()));
 		}
-		return new PhysicalOpRequest<>(lop);
+		throw new UnsupportedOperationException("Unsupported type of logical operator: " + lop.getClass().getName() + ".");
 	}
 
 	// --------- unary operators -----------

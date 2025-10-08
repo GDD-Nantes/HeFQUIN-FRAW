@@ -75,10 +75,7 @@ public class PhysicalOpFrawRequest
 
         // We have to delegate the endpoint-wise behavior specifications to the exec op itself, otherwise we could only
         // use the random selection request operator with homogeneous groups of federation members
-        if ( ! (fm instanceof SPARQLEndpoint && req instanceof SPARQLRequest)
-                && ! (fm instanceof TPFServer && req instanceof TriplePatternRequest)
-                && ! (fm instanceof BRTPFServer && req instanceof TriplePatternRequest)
-                && ! (fm instanceof FederationMemberAgglomeration && req instanceof SPARQLRequest)) {
+        if ( ! (fm instanceof SPARQLEndpoint && req instanceof SPARQLRequest)) {
             throw new IllegalArgumentException("Unsupported combination of federation member (type: " + fm.getClass().getName() + ") and request type (" + req.getClass().getName() + ")");
         }
 

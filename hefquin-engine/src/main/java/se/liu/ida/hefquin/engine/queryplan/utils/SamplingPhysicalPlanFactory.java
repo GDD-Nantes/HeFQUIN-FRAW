@@ -114,10 +114,10 @@ public class SamplingPhysicalPlanFactory
 	PhysicalPlan createPlanWithRequest( final LogicalOpRequest<R,M> lop ) {
 		final NullaryPhysicalOp pop;
 
-		if(lop.getFederationMember() instanceof FederationMemberAgglomeration){
+		if(lop.getFederationMember() instanceof FederationMemberAgglomeration || lop.getFederationMember() instanceof SPARQLRequest){
 			pop = new PhysicalOpFrawRequest((LogicalOpRequest<DataRetrievalRequest, FederationMemberAgglomeration>) lop);
 		} else {
-			pop = new PhysicalOpRequest<>(lop);
+			throw new UnsupportedOperationException("Unsupported type of logical operator: " + lop.getClass().getName() + ".");
 		}
 		return createPlan(pop);
 	}
@@ -647,7 +647,7 @@ public class SamplingPhysicalPlanFactory
 																	   final QueryPlanningInfo qpInfo ) {
 		final PhysicalOperator rootOp = nextPlan.getRootOperator();
 
-		if ( rootOp instanceof PhysicalOpRequest reqOp ) {
+		if ( rootOp instanceof PhysicalOpFrawRequest reqOp ) {
 			final UnaryLogicalOp addOp = LogicalOpUtils.createLogicalAddOpFromPhysicalReqOp(reqOp);
 			return createPlan(addOp, qpInfo, inputPlan);
 		}
@@ -655,14 +655,14 @@ public class SamplingPhysicalPlanFactory
 		final PhysicalOperator subPlanRootOp = nextPlan.getSubPlan(0).getRootOperator();
 
 		if (    rootOp instanceof PhysicalOpFilter filterOp
-				&& subPlanRootOp instanceof PhysicalOpRequest reqOp ) {
+				&& subPlanRootOp instanceof PhysicalOpFrawRequest reqOp ) {
 			final UnaryLogicalOp addOp = LogicalOpUtils.createLogicalAddOpFromPhysicalReqOp(reqOp);
 			final PhysicalPlan addOpPlan = createPlan(addOp, inputPlan);
 			return createPlan(filterOp, qpInfo, addOpPlan);
 		}
 
 		if (    rootOp instanceof PhysicalOpLocalToGlobal l2gPOP
-				&& subPlanRootOp instanceof PhysicalOpRequest reqOp ) {
+				&& subPlanRootOp instanceof PhysicalOpFrawRequest reqOp ) {
 			final LogicalOpLocalToGlobal l2gLOP = (LogicalOpLocalToGlobal) l2gPOP.getLogicalOperator();
 			final VocabularyMapping vm = l2gLOP.getVocabularyMapping();
 
@@ -702,7 +702,7 @@ public class SamplingPhysicalPlanFactory
 			final PhysicalPlan subPlan = unionPlan.getSubPlan(i);
 			final PhysicalOperator subRootOp = subPlan.getRootOperator();
 
-			if (    ! (subRootOp instanceof PhysicalOpRequest)
+			if (    ! (subRootOp instanceof PhysicalOpFrawRequest)
 					&& ! (subRootOp instanceof PhysicalOpFilter)
 					&& ! (subRootOp instanceof PhysicalOpLocalToGlobal) ) {
 				return false;
@@ -712,14 +712,14 @@ public class SamplingPhysicalPlanFactory
 				final PhysicalPlan subSubPlan = subPlan.getSubPlan(0);
 				final PhysicalOperator subSubRootOp = subSubPlan.getRootOperator();
 
-				if (    ! (subSubRootOp instanceof PhysicalOpRequest)
+				if (    ! (subSubRootOp instanceof PhysicalOpFrawRequest)
 						&& ! (subSubRootOp instanceof PhysicalOpFilter) ) {
 					return false;
 				}
 
 				if ( subSubRootOp instanceof PhysicalOpFilter ) {
 					final PhysicalOperator subSubSubRootOp = subSubPlan.getSubPlan(0).getRootOperator();
-					if ( ! (subSubSubRootOp instanceof PhysicalOpRequest) ) {
+					if ( ! (subSubSubRootOp instanceof PhysicalOpFrawRequest) ) {
 						return false;
 					}
 				}
@@ -728,7 +728,7 @@ public class SamplingPhysicalPlanFactory
 			if ( subRootOp instanceof PhysicalOpFilter ) {
 				final PhysicalOperator subSubRootOp = subPlan.getSubPlan(0).getRootOperator();
 
-				if ( ! (subSubRootOp instanceof PhysicalOpRequest) ) {
+				if ( ! (subSubRootOp instanceof PhysicalOpFrawRequest) ) {
 					return false;
 				}
 			}
