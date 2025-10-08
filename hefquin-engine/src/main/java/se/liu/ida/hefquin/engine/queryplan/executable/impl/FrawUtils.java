@@ -10,10 +10,15 @@ import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingLib;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
+import se.liu.ida.hefquin.base.data.utils.Budget;
 import se.liu.ida.hefquin.federation.FederationMember;
+import se.liu.ida.hefquin.federation.SPARQLEndpoint;
+import se.liu.ida.hefquin.federation.access.*;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.MAPPING_PROBABILITY;
 import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.VAR_PROVENANCE_PREFIX;
@@ -180,5 +185,30 @@ public class FrawUtils {
         }
 
         return true;
+    }
+
+    public static SolMapsResponse performRequest(final SamplingFederationAccessManager fedAccessMgr,
+                                                 final SPARQLRequest req,
+                                                 final SPARQLEndpoint fm,
+                                                 final Budget budget)
+            throws FederationAccessException
+    {
+        return getSolMapsResponse( fedAccessMgr.issueRequest(req, fm, budget), req, fm );
+    }
+
+    protected static SolMapsResponse getSolMapsResponse( final CompletableFuture<SolMapsResponse> futureResp,
+                                                         final DataRetrievalRequest req,
+                                                         final FederationMember fm )
+            throws FederationAccessException
+    {
+        try {
+            return futureResp.get();
+        }
+        catch ( final InterruptedException e ) {
+            throw new FederationAccessException("Unexpected interruption when getting the response to a data retrieval request.", e, req, fm);
+        }
+        catch ( final ExecutionException e ) {
+            throw new FederationAccessException("Getting the response to a data retrieval request caused an exception.", e, req, fm);
+        }
     }
 }

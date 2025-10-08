@@ -23,29 +23,27 @@ import se.liu.ida.hefquin.engine.QueryProcessingStatsAndExceptions;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcException;
 import se.liu.ida.hefquin.engine.queryproc.SamplingQueryProcessor;
 import se.liu.ida.hefquin.engine.queryproc.impl.MaterializingQueryResultSinkWithInputBindingImpl;
-import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
+import se.liu.ida.hefquin.base.data.utils.Budget;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
 
 import java.util.Iterator;
 import java.util.Objects;
 
+import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.*;
+
 public class OpExecutorFraw extends OpExecutor
 {
 	protected final SamplingQueryProcessor qProc;
 	protected boolean nextQueryProcSingleWalk = false;
-	protected final int budget;
-	protected final int subBudget;
+	protected final Budget budget;
 
-	public OpExecutorFraw(final SamplingQueryProcessor qProc, final ExecutionContext execCxt, final int budget, final int subBudget ) {
+	public OpExecutorFraw(final SamplingQueryProcessor qProc, final ExecutionContext execCxt, final Budget budget) {
 		super(execCxt);
 
 		assert qProc != null;
 		this.qProc = qProc;
 
-		assert budget >= 0;
-		assert subBudget >= 0;
 		this.budget = budget;
-		this.subBudget = subBudget;
 	}
 
 	@Override
@@ -167,33 +165,14 @@ public class OpExecutorFraw extends OpExecutor
 	}
 
 	protected QueryIterator executeSupportedOp( final Op op, final QueryIterator input ) {
-		Integer queryBudget;
-		try {
-			Integer customQueryBudget = execCxt.getContext().get(FrawConstants.BUDGET);
-			queryBudget = customQueryBudget == null ? budget : Math.min(customQueryBudget, budget);
-		} catch ( Exception e ) {
-			queryBudget = budget;
-		}
-
-		Integer querySubBudget;
-		try {
-			Integer customQuerySubBudget = execCxt.getContext().get(FrawConstants.SUB_BUDGET);
-			querySubBudget = customQuerySubBudget == null ? subBudget : Math.min(customQuerySubBudget, subBudget);
-		} catch ( Exception e ) {
-			querySubBudget = subBudget;
-		}
-
-		queryBudget = Math.max(queryBudget, 1);
-		querySubBudget = Math.max(querySubBudget, 1);
-
-		return new MainQueryIterator( op, input, nextQueryProcSingleWalk ? querySubBudget : queryBudget );
+		return new MainQueryIterator( op, input, nextQueryProcSingleWalk ? SINGLE_WALK_BUDGET : this.budget );
 	}
 
 
 	protected class MainQueryIterator extends QueryIterRepeatApply
 	{
 		protected final Op op;
-		protected final int numberOfWalks;
+		protected final Budget budget;
 
 		public MainQueryIterator( final Op op, final QueryIterator input ) {
 			super(input, execCxt);
@@ -201,13 +180,14 @@ public class OpExecutorFraw extends OpExecutor
 			throw new QueryExecException("Can't instantiate MainQueryIterator without a budget");
 		}
 
-		public MainQueryIterator( final Op op, final QueryIterator input, final int numberOfWalks ) {
+		public MainQueryIterator( final Op op, final QueryIterator input, final Budget budget ) {
 			super(input, execCxt);
 
 			assert op != null;
 			this.op = op;
 
-			this.numberOfWalks = numberOfWalks;
+			assert budget != null;
+			this.budget = budget;
 		}
 
 		@Override
@@ -235,7 +215,7 @@ public class OpExecutorFraw extends OpExecutor
 			final QueryProcessingStatsAndExceptions queryProcessingStatsAndExceptions;
 
 			try {
-				queryProcessingStatsAndExceptions = qProc.processQuery( new GenericSPARQLGraphPatternImpl2(opForStage), sink, numberOfWalks );
+				queryProcessingStatsAndExceptions = qProc.processQuery( new GenericSPARQLGraphPatternImpl2(opForStage), sink, budget );
 				if(Objects.isNull(queryProcessingStatsAndExceptions)) return new QueryIterNullIterator(execCxt);
 			}
 			catch ( final QueryProcException ex ) {

@@ -8,6 +8,7 @@ import org.apache.jena.sparql.expr.nodevalue.NodeValueNode;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementGroup;
+import se.liu.ida.hefquin.base.data.utils.Budget;
 import se.liu.ida.hefquin.base.query.ExpectedVariables;
 import se.liu.ida.hefquin.base.query.SPARQLGraphPattern;
 import se.liu.ida.hefquin.base.query.impl.GenericSPARQLGraphPatternImpl1;
@@ -74,18 +75,19 @@ public class ExecOpFrawBindJoinSPARQLwithFILTER extends BaseForExecOpFrawBindJoi
 	}
 
 	@Override
-	protected NullaryExecutableOp createExecutableReqOp( final Set<Binding> solMaps ) {
-		return createExecutableReqOp(solMaps, pattern, fm);
+	protected NullaryExecutableOp _createExecutableReqOp( final Set<Binding> solMaps ) {
+		return createExecutableReqOp(solMaps, pattern, fm, budget);
 	}
 
 
 	// ---- helper functions ---------
 
-	public static NullaryExecutableOp createExecutableReqOp( final Set<Binding> solMaps,
-															 final Element pattern,
-															 final SPARQLEndpoint fm ) {
+	public static NullaryExecutableOp createExecutableReqOp(final Set<Binding> solMaps,
+															final Element pattern,
+															final SPARQLEndpoint fm,
+															final Budget budget) {
 
 		ExecOpRequestSPARQL execOpRequestSPARQL = (ExecOpRequestSPARQL) ExecOpBindJoinSPARQLwithFILTER.createExecutableReqOp(solMaps, pattern, fm);
-		return new ExecOpFrawRequest(execOpRequestSPARQL);
+		return new ExecOpFrawRequest(execOpRequestSPARQL, budget);
 	}
 }

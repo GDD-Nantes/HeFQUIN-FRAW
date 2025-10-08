@@ -1,15 +1,16 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.iterbased;
 
+import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlanStats;
 import se.liu.ida.hefquin.engine.queryproc.ExecutionException;
 import se.liu.ida.hefquin.engine.queryproc.QueryResultSink;
+import se.liu.ida.hefquin.base.data.utils.Budget;
 
 import java.util.List;
 
 public class IteratorBasedExecutableSamplingPlanImpl extends IteratorBasedExecutablePlanImpl
 {
-	private final int numberOfWalks;
-	private final int DEFAULT_TIMEOUT_MS = Integer.MAX_VALUE;
+	private final Budget budget;
 	private final List<SamplingResultElementIterWithNullaryExecOp> leaves;
 
 	public IteratorBasedExecutableSamplingPlanImpl(final ResultElementIterator it) {
@@ -17,19 +18,23 @@ public class IteratorBasedExecutableSamplingPlanImpl extends IteratorBasedExecut
         throw new UnsupportedOperationException("Can't instantiate IteratorBasedExecutableSamplingPlanImpl without a budget");
 	}
 
-	public IteratorBasedExecutableSamplingPlanImpl( final ResultElementIterator it, final int numberOfWalks, final List<SamplingResultElementIterWithNullaryExecOp> leaves ) {
+	public IteratorBasedExecutableSamplingPlanImpl(final ResultElementIterator it, final Budget budget,
+												   final List<SamplingResultElementIterWithNullaryExecOp> leaves ) {
 		super(it);
-		this.numberOfWalks = numberOfWalks;
+		this.budget = budget;
 		this.leaves = leaves;
 	}
 
 	public void runWithBudget( final QueryResultSink resultSink ) throws ExecutionException {
 		try {
 			int attempted = 0;
+			int results = 0;
 			final long start = System.currentTimeMillis();
-			while ( it.hasNext() && !shouldStop(attempted, start) ) {
+			while ( it.hasNext() && !shouldStop(attempted, results, start) ) {
+				SolutionMapping sm = it.next();
 				resultSink.send( it.next() );
 				attempted++;
+				if(!sm.asJenaBinding().isEmpty()) results++;
 			}
 			leaves.forEach(SamplingResultElementIterWithNullaryExecOp::flush);
 		}
@@ -38,8 +43,10 @@ public class IteratorBasedExecutableSamplingPlanImpl extends IteratorBasedExecut
 		}
 	}
 
-	private boolean shouldStop(final int attempted, final long start) {
-		return attempted >= numberOfWalks || System.currentTimeMillis() - start >= DEFAULT_TIMEOUT_MS;
+	private boolean shouldStop(final int attempted, final int results, final long start) {
+		return attempted >= budget.getAttempts()
+				|| System.currentTimeMillis() - start >= budget.getTimeout()
+				|| results >= budget.getLimit();
 	}
 
 	@Override

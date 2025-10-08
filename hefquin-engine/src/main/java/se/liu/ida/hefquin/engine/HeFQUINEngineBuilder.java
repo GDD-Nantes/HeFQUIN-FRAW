@@ -14,6 +14,7 @@ import se.liu.ida.hefquin.engine.queryproc.SamplingQueryProcessor;
 import se.liu.ida.hefquin.federation.access.FederationAccessManager;
 import se.liu.ida.hefquin.federation.catalog.FederationCatalog;
 import se.liu.ida.hefquin.federation.catalog.FederationDescriptionReader;
+import se.liu.ida.hefquin.base.data.utils.Budget;
 import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
 
 import java.util.HashMap;
@@ -209,9 +210,10 @@ public class HeFQUINEngineBuilder
 		final HeFQUINEngine engine;
 
 		if( qProc instanceof SamplingQueryProcessor ){
-			Integer budget = confReader.readBudget(engineConf);
-			Integer subBudget = confReader.readSubBudget(engineConf);
-			engine = new FrawEngine(fedAccessMgr, qProc, budget, subBudget);
+			Budget defaultBudget = confReader.readBudget(engineConf, false);
+			Budget maxBudget = confReader.readBudget(engineConf, true);
+
+			engine = new FrawEngine(fedAccessMgr, qProc, defaultBudget, maxBudget);
 		} else {
 			engine = new HeFQUINEngine(fedAccessMgr, qProc);
 		}

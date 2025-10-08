@@ -1,10 +1,10 @@
 package se.liu.ida.hefquin.engine.queryplan.executable.impl.ops;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import se.liu.ida.hefquin.base.data.SolutionMapping;
 import se.liu.ida.hefquin.base.data.impl.SolutionMappingImpl;
+import se.liu.ida.hefquin.base.data.utils.Budget;
 import se.liu.ida.hefquin.base.data.utils.SolutionMappingUtils;
 import se.liu.ida.hefquin.engine.federation.access.utils.FederationAccessUtils;
 import se.liu.ida.hefquin.engine.queryplan.executable.impl.FrawUtils;
@@ -26,89 +26,102 @@ import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.random;
  *  it is called. This is a simplification of a union of request operators that all have the same query
  *  and are evaluated on different endpoints.
  *  - Compute and update the provenance and probabilities of mappings it retrieves.
- *
- *
- *  TODO : cache wip; exec op are reinstantiated all the time throughout execution (in bind joins) so cache il always
- *  TODO : thrown away. Look at what's already in HeFQUIN ?
+
  */
 public class ExecOpFrawRequest extends BaseForExecOpSolMapsRequest<DataRetrievalRequest, FederationMember>{
 
     final List<FederationMember> endpoints;
-    final Map<FederationMember, Queue<SolMapsResponse>> endpoint2Cache = new HashMap<>();
+    Budget budget;
 
-
-    public ExecOpFrawRequest(DataRetrievalRequest req, SPARQLEndpoint fm, boolean collectExceptions, QueryPlanningInfo qpInfo) {
+    public ExecOpFrawRequest(DataRetrievalRequest req, SPARQLEndpoint fm, boolean collectExceptions, QueryPlanningInfo qpInfo, Budget budget) {
         super(req, fm, collectExceptions, qpInfo);
 
+        this.budget = budget;
+
         if(fm instanceof FederationMemberAgglomeration){
-            this.endpoints = ((FederationMemberAgglomeration) fm).getInterface().getMembers();
+            List<FederationMember> members = ((FederationMemberAgglomeration) fm).getInterface().getMembers();
+            members.stream().forEach(member -> {
+                if(!(member instanceof SPARQLEndpoint)) throw new UnsupportedOperationException("Federation member" + member.toString() + "is not a SPARQL endpoint");
+            });
+            this.endpoints = members;
         }
         else{
             this.endpoints = List.of(fm);
         }
     }
 
-    public ExecOpFrawRequest(ExecOpRequestSPARQL execOpRequestSPARQL) {
-        super (execOpRequestSPARQL.req, execOpRequestSPARQL.fm, execOpRequestSPARQL.collectExceptions, execOpRequestSPARQL.qpInfo);
+    public ExecOpFrawRequest(DataRetrievalRequest req, SPARQLEndpoint fm, boolean collectExceptions, QueryPlanningInfo qpInfo) {
+        this(req, fm, collectExceptions, qpInfo, null);
+    }
 
-        if(fm instanceof FederationMemberAgglomeration){
-            this.endpoints = ((FederationMemberAgglomeration) fm).getInterface().getMembers();
-        }
-        else{
-            this.endpoints = List.of(fm);
-        }
+    public ExecOpFrawRequest(ExecOpRequestSPARQL execOpRequestSPARQL) {
+        this(execOpRequestSPARQL.req, execOpRequestSPARQL.fm, execOpRequestSPARQL.collectExceptions, execOpRequestSPARQL.qpInfo);
+    }
+
+    public ExecOpFrawRequest(ExecOpRequestSPARQL execOpRequestSPARQL, Budget budget) {
+        this(execOpRequestSPARQL.req, execOpRequestSPARQL.fm, execOpRequestSPARQL.collectExceptions, execOpRequestSPARQL.qpInfo, budget);
+    }
+
+    protected SolMapsResponse _performRequest(SamplingFederationAccessManager fedAccMan, FederationMember chosenFM, Budget budget) throws FederationAccessException {
+        return FrawUtils.performRequest(fedAccMan, (SPARQLRequest) req, (SPARQLEndpoint) chosenFM, budget);
+    }
+
+    protected SolMapsResponse _performRequest(FederationAccessManager fedAccMan, FederationMember chosenFM) throws FederationAccessException {
+        return FederationAccessUtils.performRequest(fedAccMan, (SPARQLRequest) req, (SPARQLEndpoint) chosenFM);
     }
 
     @Override
     protected SolMapsResponse performRequest(FederationAccessManager fedAccessMgr) throws FederationAccessException {
-        // TODO: add other cases
 
-        int chosen;
+        if(Objects.isNull(budget)) throw new UnsupportedOperationException("Can't sample without a budget");
 
-        chosen = random.nextInt(endpoints.size());
-
+        int chosen = random.nextInt(endpoints.size());
         FederationMember chosenFM = endpoints.get(chosen);
 
-        if(!endpoint2Cache.containsKey(chosenFM)){
-            endpoint2Cache.put(chosenFM, new LinkedList<>());
-        } else if(!endpoint2Cache.get(chosenFM).isEmpty()){
-            return endpoint2Cache.get(chosenFM).poll();
+        SolMapsResponse solMapsResponse;
+
+        if(fedAccessMgr instanceof SamplingFederationAccessManager samFedAccMan) {
+            solMapsResponse = _performRequest(samFedAccMan, chosenFM, budget);
+        }
+        else {
+            solMapsResponse = _performRequest(fedAccessMgr, chosenFM);
         }
 
-        if(chosenFM instanceof SPARQLEndpoint){
+        Iterator<SolutionMapping> smi = solMapsResponse.getResponseData().iterator();
 
-            SolMapsResponse solMapsResponse = FederationAccessUtils.performRequest(fedAccessMgr, (SPARQLRequest) req, (SPARQLEndpoint) chosenFM);
+        // We got nothing from Raw endpoints. We want raw endpoints to always return results
+        // even if empty or with a probability of 0. However, it is technically possible for raw ep to reach
+        // timeout before producing anything, so this check is relevant.
+        if (!smi.hasNext())
+            return new SolMapsResponseImpl(
+                    List.of(SolutionMappingUtils.createSolutionMapping()),
+                    fm,
+                    req, solMapsResponse.getRequestStartTime(),
+                    solMapsResponse.getRetrievalEndTime()
+            );
 
-            // We got nothing from Raw endpoints. We want raw endpoints to always return results
-            // even if empty or with a probability of 0. However, it is technically possible for raw ep to reach
-            // timeout before producing anything, so this check is relevant.
-            if (solMapsResponse.getSize() == 0)
-                return new SolMapsResponseImpl(
-                        List.of(SolutionMappingUtils.createSolutionMapping()),
-                        fm,
-                        req, solMapsResponse.getRequestStartTime(),
-                        solMapsResponse.getRetrievalEndTime()
-                );
+        // Probability
+        // We only ever yield one solution mapping from a performRequest call, hence the singular .next() call
+        Binding updatedBinding = FrawUtils.updateProbaUnion(smi.next(), endpoints.size(), chosen);
 
-            solMapsResponse.getResponseData().forEach(solutionMapping -> {
-                // Probability
-                Binding updatedBinding = FrawUtils.updateProbaUnion(solutionMapping, endpoints.size(), chosen);
+        // Provenance
+        Set<Var> variablesFromFM = req.getExpectedVariables().getCertainVariables();
+        variablesFromFM.addAll(req.getExpectedVariables().getPossibleVariables());
+        updatedBinding = FrawUtils.updateProvenance(updatedBinding, chosenFM, variablesFromFM);
 
-                // Provenance
-                Set<Var> variablesFromFM = req.getExpectedVariables().getCertainVariables();
-                variablesFromFM.addAll(req.getExpectedVariables().getPossibleVariables());
-                updatedBinding = FrawUtils.updateProvenance(updatedBinding, chosenFM, variablesFromFM);
+        // Wrapping
+        SolutionMapping updatedSolutionMapping = new SolutionMappingImpl(updatedBinding);
+        return new SolMapsResponseImpl(
+                List.of(updatedSolutionMapping),
+                fm,
+                req,
+                solMapsResponse.getRequestStartTime(),
+                solMapsResponse.getRetrievalEndTime());
+    }
 
-                // Wrapping
-                SolutionMapping updatedSolutionMapping = new SolutionMappingImpl(updatedBinding);
-                SolMapsResponse smr = new SolMapsResponseImpl(List.of(updatedSolutionMapping), fm, req, solMapsResponse.getRequestStartTime(), solMapsResponse.getRetrievalEndTime());
-                endpoint2Cache.get(chosenFM).offer(smr);
-            });
 
-            return endpoint2Cache.get(chosenFM).poll();
-        }
-
-        // TODO: handle this better
-        throw new NotImplementedException("This operation is not implemented yet in ExecOpFrawRequest");
+    // TODO : move this to the constructor
+    public void setBudget(Budget budget) {
+        this.budget = budget;
     }
 }

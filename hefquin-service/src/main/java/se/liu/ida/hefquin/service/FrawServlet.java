@@ -18,6 +18,7 @@ import se.liu.ida.hefquin.engine.FrawEngine;
 import se.liu.ida.hefquin.engine.IllegalQueryException;
 import se.liu.ida.hefquin.engine.QueryProcessingStatsAndExceptions;
 import se.liu.ida.hefquin.engine.UnsupportedQueryException;
+import se.liu.ida.hefquin.base.data.utils.Budget;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -85,8 +86,10 @@ public class FrawServlet extends HttpServlet {
 		final String contentType = request.getHeader( "Content-Type" );
 
 		final String query;
-		String budget = "";
-		String subBudget = "";
+		String attempts = "";
+		String remoteAttempts = "";
+		String limit = "";
+		String timeout = "";
 		if ( CONTENT_TYPE_SPARQL_QUERY.equals( contentType ) ) {
 			try ( final BufferedReader reader = request.getReader() ) {
 				query = reader.lines().collect( Collectors.joining( "\n" ) );
@@ -94,15 +97,17 @@ public class FrawServlet extends HttpServlet {
 		}
 		else if ( CONTENT_TYPE_FORM_URLENCODED.equals( contentType ) ) {
 			query = request.getParameter( "query" );
-			budget = request.getParameter( "budget" );
-			subBudget = request.getParameter( "subBudget" );
+			attempts = request.getParameter( "attempts" );
+			remoteAttempts = request.getParameter( "remote-attempts" );
+			limit = request.getParameter( "limit" );
+			timeout = request.getParameter( "timeout" );
 		}
 		else {
 			writeJsonError( response, 415, new JsonString(  "Unsupported 'Content-Type' header." ) );
 			return;
 		}
 		ARQ.init();
-		executeRequest( query, request, response, budget, subBudget );
+		executeRequest( query, request, response, attempts, remoteAttempts, limit, timeout );
 	}
 
 	/**
@@ -115,9 +120,11 @@ public class FrawServlet extends HttpServlet {
 	@Override
 	protected void doGet( final HttpServletRequest request, final HttpServletResponse response ) throws IOException {
 		final String query = request.getParameter( "query" );
-		final String budget = request.getParameter( "budget" );
-		final String subBudget = request.getParameter( "subBudget" );
-		executeRequest( query, request, response, budget, subBudget );
+		final String attempts = request.getParameter( "attempts" );
+		final String remoteAttempts = request.getParameter( "remote-attempts" );
+		final String limit = request.getParameter( "limit" );
+		final String timeout = request.getParameter( "timeout" );
+		executeRequest( query, request, response, attempts, remoteAttempts, limit, timeout );
 	}
 
 	/**
@@ -132,8 +139,10 @@ public class FrawServlet extends HttpServlet {
 	private void executeRequest( final String query,
 	                             final HttpServletRequest request,
 	                             final HttpServletResponse response,
-								 final String budget,
-								 final String subBudget) throws IOException {
+								 final String attempts,
+								 final String remoteAttempts,
+								 final String limit,
+								 final String timeout) throws IOException {
 		response.setCharacterEncoding( "utf-8" );
 
 		// Ensure query is not null or empty
@@ -142,23 +151,17 @@ public class FrawServlet extends HttpServlet {
 			return;
 		}
 
-		Integer budgetInt = null;
-		if ( budget != null && !budget.trim().isEmpty() ) {
-			try {
-				budgetInt = Integer.parseInt( budget );
-			} catch ( NumberFormatException e ) {
-				writeJsonError( response, 400, new JsonString( "Budget is not parsable to an integer : " + budget ) );
-			}
-		}
+		Integer attemptsInt = extractInt(attempts, response);
+		Integer remoteAttemptsInt = extractInt(remoteAttempts, response);
+		Integer limitInt = extractInt(limit, response);
+		Integer timeoutInt = extractInt(timeout, response);
+		if(response.getStatus() == HttpServletResponse.SC_BAD_REQUEST) return;
 
-		Integer subBudgetInt = null;
-		if ( subBudget != null && !subBudget.trim().isEmpty() ) {
-			try {
-				subBudgetInt = Integer.parseInt( subBudget );
-			} catch ( NumberFormatException e ) {
-				writeJsonError(response, 400, new JsonString("Sub Budget is not parsable to an integer : " + subBudget ) );
-			}
-		}
+		Budget requestBudget = new Budget()
+				.setAttempts( attemptsInt )
+				.setRemoteAttempts( remoteAttemptsInt )
+				.setLimit( limitInt )
+				.setTimeout( timeoutInt );
 
 		// Check accept header
 		final String mimeType = findSupportedMimeType( request.getHeaders( "Accept" ) );
@@ -170,7 +173,7 @@ public class FrawServlet extends HttpServlet {
 		try {
 			logger.debug( "Received SPARQL query: {}", query );
 
-			final JsonObject result = execute( query, mimeType, budgetInt, subBudgetInt );
+			final JsonObject result = execute( query, mimeType, requestBudget );
 			if ( ! result.get( "exceptions" ).getAsArray().isEmpty() ) {
 				writeJsonError( response, 500, result.get( "exceptions" ) );
 				return;
@@ -193,6 +196,19 @@ public class FrawServlet extends HttpServlet {
 			writeJsonError( response, 500, new JsonString( "Error during query execution: " + e.getLocalizedMessage() ) );
 			return;
 		}
+	}
+
+	private Integer extractInt(String string, HttpServletResponse response) throws IOException {
+		Integer integered = null;
+		if ( string != null && !string.trim().isEmpty() ) {
+			try {
+				integered = Integer.parseInt( string );
+			} catch ( NumberFormatException e ) {
+				writeJsonError(response, 400, new JsonString("String is not parsable to an integer : " + string ) );
+			}
+		}
+
+		return integered;
 	}
 
 	/**
@@ -230,7 +246,7 @@ public class FrawServlet extends HttpServlet {
 	 * @param mimeType    the MIME type for the response format
 	 * @return the query result and exceptions in JSON format
 	 */
-	private static JsonObject execute( final String queryString, final String mimeType, Integer budget, Integer subBudget )
+	private static JsonObject execute( final String queryString, final String mimeType, final Budget requestBudget )
 			throws UnsupportedQueryException, IllegalQueryException
 	{
 		final Query query = QueryFactory.create( queryString );
@@ -239,7 +255,7 @@ public class FrawServlet extends HttpServlet {
 
 		final QueryProcessingStatsAndExceptions queryProcessingStatsAndExceptions;
 		try ( PrintStream ps = new PrintStream( baos, true, StandardCharsets.UTF_8 ) ) {
-			queryProcessingStatsAndExceptions = engine.executeQuery( query, resultsFormat, ps, budget, subBudget );
+			queryProcessingStatsAndExceptions = engine.executeQuery( query, resultsFormat, ps, requestBudget );
 		}
 
 		final JsonObject res = new JsonObject();

@@ -62,7 +62,7 @@ public class PhysicalOpFrawBindJoinWithVALUES extends PhysicalOpBindJoinWithVALU
 										   final boolean collectExceptions,
 										   final QueryPlanningInfo qpInfo,
 										   final ExpectedVariables... inputVars ) {
-		return new ExecOpFrawBindJoinSPARQLwithFILTER( pattern,
+		return new ExecOpFrawBindJoinSPARQLwithVALUES( pattern,
 				sparqlEndpoint,
 				inputVars[0],
 				useOuterJoinSemantics,
@@ -70,38 +70,6 @@ public class PhysicalOpFrawBindJoinWithVALUES extends PhysicalOpBindJoinWithVALU
 				collectExceptions,
 				qpInfo );
 	}
-
-//	@Override
-//	public UnaryExecutableOp createExecOp( final boolean collectExceptions,
-//										   final ExpectedVariables... inputVars ) {
-//		final SPARQLGraphPattern pt;
-//		final FederationMember fm;
-//		final boolean useOuterJoinSemantics;
-//
-//		if ( lop instanceof LogicalOpGPAdd gpAdd ) {
-//			pt = gpAdd.getPattern();
-//			fm = gpAdd.getFederationMember();
-//			useOuterJoinSemantics = false;
-//		}
-//		else if ( lop instanceof LogicalOpGPOptAdd gpOptAdd ) {
-//			pt = gpOptAdd.getPattern();
-//			fm = gpOptAdd.getFederationMember();
-//			useOuterJoinSemantics = true;
-//		}
-//		else {
-//			throw new IllegalArgumentException("Unsupported type of operator: " + lop.getClass().getName() );
-//		}
-//
-//		if ( fm instanceof SPARQLEndpoint sparqlEndpoint )
-//			return new ExecOpFrawBindJoinSPARQLwithVALUES( pt,
-//					sparqlEndpoint,
-//					inputVars[0],
-//					useOuterJoinSemantics,
-//					ExecOpBindJoinSPARQLwithVALUES.DEFAULT_BATCH_SIZE,
-//					collectExceptions );
-//		else
-//			throw new IllegalArgumentException("Unsupported type of federation member: " + fm.getClass().getName() );
-//	}
 
 	@Override
 	public void visit(final PhysicalPlanVisitor visitor) {

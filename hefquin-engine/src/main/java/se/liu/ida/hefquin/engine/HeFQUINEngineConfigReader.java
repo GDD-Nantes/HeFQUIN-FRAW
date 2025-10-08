@@ -25,15 +25,11 @@ import se.liu.ida.hefquin.engine.queryproc.impl.poptimizer.CostModel;
 import se.liu.ida.hefquin.federation.access.FederationAccessManager;
 import se.liu.ida.hefquin.federation.catalog.FederationCatalog;
 import se.liu.ida.hefquin.jenaext.ModelUtils;
+import se.liu.ida.hefquin.base.data.utils.Budget;
 import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
 import se.liu.ida.hefquin.vocabulary.ECVocab;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
+import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.*;
 
 /**
  * Reads an RDF description of a configuration for the HeFQUIN engine and
@@ -95,11 +91,11 @@ public class HeFQUINEngineConfigReader
 		final FederationAccessManager fedAccessMgr = readFederationAccessManager(confRsrc, ctx);
 		final QueryProcessor qproc = readQueryProcessor(confRsrc, ctx, fedAccessMgr);
 
-		final int budget = readBudget(confRsrc);
-		final int subBudget = readSubBudget(confRsrc);
+		Budget defaultBudget = readBudget(confRsrc, false);
+		Budget maxBudget = readBudget(confRsrc, true);
 
-		if( budget > 0 && subBudget > 0 ) {
-			return new FrawEngine(fedAccessMgr, qproc, budget, subBudget);
+		if( defaultBudget.getAttempts() > 0 && defaultBudget.getRemoteAttempts() > 0 /*&& limit > 0*/ ) {
+			return new FrawEngine(fedAccessMgr, qproc, defaultBudget, maxBudget);
 		}
 
 		return new HeFQUINEngine(fedAccessMgr, qproc);
@@ -125,26 +121,49 @@ public class HeFQUINEngineConfigReader
 		ExecutablePlanPrinter getExecutablePlanPrinter();
 	}
 
-	public int readBudget( final Resource confRsrc ) {
-		final Literal ltrl = ModelUtils.getSingleOptionalLiteralProperty( confRsrc, FrawConstants.budget );
+	public Integer readAttempts( final Resource confRsrc, final boolean max ) {
+		final Literal ltrl = ModelUtils.getSingleOptionalLiteralProperty( confRsrc, max ? max_attempts : attempts );
 		// not pretty
-		if ( ltrl == null ) return -1;
+		if ( ltrl == null ) return null;
 		return ltrl.getInt();
 	}
 
-	public int readBudget( final Model confModel ) {
-		return readBudget(obtainConfigurationResource(confModel));
-	}
-
-	public int readSubBudget( final Resource confRsrc ) {
-		final Literal ltrl = ModelUtils.getSingleOptionalLiteralProperty( confRsrc, FrawConstants.subBudget );
+	public Integer readRemoteAttempts( final Resource confRsrc, final boolean max ) {
+		final Literal ltrl = ModelUtils.getSingleOptionalLiteralProperty( confRsrc, max ? max_remote_attempts : remote_attempts );
 		// not pretty
-		if ( ltrl == null ) return -1;
+		if ( ltrl == null ) return null;
 		return ltrl.getInt();
 	}
 
-	public int readSubBudget( final Model confModel ) {
-		return readSubBudget(obtainConfigurationResource(confModel));
+	public Integer readLimit( final Resource confRsrc, final boolean max ) {
+		final Literal ltrl = ModelUtils.getSingleOptionalLiteralProperty( confRsrc, max ? max_results : limit );
+		// not pretty
+		if ( ltrl == null ) return null;
+		return ltrl.getInt();
+	}
+
+	public Integer readTimeout( final Resource confRsrc, final boolean max ) {
+		final Literal ltrl = ModelUtils.getSingleOptionalLiteralProperty( confRsrc, max ? max_timeout : timeout );
+		// not pretty
+		if ( ltrl == null ) return null;
+		return ltrl.getInt();
+	}
+
+	public Budget readBudget( final Resource confRsrc, final boolean max ) {
+		final Integer attempts = readAttempts(confRsrc, max);
+		final Integer remoteAttempts = readRemoteAttempts(confRsrc, max);
+		final Integer limit = readLimit(confRsrc, max);
+		final Integer timeout = readTimeout(confRsrc, max);
+
+        return new Budget()
+                .setAttempts(attempts)
+                .setRemoteAttempts(remoteAttempts)
+                .setLimit(limit)
+                .setTimeout(timeout);
+	}
+
+	public Budget readBudget( final Model confModel, final boolean max ) {
+		return readBudget(obtainConfigurationResource(confModel), max);
 	}
 
 	// ------------ federation access manager ------------

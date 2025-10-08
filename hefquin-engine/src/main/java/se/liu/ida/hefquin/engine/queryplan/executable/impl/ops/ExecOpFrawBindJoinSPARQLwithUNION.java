@@ -70,11 +70,11 @@ public class ExecOpFrawBindJoinSPARQLwithUNION extends BaseForExecOpFrawBindJoin
 	}
 
 	@Override
-	protected NullaryExecutableOp createExecutableReqOp( final Set<Binding> solMaps ) {
+	protected NullaryExecutableOp _createExecutableReqOp( final Set<Binding> solMaps ) {
 		final Element elmt = createUnion(solMaps);
 		final SPARQLGraphPattern pattern = new GenericSPARQLGraphPatternImpl1(elmt);
 		final SPARQLRequest request = new SPARQLRequestImpl(pattern);
-		return new ExecOpFrawRequest(request, fm, false, null);
+		return new ExecOpFrawRequest(request, fm, false, null, budget);
 	}
 
 	protected Element createUnion( final Iterable<Binding> solMaps ) {

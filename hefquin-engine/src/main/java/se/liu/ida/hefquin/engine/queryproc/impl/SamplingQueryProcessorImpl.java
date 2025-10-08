@@ -7,6 +7,7 @@ import se.liu.ida.hefquin.engine.QueryProcessingStatsAndExceptions;
 import se.liu.ida.hefquin.engine.queryplan.executable.ExecutablePlan;
 import se.liu.ida.hefquin.engine.queryplan.physical.PhysicalPlan;
 import se.liu.ida.hefquin.engine.queryproc.*;
+import se.liu.ida.hefquin.base.data.utils.Budget;
 
 import java.util.Collections;
 import java.util.List;
@@ -58,7 +59,7 @@ public class SamplingQueryProcessorImpl implements SamplingQueryProcessor
 	}
 
 	@Override
-	public QueryProcessingStatsAndExceptions processQuery( final Query query, final QueryResultSink resultSink, int numberOfWalks )
+	public QueryProcessingStatsAndExceptions processQuery(final Query query, final QueryResultSink resultSink, Budget budget)
 			throws QueryProcException
 	{
 		boolean skipExecution = ctxt.skipExecution();
@@ -82,7 +83,7 @@ public class SamplingQueryProcessorImpl implements SamplingQueryProcessor
 			exceptionsCaughtDuringExecution = Collections.emptyList();
 		}
 		else {
-			prg = planCompiler.compile( qepAndStats.object1, numberOfWalks );
+			prg = planCompiler.compile( qepAndStats.object1, budget );
 
 			t3 = System.currentTimeMillis();
 			execStats = execEngine.execute(prg, resultSink);

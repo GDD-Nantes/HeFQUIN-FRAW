@@ -10,29 +10,27 @@ import org.apache.jena.sparql.resultset.ResultsFormat;
 import se.liu.ida.hefquin.engine.queryproc.QueryProcessor;
 import se.liu.ida.hefquin.engine.queryproc.impl.QueryProcessingStatsAndExceptionsImpl;
 import se.liu.ida.hefquin.federation.access.FederationAccessManager;
-import se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants;
+import se.liu.ida.hefquin.base.data.utils.Budget;
 import se.liu.ida.hefquin.jenaintegration.sparql.HeFQUINConstants;
 
 import java.io.PrintStream;
 import java.util.Arrays;
 
+import static se.liu.ida.hefquin.jenaintegration.sparql.FrawConstants.*;
+
 public class FrawEngine extends HeFQUINEngine
 {
-
-	protected final int budget;
-	protected final int subBudget;
+	protected final Budget defaultBudget;
+	protected final Budget maxBudget;
 
 	public FrawEngine(final FederationAccessManager fedAccessMgr,
 					  final QueryProcessor qProc,
-					  final int budget,
-					  final int subBudget) {
+					  final Budget defaultBudget,
+					  final Budget maxBudget) {
 		super( fedAccessMgr, qProc );
 
-		assert budget >= 0;
-		assert subBudget >= 0;
-
-		this.budget = budget;
-		this.subBudget = subBudget;
+		this.defaultBudget = defaultBudget;
+		this.maxBudget = maxBudget;
 
 		initialize();
 	}
@@ -51,20 +49,24 @@ public class FrawEngine extends HeFQUINEngine
 	{
 		QueryExecution qe = super._prepareExecution(query);
 
-		qe.getContext().set(FrawConstants.ENGINE, this);
+		qe.getContext().set(ENGINE, this);
 
 
 		return qe;
 	}
 
-	public QueryProcessingStatsAndExceptions executeQuery(Query query, ResultsFormat outputFormat, PrintStream output, Integer budget, Integer subBudget)
+	public QueryProcessingStatsAndExceptions executeQuery(Query query, ResultsFormat outputFormat, PrintStream output, Budget requestBudget)
 			throws UnsupportedQueryException, IllegalQueryException{
 
 		QueryExecution qe = _prepareExecution(query);
 
-		qe.getContext().set(FrawConstants.ENGINE, this);
-		qe.getContext().set(FrawConstants.BUDGET, budget);
-		qe.getContext().set(FrawConstants.SUB_BUDGET, subBudget);
+		qe.getContext().set(ENGINE, this);
+
+		requestBudget.fillWith(defaultBudget);
+		Budget queryExecutionBudget = Budget.mergeMin(requestBudget, maxBudget);
+
+		qe.getContext().set(QUERY_EXECUTION_BUDGET, queryExecutionBudget);
+
 
 		Exception ex = null;
 		try {
@@ -90,12 +92,11 @@ public class FrawEngine extends HeFQUINEngine
 		}
 	}
 
-	public Integer getBudget() {
-		return budget;
+	public Budget getDefaultBudget(){
+		return defaultBudget;
 	}
 
-	public Integer getSubBudget() {
-		return subBudget;
+	public Budget getMaxBudget(){
+		return maxBudget;
 	}
-
 }
