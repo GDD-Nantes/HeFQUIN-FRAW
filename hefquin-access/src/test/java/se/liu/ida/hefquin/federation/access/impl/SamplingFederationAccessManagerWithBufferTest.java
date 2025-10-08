@@ -1,31 +1,27 @@
 package se.liu.ida.hefquin.federation.access.impl;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.graph.NodeFactory;
 import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import se.liu.ida.hefquin.base.data.VocabularyMapping;
 import se.liu.ida.hefquin.base.data.utils.Budget;
 import se.liu.ida.hefquin.base.query.TriplePattern;
 import se.liu.ida.hefquin.base.query.impl.TriplePatternImpl;
-import se.liu.ida.hefquin.federation.FederationMember;
 import se.liu.ida.hefquin.federation.SPARQLEndpoint;
-import se.liu.ida.hefquin.federation.access.*;
+import se.liu.ida.hefquin.federation.access.DataRetrievalRequest;
+import se.liu.ida.hefquin.federation.access.FederationAccessException;
+import se.liu.ida.hefquin.federation.access.SPARQLEndpointInterface;
+import se.liu.ida.hefquin.federation.access.SPARQLRequest;
 import se.liu.ida.hefquin.federation.access.impl.req.SPARQLRequestImpl;
 import se.liu.ida.hefquin.federation.access.impl.reqproc.SamplingSPARQLRequestProcessor;
 import se.liu.ida.hefquin.federation.access.impl.reqproc.SamplingSPARQLRequestProcessorImpl;
-import se.liu.ida.hefquin.federation.access.impl.response.SolMapsResponseImpl;
-import se.liu.ida.hefquin.federation.catalog.FederationDescriptionReader;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class SamplingFederationAccessManagerWithBufferTest  {
 
@@ -59,6 +55,8 @@ public class SamplingFederationAccessManagerWithBufferTest  {
         }
     }
 
+    // TODO: add more tests : different bgps, configs, and on local services
+
     @Test
     public void issue_request_uses_buffer_when_same_request_twice() throws FederationAccessException {
         // Need a running endpoint at URL
@@ -74,7 +72,7 @@ public class SamplingFederationAccessManagerWithBufferTest  {
         samFedAccMan.issueRequest(sparqlReq, sparqlEp, budget);
         samFedAccMan.issueRequest(sparqlReq, sparqlEp, budget);
 
-        Assert.assertEquals(1, samFedAccMan.getBufferHitCounter());
+        Assertions.assertEquals(1, samFedAccMan.getBufferHitCounter());
     }
 
     @Test
@@ -94,7 +92,7 @@ public class SamplingFederationAccessManagerWithBufferTest  {
         samFedAccMan.issueRequest(sparqlReq, sparqlEp1, budget);
         samFedAccMan.issueRequest(sparqlReq, sparqlEp2, budget);
 
-        Assert.assertEquals(0, samFedAccMan.getBufferHitCounter());
+        Assertions.assertEquals(0, samFedAccMan.getBufferHitCounter());
     }
 
     @Test
@@ -112,12 +110,12 @@ public class SamplingFederationAccessManagerWithBufferTest  {
         samFedAccMan.issueRequest(sparqlReq, sparqlEp, budget);
         samFedAccMan.issueRequest(sparqlReq2, sparqlEp, budget);
 
-        Assert.assertEquals(0, samFedAccMan.getBufferHitCounter());
+        Assertions.assertEquals(0, samFedAccMan.getBufferHitCounter());
     }
 
     @NotNull
     private static SPARQLEndpoint getSparqlEndpoint(String URL) {
-        SPARQLEndpoint sparqlEp = new SPARQLEndpoint(){
+        return new SPARQLEndpoint(){
             @Override public SPARQLEndpointInterface getInterface() {return new SPARQLEndpointInterface() {
                 @Override public boolean supportsTriplePatternRequests() {return false;}
                 @Override public boolean supportsBGPRequests() {return false;}
@@ -128,6 +126,5 @@ public class SamplingFederationAccessManagerWithBufferTest  {
             };}
             @Override public VocabularyMapping getVocabularyMapping() {return null;}
         };
-        return sparqlEp;
     }
 }
